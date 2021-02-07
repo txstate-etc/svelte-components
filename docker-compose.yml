@@ -1,0 +1,8 @@
+version: "3.5"
+services:
+  storybook:
+    build: .
+    ports:
+      - 80:6006
+    volumes:
+      - ./src:/usr/app/src
