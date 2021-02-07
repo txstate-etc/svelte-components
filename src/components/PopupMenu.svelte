@@ -65,7 +65,6 @@
   }
 
   function close (value?: string) {
-    console.log('close')
     if (!menushown) return
     menushown = false
     buttonelement.setAttribute('aria-expanded', 'false')
@@ -104,7 +103,7 @@
 
   // if buttonelement changes we need to handle listeners and aria
   let lastbuttonelement: HTMLElement
-  $: (function (buttonelement) {
+  function reactToButtonElement (buttonelement: HTMLElement) {
     if (lastbuttonelement) {
       lastbuttonelement.removeEventListener('click', onbuttonclick)
       lastbuttonelement.removeEventListener('keydown', onkeydown)
@@ -120,7 +119,8 @@
       buttonelement.addEventListener('click', onbuttonclick)
       buttonelement.addEventListener('keydown', onkeydown)
     }
-  })(buttonelement)
+  }
+  $: reactToButtonElement(buttonelement)
 
   const onclick = (item: PopupMenuItem) => () => {
     close(item.value)

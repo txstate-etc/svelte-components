@@ -14,16 +14,21 @@
   export let items: any[]
   export let config: CollapsingTableColumn[]|undefined = undefined
   let columns: CollapsingTableColumn[]
+  let width: number = 320
+  let selectedkey: string | undefined
   $: firstrow = items?.[0] ?? {}
   $: columns = config ?? Object.keys(firstrow).map(key => ({ key }))
-  $: (function (columns) {
+  function reactToColumns (columns: CollapsingTableColumn[]) {
     if (!columns.some(c => c.neverhide)) {
       columns[0].neverhide = true
     }
-    columns.sort((a, b) => (a.neverhide ? 0 : 1) - (b.neverhide ? 0 : 1))
-  })(columns)
-  let width: number = 320
-  let selectedkey: string
+    columns // stable sort
+      .map((c, i) => ({ col: c, idx: i}))
+      .sort((a, b) => (a.col.neverhide ? 0 : 1) - (b.col.neverhide ? 0 : 1) || a.idx - b.idx)
+      .map(o => o.col)
+    if (!selectedkey) selectedkey = columns.find(c => !c.neverhide)?.key
+  }
+  $: reactToColumns(columns)
 
   const state = new DeepStore({
     keepcolumns: [] as (CollapsingTableColumn & { widthPercent?: number })[],
@@ -31,7 +36,7 @@
     lastcolumn: 0
   })
   const menuitems = derived(state, obj => obj.hiddencolumns.map(c => ({ value: c.key, label: c.title })))
-  function react (width: number, selectedkey: string) {
+  function react (width: number, selectedkey?: string) {
     const selectedcol = columns.find(c => c.key === selectedkey) ?? columns[1]
     const keepcolumns: CollapsingTableColumn[] = []
     const hiddencolumns: CollapsingTableColumn[] = []
