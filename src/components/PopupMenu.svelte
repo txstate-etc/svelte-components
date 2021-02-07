@@ -28,7 +28,7 @@
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
   }
 
-  async function open () {
+  async function open (moveTo = 0) {
     if (menushown) return
     const offset = bodyOffset(buttonelement)
     let autoalign = align
@@ -61,7 +61,7 @@
     }
     menushown = true
     buttonelement.setAttribute('aria-expanded', 'true')
-    move(0)
+    move(moveTo)
   }
 
   function close (value?: string) {
@@ -73,15 +73,14 @@
   }
 
   function onkeydown (e: KeyboardEvent) {
-    console.log(e.code)
     if (e.code === 'ArrowDown') {
       e.preventDefault()
       e.stopPropagation()
-      move(hilited + 1)
+      menushown ? move(hilited + 1) : open()
     } else if (e.code === 'ArrowUp') {
       e.preventDefault()
       e.stopPropagation()
-      move(hilited - 1)
+      menushown ? move(hilited - 1) : open(items.length - 1)
     } else if ([' ', 'Space', 'Enter'].includes(e.code)) {
       e.preventDefault()
       e.stopPropagation()
@@ -91,6 +90,10 @@
         open()
       }
     } else {
+      if (e.code === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+      }
       close()
     }
   }

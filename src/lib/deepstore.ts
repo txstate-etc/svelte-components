@@ -27,7 +27,7 @@ export class DeepStore<T> implements Writable<T> {
     this.set(this.clone(updater(this.value)))
   }
 
-  public subscribe (run: (s: T) => void) {
+  public subscribe (run: (s: T) => any) {
     const id = Math.random().toString(32)
     this.subscribers.set(id, run)
     run(this.value)
