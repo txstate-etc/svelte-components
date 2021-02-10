@@ -40,7 +40,7 @@
   const state = new DeepStore({
     keepcolumns: [] as (CollapsingTableColumn & { widthPercent?: number })[],
     hiddencolumns: [] as CollapsingTableColumn[],
-    lastcolumn: 0
+    dropdowncolumn: undefined as (CollapsingTableColumn & { widthPercent?: number }) | undefined
   })
   const menuitems = derived(state, obj => obj.hiddencolumns.map(c => ({ value: c.key, label: c.title })))
   function react (width: number, selectedkey?: string) {
@@ -57,7 +57,8 @@
     for (const col of keepcolumns) {
       (col as any).widthPercent = 100 * (col.width ?? defaultCellWidth) / used
     }
-    state.set({ keepcolumns, hiddencolumns, lastcolumn: keepcolumns.length - 1 })
+    const dropdowncolumn = hiddencolumns.length ? keepcolumns[keepcolumns.length - 1] : undefined
+    state.set({ keepcolumns, hiddencolumns, dropdowncolumn })
   }
   $: react(width, selectedkey)
   let menubuttonelement: HTMLElement
@@ -91,18 +92,17 @@
     <thead><tr class={headerRowClass}>
       {#each $state.keepcolumns as column, i}
         <th
-          class={column.headerCellClass || headerCellClass}
-          class:dropdowncol={i === $state.lastcolumn}
-          class:defaultIcon={!$$slots.dropicon}
+          class={`${column.headerCellClass} ${headerCellClass}`}
+          class:defaultIcon={!$$slots.dropicon && $state.dropdowncolumn}
         >
           <ConditionalWrapper
             bind:element={menubuttonelement}
-            condition={i === $state.lastcolumn}
+            condition={$state.dropdowncolumn === column}
             role='button'
-            tabindex={i === $state.lastcolumn ? 0 : undefined}
+            tabindex=0
           >
-            <ConditionalWrapper component={column.headerCellComponent} {column} title={column.title || column.key}>
-              {#if i === $state.lastcolumn}
+            <ConditionalWrapper component={column.headerCellComponent} {column} key={column.key} title={column.title || column.key}>
+              {#if $state.dropdowncolumn === column}
                 {column.title || column.key}<ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
                 <slot name="dropicon">
                   <i aria-hidden="true"></i>
@@ -119,9 +119,9 @@
       {#each items as item, i (itemkeys[i])}
         <tr class={bodyRowClass}>
           {#each $state.keepcolumns as column}
-            <td class={column.bodyCellClass || bodyCellClass}>
+            <td class={`${column.bodyCellClass} ${bodyCellClass}`}>
               {#if column.bodyCellComponent}
-                <svelte:component this={column.bodyCellComponent} value={item[column.key]}>{item[column.key]}</svelte:component>
+                <svelte:component this={column.bodyCellComponent} key={column.key} value={item[column.key]} {item}>{item[column.key]}</svelte:component>
               {:else}
                 {item[column.key]}
               {/if}
