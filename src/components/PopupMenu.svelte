@@ -60,6 +60,7 @@
       right = offset.right + 'px'
     }
     menushown = true
+    buttonelement.setAttribute('aria-controls', menuid)
     buttonelement.setAttribute('aria-expanded', 'true')
     move(moveTo)
   }
@@ -67,12 +68,14 @@
   function close (value?: string) {
     if (!menushown) return
     menushown = false
+    buttonelement.removeAttribute('aria-controls')
     buttonelement.setAttribute('aria-expanded', 'false')
     buttonelement.focus()
     if (value) dispatch('change', value)
   }
 
   function onkeydown (e: KeyboardEvent) {
+    console.log(e.code)
     if (e.code === 'ArrowDown') {
       e.preventDefault()
       e.stopPropagation()
@@ -118,7 +121,6 @@
     lastbuttonelement = buttonelement
     if (buttonelement) {
       buttonelement.setAttribute('aria-haspopup', 'listbox')
-      buttonelement.setAttribute('aria-controls', menuid)
       buttonelement.addEventListener('click', onbuttonclick)
       buttonelement.addEventListener('keydown', onkeydown)
     }

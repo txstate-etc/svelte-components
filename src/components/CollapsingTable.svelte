@@ -3,6 +3,8 @@
   import { CollapsingTableColumn } from '../types'
   import { derived } from 'svelte/store'
   import PopupMenu from './PopupMenu.svelte'
+  import ConditionalWrapper from './ConditionalWrapper.svelte'
+  import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   export let tableClass = ''
   export let bodyRowClass = ''
   export let bodyCellClass = ''
@@ -68,51 +70,52 @@
     position: relative;
     box-sizing: border-box;
   }
-  th a {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    text-decoration: none;
+  th :global([role="button"]) {
+    cursor: pointer;
   }
-  .lastcol.defaultIcon {
-    padding-right: 1.5em;
+  th.defaultIcon :global([role="button"]) {
+    padding-right: 1.3em;
   }
   i {
+    position: absolute;
+    right: 0.4em;
+    top: calc(50% - 0.08em);
+    transform: translateY(-50%);
     border: solid black;
     border-width: 0 .2em .2em 0;
     padding: .15em;
-    margin-top: -0.1em;
-    margin-right: 0.4em;
   }
-  .down { transform:rotate(45deg); }
+  .down { transform: translateY(-50%) rotate(45deg); }
 </style>
 
 <div bind:clientWidth={width}>
   <table class={tableClass}>
     <thead><tr class={headerRowClass}>
       {#each $state.keepcolumns as column, i}
-        <th class={column.headerCellClass || headerCellClass} class:lastcol={i === $state.lastcolumn} class:defaultIcon={!headerButtonIconComponent}>
-          {#if column.headerCellComponent}
-            <svelte:component this={column.headerCellComponent} {column} title={column.title || column.key}>
-              {column.title || column.key}
-            </svelte:component>
-          {:else}
-            {column.title || column.key}
-          {/if}
-          {#if i === $state.lastcolumn}
-            <a href='#void' bind:this={menubuttonelement} aria-label={`showing ${column.title || column.key}, choose another column`}>
-              {#if headerButtonIconComponent}
-                <svelte:component this={headerButtonIconComponent}></svelte:component>
+        <th
+          class={column.headerCellClass || headerCellClass}
+          class:dropdowncol={i === $state.lastcolumn}
+          class:defaultIcon={!headerButtonIconComponent}
+        >
+          <ConditionalWrapper
+            bind:element={menubuttonelement}
+            condition={i === $state.lastcolumn}
+            role='button'
+            tabindex={i === $state.lastcolumn ? 0 : undefined}
+          >
+            <ConditionalWrapper component={column.headerCellComponent} {column} title={column.title || column.key}>
+              {#if i === $state.lastcolumn}
+                {column.title || column.key}<ScreenReaderOnly>, click to choose another column</ScreenReaderOnly>
+                {#if headerButtonIconComponent}
+                  <svelte:component this={headerButtonIconComponent}></svelte:component>
+                {:else}
+                  <i aria-hidden="true" class="down"></i>
+                {/if}
               {:else}
-                <i aria-hidden="true" class="down"></i>
+                {column.title || column.key}
               {/if}
-            </a>
-          {/if}
+            </ConditionalWrapper>
+          </ConditionalWrapper>
         </th>
       {/each}
     </tr></thead>
