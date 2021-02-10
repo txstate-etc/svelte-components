@@ -10,7 +10,6 @@
   export let bodyCellClass = ''
   export let headerRowClass = ''
   export let headerCellClass = ''
-  export let headerButtonIconComponent: Function | undefined = undefined
   export let menuClass = ''
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
@@ -80,12 +79,11 @@
     position: absolute;
     right: 0.4em;
     top: calc(50% - 0.08em);
-    transform: translateY(-50%);
+    transform: translateY(-50%) rotate(45deg);
     border: solid black;
     border-width: 0 .2em .2em 0;
     padding: .15em;
   }
-  .down { transform: translateY(-50%) rotate(45deg); }
 </style>
 
 <div bind:clientWidth={width}>
@@ -95,7 +93,7 @@
         <th
           class={column.headerCellClass || headerCellClass}
           class:dropdowncol={i === $state.lastcolumn}
-          class:defaultIcon={!headerButtonIconComponent}
+          class:defaultIcon={!$$slots.dropicon}
         >
           <ConditionalWrapper
             bind:element={menubuttonelement}
@@ -105,12 +103,10 @@
           >
             <ConditionalWrapper component={column.headerCellComponent} {column} title={column.title || column.key}>
               {#if i === $state.lastcolumn}
-                {column.title || column.key}<ScreenReaderOnly>, click to choose another column</ScreenReaderOnly>
-                {#if headerButtonIconComponent}
-                  <svelte:component this={headerButtonIconComponent}></svelte:component>
-                {:else}
-                  <i aria-hidden="true" class="down"></i>
-                {/if}
+                {column.title || column.key}<ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
+                <slot name="dropicon">
+                  <i aria-hidden="true"></i>
+                </slot>
               {:else}
                 {column.title || column.key}
               {/if}
@@ -134,6 +130,7 @@
         </tr>
       {/each}
     </tbody>
+    {#if $$slots.footer}<tfoot><slot name="footer"></slot></tfoot>{/if}
   </table>
 </div>
 <PopupMenu {menuClass} {menuItemClass} {menuItemHilitedClass} items={$menuitems} buttonelement={menubuttonelement} on:change={e => selectedkey = e.detail}></PopupMenu>
