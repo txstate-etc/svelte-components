@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DeepStore } from '../lib'
+  import { DeepStore, classes } from '../lib'
   import { CollapsingTableColumn } from '../types'
   import { derived } from 'svelte/store'
   import PopupMenu from './PopupMenu.svelte'
@@ -19,23 +19,24 @@
   let columns: CollapsingTableColumn[]
   let width: number = 320
   let selectedkey: string | undefined
-  let keykeys: string[] = []
+  let identifyingkeys: string[] = []
   $: firstrow = items?.[0] ?? {}
   $: columns = config ?? Object.keys(firstrow).map(key => ({ key }))
   function reactToColumns (columns: CollapsingTableColumn[]) {
     if (!columns.some(c => c.neverhide)) {
       columns[0].neverhide = true
     }
-    columns // stable sort
+    const sortedcolumns = columns // stable sort
       .map((c, i) => ({ col: c, idx: i}))
-      .sort((a, b) => (a.col.neverhide ? 0 : 1) - (b.col.neverhide ? 0 : 1) || a.idx - b.idx)
+      .sort((a, b) => ((a.col.neverhide ? 0 : 1) - (b.col.neverhide ? 0 : 1)) || a.idx - b.idx)
       .map(o => o.col)
-    if (!selectedkey) selectedkey = columns.find(c => !c.neverhide)?.key
-    keykeys = columns.filter(c => c.neverhide).map(c => c.key)
+    if (!selectedkey) selectedkey = sortedcolumns.find(c => !c.neverhide)?.key
+    identifyingkeys = sortedcolumns.filter(c => c.neverhide).map(c => c.key)
+    return sortedcolumns
   }
-  $: reactToColumns(columns)
+  $: sortedcolumns = reactToColumns(columns)
 
-  $: itemkeys = items.map(item => item.id ?? item._id ?? keykeys.map(k => item[k]).join('.'))
+  $: itemkeys = items.map(item => item.id ?? item._id ?? identifyingkeys.map(k => item[k]).join('.'))
 
   const state = new DeepStore({
     keepcolumns: [] as (CollapsingTableColumn & { widthPercent?: number })[],
@@ -44,11 +45,11 @@
   })
   const menuitems = derived(state, obj => obj.hiddencolumns.map(c => ({ value: c.key, label: c.title })))
   function react (width: number, selectedkey?: string) {
-    const selectedcol = columns.find(c => c.key === selectedkey) ?? columns[1]
+    const selectedcol = sortedcolumns.find(c => c.key === selectedkey) ?? columns[1]
     const keepcolumns: CollapsingTableColumn[] = []
     const hiddencolumns: CollapsingTableColumn[] = []
-    let used = columns.filter(c => c.neverhide || c === selectedcol).reduce((sum, col) => sum + (col.width ?? defaultCellWidth), 0)
-    for (const col of columns) {
+    let used = sortedcolumns.filter(c => c.neverhide || c === selectedcol).reduce((sum, col) => sum + (col.width ?? defaultCellWidth), 0)
+    for (const col of sortedcolumns) {
       if (col.neverhide || col === selectedcol || used + (col.width ?? defaultCellWidth) < width) {
         keepcolumns.push(col)
         if (col !== selectedcol && !col.neverhide) used += col.width ?? defaultCellWidth
@@ -90,27 +91,26 @@
 <div bind:clientWidth={width}>
   <table class={tableClass}>
     <thead><tr class={headerRowClass}>
-      {#each $state.keepcolumns as column, i}
+      {#each $state.keepcolumns as column (column.key)}
         <th
-          class={`${column.headerCellClass} ${headerCellClass}`}
+          class={classes(column.headerCellClass, headerCellClass)}
           class:defaultIcon={!$$slots.dropicon && $state.dropdowncolumn}
         >
           <ConditionalWrapper
             bind:element={menubuttonelement}
             condition={$state.dropdowncolumn === column}
-            role='button'
+            role="button"
             tabindex=0
           >
-            <ConditionalWrapper component={column.headerCellComponent} {column} key={column.key} title={column.title || column.key}>
-              {#if $state.dropdowncolumn === column}
-                {column.title || column.key}<ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
-                <slot name="dropicon">
-                  <i aria-hidden="true"></i>
-                </slot>
-              {:else}
-                {column.title || column.key}
-              {/if}
-            </ConditionalWrapper>
+            <slot name="headercell" {column} key={column.key} title={column.title || column.key}>
+              {column.title || column.key}
+            </slot>
+            {#if $state.dropdowncolumn === column}
+              <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
+              <slot name="dropicon">
+                <i aria-hidden="true"></i>
+              </slot>
+            {/if}
           </ConditionalWrapper>
         </th>
       {/each}
@@ -118,13 +118,11 @@
     <tbody>
       {#each items as item, i (itemkeys[i])}
         <tr class={bodyRowClass}>
-          {#each $state.keepcolumns as column}
-            <td class={`${column.bodyCellClass} ${bodyCellClass}`}>
-              {#if column.bodyCellComponent}
-                <svelte:component this={column.bodyCellComponent} key={column.key} value={item[column.key]} {item}>{item[column.key]}</svelte:component>
-              {:else}
+          {#each $state.keepcolumns as column (column.key)}
+            <td class={classes(column.bodyCellClass, bodyCellClass)}>
+              <slot key={column.key} value={item[column.key]} {item}>
                 {item[column.key]}
-              {/if}
+              </slot>
             </td>
           {/each}
         </tr>

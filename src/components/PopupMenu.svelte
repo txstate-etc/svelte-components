@@ -1,9 +1,9 @@
 <script lang="ts">
   import { portal } from '../actions'
-  import { createEventDispatcher, onDestroy, tick } from 'svelte'
+  import { createEventDispatcher, onDestroy } from 'svelte'
   import { randomid } from 'txstate-utils'
   import { PopupMenuItem } from '../types'
-  import { bodyOffset } from '../lib/bodyoffset'
+  import { bodyOffset } from '../lib'
   const dispatch = createEventDispatcher()
 
   export let menushown = false

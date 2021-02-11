@@ -21,13 +21,9 @@ A `config` prop allows you to pass an array of column definitions. If passed, on
   the column that is most identifying for each row, like a name.
   by default the leftmost column will stick around as identifying
 * `bodyCellClass?: string` CSS class to set on `td` elements in the body area
-* `bodyCellComponent?: SvelteComponent`<br>
-  A svelte component to place inside each `td` in the body area. Your component will receive
   `item`, `key`, and `value` as props. The value will also be placed inside your component's
   default slot as a bare string.
 * `headerCellClass?: string` CSS class to set on `td` elements in the header row
-* `headerCellComponent?: SvelteComponent`<br>
-  A svelte component to place inside each `th` in the header row. Your component will receive
   `column`, `key`, and `title` as props, where `column` is this configuration object, and `title`
   is reliable (uses `key` if configuration had no `title`). The title/key will also be placed
   inside your component's default slot as a bare string.
@@ -42,3 +38,43 @@ A `config` prop allows you to pass an array of column definitions. If passed, on
  * `menuItemClass` CSS class for `li` in the dropdown menu
  * `menuItemHilitedClass` CSS class for `li` in the dropdown menu when they are currently hilited/active
  * `defaultCellWidth`, guess for any column width in pixels, allows you to hide columns earlier/later, default 150
+
+## Slots
+Lots of slots are provided for extra configuration.
+
+### Default Slot
+The default slot is used for each table cell in the body area. Because of the way slots work, your
+content will always be executed in every cell. So if you need to do something special for just one
+cell, you have to use an if/else block to identify the special cell, falling back to {value} for
+everything else:
+```svelte
+<CollapsingTable items={myItems} let:key let:value>
+  {#if key === 'myspecialkey'}
+    <MySpecialComponent>{value}</MySpecialComponent>
+  {:else}
+    {value}
+  {/if}
+</CollapsingTable>
+```
+### Header Cell Slot
+A slot named `headercell` allows you to do the same thing for cells in the header row that the
+default slot allows for body cells.
+```svelte
+<CollapsingTable items={myItems} let:key let:title>
+  <div slot="headercell">
+    {#if key === 'myspecialkey'}
+      <MySpecialComponent>{title}</MySpecialComponent>
+    {:else}
+      {title}
+    {/if}
+  </div>
+</CollapsingTable>
+```
+### Dropdown Icon Slot
+A slot is provided for you to provide a custom icon for the column header that is serving as the
+dropdown button.
+```svelte
+<CollapsingTable items={myItems} let:key let:value>
+  <i type='fa caret-down' slot="dropicon" aria-hidden="true"></i>
+</CollapsingTable>
+```
