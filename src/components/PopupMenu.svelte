@@ -16,10 +16,6 @@
   let menuelement: HTMLElement|undefined
   let hilited: number|undefined = undefined
   let itemelements: HTMLElement[] = []
-  let top = '0px'
-  let left = '0px'
-  let right = 'auto'
-  let bottom = 'auto'
   const menuid = randomid()
 
   function move (idx: number) {
@@ -91,9 +87,7 @@
     }
   }
 
-  onDestroy(() => {
-    cleanup(buttonelement)
-  })
+  onDestroy(() => cleanup(buttonelement))
 
   // if buttonelement changes we need to handle listeners and aria
   let lastbuttonelement: HTMLElement
@@ -136,7 +130,7 @@
 </style>
 
 {#if menushown}
-  <ul bind:this={menuelement} use:glue={{ target: buttonelement, align }} id={menuid} role='listbox' class={menuClass || 'default'} on:keydown={onkeydown} style={`left: ${left}; top: ${top}; bottom: ${bottom}; right: ${right}`}>
+  <ul bind:this={menuelement} use:glue={{ target: buttonelement, align }} id={menuid} role='listbox' class={menuClass || 'default'} on:keydown={onkeydown}>
     {#each items as item, i}
       <li
         id={`${menuid}-${i}`}
