@@ -49,7 +49,7 @@
     } else if (e.code === 'ArrowUp') {
       e.preventDefault()
       menushown ? move((hilited ?? items.length) - 1) : open(items.length - 1)
-    } else if ([' ', 'Space', 'Enter'].includes(e.code)) {
+    } else if (['Space', 'Enter'].includes(e.code)) {
       e.preventDefault()
       if (menushown) {
         close(typeof hilited === 'undefined' ? undefined : items[hilited].value)
@@ -61,6 +61,7 @@
     } else {
       if (e.code === 'Escape') {
         e.preventDefault()
+        e.stopPropagation()
       }
       close()
     }
