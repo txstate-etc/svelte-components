@@ -1,9 +1,10 @@
 <script lang="ts">
   import { portal } from '../actions'
-  import { createEventDispatcher, onDestroy } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { randomid } from 'txstate-utils'
   import { PopupMenuItem } from '../types'
-  import { bodyOffset } from '../lib'
+  import { bodyOffset, debounced } from '../lib'
+import { clearTimeout } from 'timers';
   const dispatch = createEventDispatcher()
 
   export let menushown = false
@@ -15,7 +16,7 @@
   export let align: 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright' = 'auto'
 
   let menuelement: HTMLElement|undefined
-  let hilited = 0
+  let hilited: number|undefined = undefined
   let itemelements: HTMLElement[] = []
   let top = '0px'
   let left = '0px'
@@ -29,8 +30,8 @@
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
   }
 
-  async function open (moveTo = 0) {
-    if (menushown) return
+  function reposition () {
+    if (!menushown) return
     const offset = bodyOffset(buttonelement)
     let autoalign = align
     if (align === 'auto') {
@@ -60,15 +61,21 @@
       bottom = offset.top + 'px'
       right = offset.right + 'px'
     }
+  }
+
+  function open (moveTo?: number) {
+    if (menushown) return
     menushown = true
+    reposition()
     buttonelement.setAttribute('aria-controls', menuid)
     buttonelement.setAttribute('aria-expanded', 'true')
-    move(moveTo)
+    if (typeof moveTo !== 'undefined') move(moveTo)
   }
 
   function close (value?: string) {
     if (!menushown) return
     menushown = false
+    hilited = undefined
     buttonelement.removeAttribute('aria-controls')
     buttonelement.setAttribute('aria-expanded', 'false')
     buttonelement.focus()
@@ -78,26 +85,22 @@
   function onkeydown (e: KeyboardEvent) {
     if (e.code === 'ArrowDown') {
       e.preventDefault()
-      e.stopPropagation()
-      menushown ? move(hilited + 1) : open()
+      menushown ? move((hilited ?? -1) + 1) : open(0)
     } else if (e.code === 'ArrowUp') {
       e.preventDefault()
-      e.stopPropagation()
-      menushown ? move(hilited - 1) : open(items.length - 1)
+      menushown ? move((hilited ?? items.length) - 1) : open(items.length - 1)
     } else if ([' ', 'Space', 'Enter'].includes(e.code)) {
       e.preventDefault()
-      e.stopPropagation()
       if (menushown) {
-        close(items[hilited].value)
+        close(typeof hilited === 'undefined' ? undefined : items[hilited].value)
       } else {
-        open()
+        open(0)
       }
     } else if (['ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'ControlLeft', 'ControlRight', 'MetaLeft', 'MetaRight'].includes(e.code)) {
       // avoid hiding the menu when just using control keys
     } else {
       if (e.code === 'Escape') {
         e.preventDefault()
-        e.stopPropagation()
       }
       close()
     }
@@ -105,7 +108,6 @@
 
   function onbuttonclick (e: MouseEvent) {
     e.preventDefault()
-    e.stopPropagation()
     menushown ? close() : open()
   }
 
@@ -124,7 +126,21 @@
       element.removeAttribute('aria-activedescendant')
     }
   }
-  onDestroy(() => cleanup(buttonelement))
+  const debouncedreposition = debounced(reposition, 200)
+  onMount(() => {
+    const observer = new MutationObserver(debouncedreposition)
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      characterData: true
+    })
+    window.addEventListener('resize', debouncedreposition)
+  })
+  onDestroy(() => {
+    cleanup(buttonelement)
+    window.removeEventListener('resize', debouncedreposition)
+  })
 
   // if buttonelement changes we need to handle listeners and aria
   let lastbuttonelement: HTMLElement
