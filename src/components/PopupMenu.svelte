@@ -1,10 +1,8 @@
 <script lang="ts">
-  import { portal } from '../actions'
+  import { glue } from '../actions'
   import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import { randomid } from 'txstate-utils'
   import { PopupMenuItem } from '../types'
-  import { bodyOffset, debounced } from '../lib'
-import { clearTimeout } from 'timers';
   const dispatch = createEventDispatcher()
 
   export let menushown = false
@@ -30,43 +28,9 @@ import { clearTimeout } from 'timers';
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
   }
 
-  function reposition () {
-    if (!menushown) return
-    const offset = bodyOffset(buttonelement)
-    let autoalign = align
-    if (align === 'auto') {
-      const rect = buttonelement.getBoundingClientRect()
-      const leftright = window.innerWidth - rect.right > rect.left ? 'left' : 'right'
-      const topbottom = window.innerHeight - rect.bottom > rect.top ? 'bottom' : 'top'
-      autoalign = topbottom + leftright as 'auto'
-    }
-    if (autoalign === 'bottomleft') {
-      top = (offset.top + buttonelement.offsetHeight) + 'px'
-      left = offset.left + 'px'
-      bottom = 'auto'
-      right = 'auto'
-    } else if (autoalign === 'bottomright') {
-      top = (offset.top + buttonelement.offsetHeight) + 'px'
-      left = 'auto'
-      bottom = 'auto'
-      right = offset.right + 'px'
-    } else if (autoalign === 'topleft') {
-      top = 'auto'
-      left = offset.left + 'px'
-      bottom = offset.top + 'px'
-      right = 'auto'
-    } else if (autoalign === 'topright') {
-      top = 'auto'
-      left = 'auto'
-      bottom = offset.top + 'px'
-      right = offset.right + 'px'
-    }
-  }
-
   function open (moveTo?: number) {
     if (menushown) return
     menushown = true
-    reposition()
     buttonelement.setAttribute('aria-controls', menuid)
     buttonelement.setAttribute('aria-expanded', 'true')
     if (typeof moveTo !== 'undefined') move(moveTo)
@@ -126,20 +90,9 @@ import { clearTimeout } from 'timers';
       element.removeAttribute('aria-activedescendant')
     }
   }
-  const debouncedreposition = debounced(reposition, 200)
-  onMount(() => {
-    const observer = new MutationObserver(debouncedreposition)
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      characterData: true
-    })
-    window.addEventListener('resize', debouncedreposition)
-  })
+
   onDestroy(() => {
     cleanup(buttonelement)
-    window.removeEventListener('resize', debouncedreposition)
   })
 
   // if buttonelement changes we need to handle listeners and aria
@@ -183,7 +136,7 @@ import { clearTimeout } from 'timers';
 </style>
 
 {#if menushown}
-  <ul bind:this={menuelement} use:portal id={menuid} role='listbox' class={menuClass || 'default'} on:keydown={onkeydown} style={`left: ${left}; top: ${top}; bottom: ${bottom}; right: ${right}`}>
+  <ul bind:this={menuelement} use:glue={{ target: buttonelement, align }} id={menuid} role='listbox' class={menuClass || 'default'} on:keydown={onkeydown} style={`left: ${left}; top: ${top}; bottom: ${bottom}; right: ${right}`}>
     {#each items as item, i}
       <li
         id={`${menuid}-${i}`}
