@@ -1,12 +1,20 @@
 import { Writable } from 'svelte/store'
 import deepEqual from 'fast-deep-equal'
 
+function isWritable <T> (value: T|Writable<T>): value is Writable<T> {
+  return !!(value as Writable<T>).subscribe
+}
+
 export class DeepStore<T> implements Writable<T> {
-  protected value: T
+  protected value!: T
   protected subscribers: Map<string, (s: T) => void>
 
-  constructor (value: T) {
-    this.value = this.clone(value)
+  constructor (value: T|Writable<T>) {
+    if (isWritable(value)) {
+      value.subscribe(v => this.set(v))
+    } else {
+      this.value = this.clone(value)
+    }
     this.subscribers = new Map()
   }
 
