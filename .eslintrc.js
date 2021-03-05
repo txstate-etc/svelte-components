@@ -1,11 +1,11 @@
-const eslintSveltePreprocess = require('./eslint-svelte-preprocess')
-
 module.exports = {
   extends: 'standard-with-typescript',
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'tsconfig.eslint.json'
+    project: './tsconfig.eslint.json',
+    extraFileExtensions: ['.svelte']
   },
+  ignorePatterns: ['.eslintrc.js', 'dist/**/*'],
   plugins: ['svelte3', '@typescript-eslint'],
   overrides: [
     {
@@ -14,7 +14,7 @@ module.exports = {
     }
   ],
   settings: {
-    'svelte3/preprocess': eslintSveltePreprocess()
+    'svelte3/typescript': require('typescript')
   },
   rules: {
     '@typescript-eslint/explicit-function-return-type': 'off',

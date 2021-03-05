@@ -49,7 +49,7 @@ import ScreenReaderOnly from './ScreenReaderOnly.svelte'
     }
   }
   const keydown = (e: KeyboardEvent) => {
-    if (active && e.key === "Escape" || e.keyCode === 27) {
+    if (active && e.key === "Escape") {
       e.stopPropagation()
       e.preventDefault()
       dispatch('escape')

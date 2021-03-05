@@ -1,3 +1,4 @@
-export { default as CollapsingTable } from './CollapsingTable.svelte'
+export * from './components'
+export * from './actions'
 export * from './lib'
 export * from './types'

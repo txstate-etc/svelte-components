@@ -1,8 +1,8 @@
 <script lang="ts">
   import { glue } from '../actions'
-  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+  import { createEventDispatcher, onDestroy } from 'svelte'
   import { randomid } from 'txstate-utils'
-  import { PopupMenuItem } from '../types'
+  import type { PopupMenuItem } from '../types'
   const dispatch = createEventDispatcher()
 
   export let menushown = false

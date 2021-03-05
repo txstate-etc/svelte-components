@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DeepStore, classes } from '../lib'
-  import { CollapsingTableColumn } from '../types'
+  import type { CollapsingTableColumn } from '../types'
   import { derived } from 'svelte/store'
   import PopupMenu from './PopupMenu.svelte'
   import ConditionalWrapper from './ConditionalWrapper.svelte'
