@@ -3,7 +3,6 @@
   import type { CollapsingTableColumn } from '../types'
   import { derived } from 'svelte/store'
   import PopupMenu from './PopupMenu.svelte'
-  import ConditionalWrapper from './ConditionalWrapper.svelte'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   export let tableClass = ''
   export let bodyRowClass = ''
@@ -62,7 +61,8 @@
     state.set({ keepcolumns, hiddencolumns, dropdowncolumn })
   }
   $: react(width, selectedkey)
-  let menubuttonelement: HTMLElement
+  let headers: HTMLElement[] = []
+  $: menubuttonelement = headers[$state.keepcolumns.length - 1]
 </script>
 
 <style>
@@ -71,8 +71,8 @@
     position: relative;
     box-sizing: border-box;
   }
-  th :global([role="button"]) {
-    cursor: pointer;
+  th[role="button"] {
+    cursor: pointer !important;
   }
   th.defaultIcon :global([role="button"]) {
     padding-right: 1.3em;
@@ -91,27 +91,23 @@
 <div bind:clientWidth={width}>
   <table class={tableClass}>
     <thead><tr class={headerRowClass}>
-      {#each $state.keepcolumns as column (column.key)}
+      {#each $state.keepcolumns as column, i (column.key)}
         <th
           class={classes(column.headerCellClass, headerCellClass)}
-          class:defaultIcon={!$$slots.dropicon && $state.dropdowncolumn}
+          class:defaultIcon={$state.dropdowncolumn === column && !$$slots.dropicon && $state.dropdowncolumn}
+          bind:this={headers[i]}
+          role={$state.dropdowncolumn === column ? 'button' : undefined }
+          tabindex={$state.dropdowncolumn === column ? 0 : undefined }
         >
-          <ConditionalWrapper
-            bind:element={menubuttonelement}
-            condition={$state.dropdowncolumn === column}
-            role="button"
-            tabindex=0
-          >
-            <slot name="headercell" {column} key={column.key} title={column.title || column.key}>
-              {column.title || column.key}
+          <slot name="headercell" {column} key={column.key} title={column.title || column.key}>
+            {column.title || column.key}
+          </slot>
+          {#if $state.dropdowncolumn === column}
+            <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
+            <slot name="dropicon">
+              <i aria-hidden="true"></i>
             </slot>
-            {#if $state.dropdowncolumn === column}
-              <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
-              <slot name="dropicon">
-                <i aria-hidden="true"></i>
-              </slot>
-            {/if}
-          </ConditionalWrapper>
+          {/if}
         </th>
       {/each}
     </tr></thead>

@@ -1,16 +1,16 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Svelte components that are generically useful.",
   "svelte": "dist/index.js",
   "module": "dist/index.js",
   "scripts": {
     "test": "jest src",
     "test:watch": "npm run test -- --watch",
-    "svelte-check": "svelte-check",
-    "build": "svelte-check && rm -rf dist && tsc && rm -rf dist/tests && cp -R src/components/*.svelte dist/components/ && cp package.json dist/ && cp README.md dist/ && cp LICENSE dist/ && cp prepublish.js dist/",
+    "svelte-check": "svelte-check --ignore dist",
+    "build": "npm run svelte-check && rm -rf dist && tsc && rm -rf dist/tests && cp -R src/components/*.svelte dist/components/ && cp package.json dist/ && cp README.md dist/ && cp LICENSE dist/ && cp prepublish.js dist/",
     "prepublishOnly": "node prepublish.js",
-    "pub": "npm run build && cd ./dist && RELEASE_MODE=true npm publish"
+    "pub": "npm run build && cd ./dist && RELEASE_MODE=true npm publish --access=public"
   },
   "repository": {
     "type": "git",
