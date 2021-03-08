@@ -1,20 +1,20 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Svelte components that are generically useful.",
-  "svelte": "dist/index.js",
-  "module": "dist/index.js",
+  "svelte": "dist-esm/index.js",
+  "module": "dist-esm/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest src",
     "test:watch": "npm run test -- --watch",
-    "svelte-check": "svelte-check --ignore dist",
-    "build": "npm run svelte-check && rm -rf dist && tsc && rm -rf dist/tests && cp -R src/components/*.svelte dist/components/ && cp package.json dist/ && cp README.md dist/ && cp LICENSE dist/ && cp prepublish.js dist/",
-    "prepublishOnly": "node prepublish.js",
-    "pub": "npm run build && cd ./dist && RELEASE_MODE=true npm publish --access=public"
+    "svelte-check": "svelte-check --ignore 'dist,dist-esm'",
+    "build": "npm run svelte-check && rm -rf dist* && tsc && tsc -m commonjs --outDir dist && rm -rf dist/tests && cp -R src/components/*.svelte dist/components/ && rm -rf dist-esm/tests && cp -R src/components/*.svelte dist-esm/components/",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git@git.txstate.edu:mws/txmantic-svelte.git"
+    "url": "git@github.com:txstate-etc/svelte-components.git"
   },
   "author": "Nick Wing",
   "license": "MIT",
@@ -64,6 +64,7 @@
         }
       ]
     },
+    "transformIgnorePatterns": [],
     "moduleFileExtensions": [
       "js",
       "ts",
@@ -73,5 +74,10 @@
       "@testing-library/jest-dom"
     ]
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "dist-esm",
+    "docs"
+  ]
 }
