@@ -1,14 +1,15 @@
 <script lang="ts">
   import { glue } from '../actions'
-  import { createEventDispatcher, onDestroy } from 'svelte'
+  import { createEventDispatcher, onDestroy, tick } from 'svelte'
   import { randomid } from 'txstate-utils'
   import type { PopupMenuItem } from '../types'
   const dispatch = createEventDispatcher()
 
   export let menushown = false
-  export let menuClass = ''
+  export let menuClass = 'popupmenu'
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
+  export let containerClass = ''
   export let items: PopupMenuItem[] = []
   export let buttonelement: HTMLElement
   export let align: 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright' = 'auto'
@@ -18,43 +19,51 @@
   let itemelements: HTMLElement[] = []
   const menuid = randomid()
 
+  async function reactToMenuShown (shown: boolean) {
+    await tick()
+    if (!menushown) {
+      hilited = undefined
+      buttonelement.removeAttribute('aria-controls')
+      buttonelement.setAttribute('aria-expanded', 'false')
+    } else {
+      buttonelement.setAttribute('aria-controls', menuid)
+      buttonelement.setAttribute('aria-expanded', 'true')
+    }
+    buttonelement.focus()
+  }
+  $: reactToMenuShown(menushown)
+
   function move (idx: number) {
     if (!menushown) return
     hilited = Math.max(0, Math.min(items.length - 1, idx))
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
   }
 
-  function open (moveTo?: number) {
-    if (menushown) return
-    menushown = true
-    buttonelement.setAttribute('aria-controls', menuid)
-    buttonelement.setAttribute('aria-expanded', 'true')
-    if (typeof moveTo !== 'undefined') move(moveTo)
-  }
-
-  function close (value?: string) {
-    if (!menushown) return
-    menushown = false
-    hilited = undefined
-    buttonelement.removeAttribute('aria-controls')
-    buttonelement.setAttribute('aria-expanded', 'false')
-    buttonelement.focus()
-    if (value) dispatch('change', value)
-  }
-
   function onkeydown (e: KeyboardEvent) {
     if (e.code === 'ArrowDown') {
       e.preventDefault()
-      menushown ? move((hilited ?? -1) + 1) : open(0)
+      if (menushown) {
+        move((hilited ?? -1) + 1)
+      } else {
+        menushown = true
+        move(0)
+      }
     } else if (e.code === 'ArrowUp') {
       e.preventDefault()
-      menushown ? move((hilited ?? items.length) - 1) : open(items.length - 1)
+      if (menushown) {
+        move((hilited ?? items.length) - 1)
+      } else {
+        menushown = true
+        move(items.length - 1)
+      }
     } else if (['Space', 'Enter'].includes(e.code)) {
       e.preventDefault()
       if (menushown) {
-        close(typeof hilited === 'undefined' ? undefined : items[hilited].value)
+        menushown = false
+        if (typeof hilited !== 'undefined') dispatch('change', items[hilited].value)
       } else {
-        open(0)
+        menushown = true
+        move(0)
       }
     } else if (['ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'ControlLeft', 'ControlRight', 'MetaLeft', 'MetaRight'].includes(e.code)) {
       // avoid hiding the menu when just using control keys
@@ -63,17 +72,17 @@
         e.preventDefault()
         e.stopPropagation()
       }
-      close()
+      menushown = false
     }
   }
 
   function onbuttonclick (e: MouseEvent) {
     e.preventDefault()
-    menushown ? close() : open()
+    menushown = !menushown
   }
 
   async function onblur (e: FocusEvent) {
-    if (!(e.relatedTarget instanceof HTMLElement && menuelement?.contains(e.relatedTarget))) close()
+    if (!(e.relatedTarget instanceof HTMLElement && menuelement?.contains(e.relatedTarget))) menushown = false
   }
 
   function cleanup (element: HTMLElement) {
@@ -105,14 +114,35 @@
   $: reactToButtonElement(buttonelement)
 
   const onclick = (item: PopupMenuItem) => () => {
-    close(item.value)
+    menushown = false
+    dispatch('change', item.value)
   }
 </script>
 
+{#if menushown}
+  <div use:glue={{ target: buttonelement, align }} class={containerClass}>
+    <ul bind:this={menuelement} id={menuid} role='listbox' class={menuClass} on:keydown={onkeydown}>
+      {#each items as item, i}
+        <li
+          id={`${menuid}-${i}`}
+          bind:this={itemelements[i]}
+          class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass || '' : ''}`}
+          class:hilited={!menuItemHilitedClass && i === hilited}
+          on:click={onclick(item)}
+          role="option"
+          tabindex=-1
+        >{item.label || item.value}</li>
+      {/each}
+    </ul>
+  </div>
+{/if}
+
 <style>
+  div {
+    position: absolute;
+  }
   ul {
     list-style: none;
-    position: absolute;
   }
   ul.default {
     margin: 0;
@@ -129,19 +159,3 @@
     background: lightblue;
   }
 </style>
-
-{#if menushown}
-  <ul bind:this={menuelement} use:glue={{ target: buttonelement, align }} id={menuid} role='listbox' class={menuClass || 'default'} on:keydown={onkeydown}>
-    {#each items as item, i}
-      <li
-        id={`${menuid}-${i}`}
-        bind:this={itemelements[i]}
-        class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass || '' : ''}`}
-        class:hilited={!menuItemHilitedClass && i === hilited}
-        on:click={onclick(item)}
-        role="option"
-        tabindex=-1
-      >{item.label || item.value}</li>
-    {/each}
-  </ul>
-{/if}
