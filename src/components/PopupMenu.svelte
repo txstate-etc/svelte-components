@@ -139,12 +139,12 @@
 
 <style>
   div {
-    position: absolute;
+    position: absolute !important;
   }
   ul {
     list-style: none;
   }
-  ul.default {
+  ul.popupmenu {
     margin: 0;
     padding: 5px;
     background: white;
