@@ -1,10 +1,11 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Svelte components that are generically useful.",
   "svelte": "dist-esm/index.js",
   "module": "dist-esm/index.js",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest src",
     "test:watch": "npm run test -- --watch",
@@ -26,9 +27,6 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.12.11",
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.1.1",
-    "@rollup/plugin-typescript": "^8.1.1",
     "@storybook/svelte": "^6.1.15",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/svelte": "^3.0.3",
