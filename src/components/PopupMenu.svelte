@@ -19,7 +19,7 @@
   let itemelements: HTMLElement[] = []
   const menuid = randomid()
 
-  async function reactToMenuShown (shown: boolean) {
+  async function reactToMenuShown (_: boolean) {
     await tick()
     if (!menushown) {
       hilited = undefined

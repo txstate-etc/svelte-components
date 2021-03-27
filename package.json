@@ -1,16 +1,17 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "0.0.6",
+  "version": "0.0.11",
   "description": "Svelte components that are generically useful.",
-  "svelte": "dist-esm/index.js",
-  "module": "dist-esm/index.js",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "module": "esm/index.js",
+  "svelte": "esm/index.js",
+  "types": "dist/ts/index.d.ts",
   "scripts": {
     "test": "jest src",
     "test:watch": "npm run test -- --watch",
-    "svelte-check": "svelte-check --ignore 'dist,dist-esm'",
-    "build": "npm run svelte-check && rm -rf dist* && tsc && tsc -m commonjs --outDir dist && rm -rf dist/tests && cp -R src/components/*.svelte dist/components/ && rm -rf dist-esm/tests && cp -R src/components/*.svelte dist-esm/components/",
+    "svelte-check": "svelte-check --ignore 'dist'",
+    "prebuild": "rm -rf ./dist",
+    "build": "npm run svelte-check && tsc -m commonjs && node scripts/preprocess.js && rm -rf dist/tests",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -26,7 +27,6 @@
     "txstate-utils": "^1.2.26"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.12.11",
     "@storybook/svelte": "^6.1.15",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/svelte": "^3.0.3",
@@ -42,6 +42,8 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-svelte3": "^3.0.0",
+    "fs-extra": "^9.0.1",
+    "glob": "^7.1.6",
     "jest": "^26.6.3",
     "svelte": "^3.32.1",
     "svelte-check": "^1.1.31",
@@ -75,7 +77,7 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "dist-esm",
+    "esm",
     "docs"
   ]
 }
