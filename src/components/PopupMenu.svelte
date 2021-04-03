@@ -7,12 +7,16 @@
 
   export let menushown = false
   export let menuContainerClass = ''
-  export let menuClass = 'popupmenu'
+  export let menuClass = ''
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
+  export let menuItemSelectedClass = ''
   export let items: PopupMenuItem[] = []
   export let buttonelement: HTMLElement
   export let align: 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright' = 'auto'
+  export let cover = false
+  export let selected: PopupMenuItem|undefined = undefined
+  export let showSelected = true
 
   let menuelement: HTMLElement|undefined
   let hilited: number|undefined = undefined
@@ -64,7 +68,10 @@
       e.preventDefault()
       if (menushown) {
         menushown = false
-        if (typeof hilited !== 'undefined') dispatch('change', items[hilited].value)
+        if (typeof hilited !== 'undefined') {
+          selected = items[hilited]
+          dispatch('change', items[hilited].value)
+        }
       } else {
         menushown = true
         move(0)
@@ -72,11 +79,11 @@
     } else if (['ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'ControlLeft', 'ControlRight', 'MetaLeft', 'MetaRight'].includes(e.code)) {
       // avoid hiding the menu when just using control keys
     } else {
-      if (e.code === 'Escape') {
+      if (menushown && e.code === 'Escape') {
         e.preventDefault()
         e.stopPropagation()
+        menushown = false
       }
-      menushown = false
     }
   }
 
@@ -119,23 +126,29 @@
 
   const onclick = (item: PopupMenuItem) => () => {
     menushown = false
+    selected = item
     dispatch('change', item.value)
   }
+
+  $: hasSelected = showSelected && !!items.find(itm => itm.value === selected?.value)
 </script>
 
 {#if menushown}
-  <div use:glue={{ target: buttonelement, align }} class={menuContainerClass}>
-    <ul bind:this={menuelement} id={menuid} role='listbox' class={menuClass} on:keydown={onkeydown}>
+  <div use:glue={{ target: buttonelement, align, cover }} class={menuContainerClass}>
+    <ul bind:this={menuelement} id={menuid} role='listbox' class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
       {#each items as item, i}
-        <li
-          id={`${menuid}-${i}`}
-          bind:this={itemelements[i]}
-          class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass || '' : ''}`}
-          class:hilited={!menuItemHilitedClass && i === hilited}
-          on:click={onclick(item)}
-          role="option"
-          tabindex=-1
-        >{item.label || item.value}</li>
+        {#if showSelected || (selected && item.value === selected.value)}
+          <li
+            id={`${menuid}-${i}`}
+            bind:this={itemelements[i]}
+            class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass || '' : ''} ${selected && selected.value === item.value ? menuItemSelectedClass || '' : ''}`}
+            class:hilited={!menuItemHilitedClass && i === hilited}
+            class:selected={showSelected && !menuItemSelectedClass && selected && selected.value === item.value}
+            on:click={onclick(item)}
+            role="option"
+            tabindex=-1
+          >{item.label || item.value}</li>
+        {/if}
       {/each}
     </ul>
   </div>
@@ -148,7 +161,7 @@
   ul {
     list-style: none;
   }
-  ul.popupmenu {
+  ul.defaultmenu {
     margin: 0;
     padding: 5px;
     background: white;
@@ -161,5 +174,23 @@
   }
   li.hilited {
     background: lightblue;
+  }
+  li.selected {
+    position: relative;
+  }
+  ul.hasSelected li {
+    padding-left: 1em;
+  }
+  li.selected:after {
+    content: ' ';
+    position: absolute;
+    left: 0;
+    top: calc(50% - 0.1em);
+    transform: translateY(-50%) rotate(45deg);
+    display: block;
+    height: 0.5em;
+    width: 0.25em;
+    border-bottom: 0.2em solid;
+    border-right: 0.2em solid;
   }
 </style>
