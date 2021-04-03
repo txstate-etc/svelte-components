@@ -2,7 +2,7 @@
   import { DeepStore, classes } from '../lib'
   import type { CollapsingTableColumn } from '../types'
   import { derived } from 'svelte/store'
-  import PopupMenu from './PopupMenu.svelte'
+  import DefaultPopupMenu from './PopupMenu.svelte'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   export let tableClass = ''
   export let bodyRowClass = ''
@@ -16,6 +16,7 @@
   export let items: any[]
   export let config: CollapsingTableColumn[]|undefined = undefined
   export let defaultCellWidth = 150
+  export let PopupMenu = DefaultPopupMenu
   let columns: CollapsingTableColumn[]
   let width: number = 320
   let selectedkey: string | undefined
@@ -105,7 +106,7 @@
           </slot>
           {#if $state.dropdowncolumn === column}
             <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
-            <slot name="dropicon" {column} key={column.key} title={column.title || column.key} item={undefined} value={undefined}>
+            <slot name="dropicon" {column} item={undefined} value={undefined}>
               <i aria-hidden="true"></i>
             </slot>
           {/if}
