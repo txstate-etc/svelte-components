@@ -100,12 +100,12 @@
           role={$state.dropdowncolumn === column ? 'button' : undefined }
           tabindex={$state.dropdowncolumn === column ? 0 : undefined }
         >
-          <slot name="headercell" {column} key={column.key} title={column.title || column.key}>
+          <slot name="headercell" {column} key={column.key} title={column.title || column.key} item={undefined} value={undefined}>
             {column.title || column.key}
           </slot>
           {#if $state.dropdowncolumn === column}
             <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
-            <slot name="dropicon">
+            <slot name="dropicon" {column} key={column.key} title={column.title || column.key} item={undefined} value={undefined}>
               <i aria-hidden="true"></i>
             </slot>
           {/if}
@@ -125,7 +125,7 @@
         </tr>
       {/each}
     </tbody>
-    {#if $$slots.footer}<tfoot><slot name="footer"></slot></tfoot>{/if}
+    {#if $$slots.footer}<tfoot><slot name="footer" item={undefined} key={undefined} value={undefined}></slot></tfoot>{/if}
   </table>
 </div>
 <PopupMenu {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={$menuitems} buttonelement={menubuttonelement} on:change={e => selectedkey = e.detail}></PopupMenu>

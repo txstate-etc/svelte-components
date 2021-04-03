@@ -20,7 +20,6 @@
   const menuid = randomid()
 
   async function reactToMenuShown (_: boolean) {
-    console.log('reactToMenuShown')
     if (!buttonelement) {
       hilited = undefined
       return
