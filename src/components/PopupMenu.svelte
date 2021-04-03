@@ -20,6 +20,10 @@
   const menuid = randomid()
 
   async function reactToMenuShown (_: boolean) {
+    if (!buttonelement) {
+      hilited = undefined
+      return
+    }
     await tick()
     if (!menushown) {
       hilited = undefined
