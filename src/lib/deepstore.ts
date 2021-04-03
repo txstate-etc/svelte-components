@@ -1,6 +1,14 @@
 import { Writable } from 'svelte/store'
 import deepEqual from 'fast-deep-equal'
 
+export interface UsableSubject<T> {
+  subscribe: (observer: (value: T) => void) => () => void
+}
+
+export interface WritableSubject<T> extends UsableSubject<T> {
+  update: (updater: (value: T) => T) => void
+}
+
 function isWritable <T> (value: T|Writable<T>): value is Writable<T> {
   return !!(value as Writable<T>).subscribe
 }
@@ -8,10 +16,11 @@ function isWritable <T> (value: T|Writable<T>): value is Writable<T> {
 export class DeepStore<T> implements Writable<T> {
   protected value!: T
   protected subscribers: Map<string, (s: T) => void>
+  protected cleanups: (() => void)[] = []
 
   constructor (value: T|Writable<T>) {
     if (isWritable(value)) {
-      value.subscribe(v => this.set(v))
+      this.cleanup(value.subscribe(v => this.set(v)))
     } else {
       this.value = this.clone(value)
     }
@@ -35,10 +44,20 @@ export class DeepStore<T> implements Writable<T> {
     this.set(this.clone(updater(this.value)))
   }
 
-  public subscribe (run: (s: T) => any) {
+  subscribe (run: (s: T) => any) {
     const id = Math.random().toString(32)
     this.subscribers.set(id, run)
     run(this.value)
     return () => { this.subscribers.delete(id) }
+  }
+
+  protected cleanup (fn: () => void) {
+    this.cleanups.push(fn)
+  }
+
+  complete () {
+    for (const fn of this.cleanups) fn()
+    this.cleanups = []
+    this.subscribers.clear()
   }
 }
