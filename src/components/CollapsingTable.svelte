@@ -9,6 +9,7 @@
   export let bodyCellClass = ''
   export let headerRowClass = ''
   export let headerCellClass = ''
+  export let menuContainerClass = ''
   export let menuClass = ''
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
@@ -127,4 +128,4 @@
     {#if $$slots.footer}<tfoot><slot name="footer"></slot></tfoot>{/if}
   </table>
 </div>
-<PopupMenu {menuClass} {menuItemClass} {menuItemHilitedClass} items={$menuitems} buttonelement={menubuttonelement} on:change={e => selectedkey = e.detail}></PopupMenu>
+<PopupMenu {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={$menuitems} buttonelement={menubuttonelement} on:change={e => selectedkey = e.detail}></PopupMenu>

@@ -6,10 +6,10 @@
   const dispatch = createEventDispatcher()
 
   export let menushown = false
+  export let menuContainerClass = ''
   export let menuClass = 'popupmenu'
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
-  export let containerClass = ''
   export let items: PopupMenuItem[] = []
   export let buttonelement: HTMLElement
   export let align: 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright' = 'auto'
@@ -20,6 +20,7 @@
   const menuid = randomid()
 
   async function reactToMenuShown (_: boolean) {
+    console.log('reactToMenuShown')
     if (!buttonelement) {
       hilited = undefined
       return
@@ -124,7 +125,7 @@
 </script>
 
 {#if menushown}
-  <div use:glue={{ target: buttonelement, align }} class={containerClass}>
+  <div use:glue={{ target: buttonelement, align }} class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' class={menuClass} on:keydown={onkeydown}>
       {#each items as item, i}
         <li
