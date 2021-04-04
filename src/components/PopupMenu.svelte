@@ -65,7 +65,7 @@
         menushown = true
         move(items.length - 1)
       }
-    } else if (['Space', 'Enter'].includes(e.code)) {
+    } else if (e.code === 'Enter') {
       e.preventDefault()
       if (menushown) {
         menushown = false
@@ -77,14 +77,32 @@
         menushown = true
         move(0)
       }
-    } else if (['ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'ControlLeft', 'ControlRight', 'MetaLeft', 'MetaRight'].includes(e.code)) {
-      // avoid hiding the menu when just using control keys
-    } else {
-      if (menushown && e.code === 'Escape') {
-        e.preventDefault()
-        e.stopPropagation()
-        menushown = false
+    } else if (e.code === 'Space') {
+      // buttonelement might be a text input if this popup is searchable,
+      // so we want to allow spaces to be entered without changing the menu situation
+      if (menushown) {
+        if (typeof hilited !== 'undefined') {
+          e.preventDefault()
+          menushown = false
+          selected = items[hilited]
+          dispatch('change', items[hilited].value)
+        } else {
+          if (buttonelement.tagName !== 'INPUT') {
+            e.preventDefault()
+            menushown = false
+          }
+        }
+      } else {
+        if (buttonelement.tagName !== 'INPUT') {
+          e.preventDefault()
+          menushown = true
+          move(0)
+        }
       }
+    } else if (menushown && e.code === 'Escape') {
+      e.preventDefault()
+      e.stopPropagation()
+      menushown = false
     }
   }
 
