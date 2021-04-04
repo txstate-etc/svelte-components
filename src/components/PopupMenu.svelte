@@ -163,11 +163,11 @@
   }
   ul.defaultmenu {
     margin: 0;
-    padding: 5px;
+    padding: 0.4em;
     background: white;
     border: 1px solid slategray;
     border-radius: 3px;
-    min-width: 120px;
+    min-width: 10em;
   }
   li {
     cursor: pointer;
@@ -179,18 +179,19 @@
     position: relative;
   }
   ul.hasSelected li {
-    padding-left: 1em;
+    padding-left: 1.4em;
   }
   li.selected:after {
     content: ' ';
     position: absolute;
-    left: 0;
-    top: calc(50% - 0.1em);
-    transform: translateY(-50%) rotate(45deg);
+    left: 0.5em;
+    top: calc(50% - 0.11em);
+    transform: translateY(-50%) rotate(38deg);
     display: block;
-    height: 0.5em;
-    width: 0.25em;
+    height: 0.786em;
+    width: 0.4286em;
     border-bottom: 0.2em solid;
     border-right: 0.2em solid;
+    box-sizing: border-box;
   }
 </style>
