@@ -18,6 +18,7 @@
   export let config: CollapsingTableColumn[]|undefined = undefined
   export let defaultCellWidth = 150
   export let PopupMenu = DefaultPopupMenu
+  export let slots: Record<string, boolean> = $$slots
   let columns: CollapsingTableColumn[]
   let width: number = 320
   let selected: PopupMenuItem | undefined
@@ -49,7 +50,7 @@
     dropdowncolumn: undefined as (CollapsingTableColumn & { widthPercent?: number }) | undefined
   })
   const menuitems = derived(state, obj => obj.hiddencolumns.map(c => ({ value: c.key, label: c.title })))
-  function react (...args: any[]) {
+  function react (..._: any[]) {
     const selectedcol = sortedcolumns.find(c => c.key === selected?.value) ?? columns[1]
     const keepcolumns: CollapsingTableColumn[] = []
     const hiddencolumns: CollapsingTableColumn[] = []
@@ -77,7 +78,7 @@
       {#each $state.keepcolumns as column, i (column.key)}
         <th
           class={classes(column.headerCellClass, headerCellClass)}
-          class:defaultIcon={$state.dropdowncolumn === column && !$$slots.dropicon}
+          class:defaultIcon={!slots.dropicon && $state.dropdowncolumn === column}
           bind:this={headers[i]}
           role={$state.dropdowncolumn === column ? 'button' : undefined }
           tabindex={$state.dropdowncolumn === column ? 0 : undefined }
@@ -107,7 +108,7 @@
         </tr>
       {/each}
     </tbody>
-    {#if $$slots.footer}<tfoot><slot name="footer" item={undefined} key={undefined} value={undefined}></slot></tfoot>{/if}
+    {#if slots.footer}<tfoot><slot name="footer" item={undefined} key={undefined} value={undefined}></slot></tfoot>{/if}
   </table>
 </div>
 <svelte:component this={PopupMenu} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={$menuitems} buttonelement={menubuttonelement} bind:selected></svelte:component>
