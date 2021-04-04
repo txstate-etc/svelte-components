@@ -17,6 +17,7 @@
   export let cover = false
   export let selected: PopupMenuItem|undefined = undefined
   export let showSelected = true
+  export let width:string|undefined = undefined
 
   let menuelement: HTMLElement|undefined
   let hilited: number|undefined = undefined
@@ -135,7 +136,7 @@
 
 {#if menushown}
   <div use:glue={{ target: buttonelement, align, cover }} class={menuContainerClass}>
-    <ul bind:this={menuelement} id={menuid} role='listbox' class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
+    <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
       {#each items as item, i}
         {#if showSelected || (selected && item.value === selected.value)}
           <li
