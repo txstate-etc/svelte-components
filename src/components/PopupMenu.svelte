@@ -166,7 +166,7 @@
             on:click={onclick(item)}
             role="option"
             tabindex=-1
-          >{item.label || item.value}</li>
+          ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={selected && selected.value === item.value}>{item.label || item.value}</slot></li>
         {/if}
       {/each}
     </ul>
