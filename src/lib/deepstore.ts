@@ -9,6 +9,10 @@ export interface WritableSubject<T> extends UsableSubject<T> {
   update: (updater: (value: T) => T) => void
 }
 
+export interface SettableSubject<T> extends WritableSubject<T> {
+  set: (value: T) => void
+}
+
 function isWritable <T> (value: T|Writable<T>): value is Writable<T> {
   return !!(value as Writable<T>).subscribe
 }
