@@ -24,16 +24,14 @@ export function button (node: HTMLElement) {
 
   node.addEventListener('click', click)
   node.addEventListener('keydown', keydown)
-  const saveindex = node.tabIndex
   if (node.tabIndex < 0) node.tabIndex = 0
   node.setAttribute('role', 'button')
+  node.style.cursor = 'pointer'
 
   return {
     destroy () {
       node.removeEventListener('click', click)
       node.removeEventListener('keydown', keydown)
-      node.removeAttribute('button')
-      node.tabIndex = saveindex
     }
   }
 }
