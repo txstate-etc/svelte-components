@@ -2,17 +2,17 @@
   import { writable } from 'svelte/store'
   import type { ElementSize } from '../../actions/resize'
   import { resize } from '../../actions/resize'
-  export let allowToSettle = false
+  export let debounce = false
   let mysize = writable<ElementSize>({})
 </script>
 
-<div use:resize={{ store: mysize, allowToSettle }} class='resizable'>resize this div</div>
+<div use:resize={{ store: mysize, debounce }} class='resizable'>resize this div</div>
 <div class="display">
   Above div's size...<br>
   Width: {$mysize.offsetWidth}<br>
   Height: {$mysize.offsetHeight}
 </div>
-allowToSettle: {allowToSettle}
+debounce: {debounce}
 
 <style>
   div {

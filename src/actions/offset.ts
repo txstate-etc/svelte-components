@@ -4,11 +4,12 @@ import { bodyOffset, debounced, SettableSubject } from '../lib'
 export type ElementOffsets = Partial<ReturnType<typeof bodyOffset>>
 
 interface OffsetConfig {
-  allowToSettle?: boolean
+  debounce?: boolean|number
   store?: SettableSubject<ElementOffsets>
 }
 
 export function offset (el: HTMLElement, config?: OffsetConfig) {
+  if (config?.debounce === true) config.debounce = 100
   let lastOffset: ElementOffsets = {}
   function lookforoffsetchange () {
     const current = bodyOffset(el)
@@ -18,10 +19,10 @@ export function offset (el: HTMLElement, config?: OffsetConfig) {
       el.dispatchEvent(new CustomEvent('offset', { detail: current }))
     }
   }
-  const debouncedlookforoffsetchange = debounced(lookforoffsetchange, 100)
+  let resolvedchange = config?.debounce ? debounced(lookforoffsetchange, config.debounce) : lookforoffsetchange
 
-  window.addEventListener('resize', config?.allowToSettle ? debouncedlookforoffsetchange : lookforoffsetchange, { passive: true })
-  let observer = new MutationObserver(config?.allowToSettle ? debouncedlookforoffsetchange : lookforoffsetchange)
+  window.addEventListener('resize', resolvedchange, { passive: true })
+  let observer = new MutationObserver(resolvedchange)
   observer.observe(document.body, {
     subtree: true,
     childList: true,
@@ -32,30 +33,27 @@ export function offset (el: HTMLElement, config?: OffsetConfig) {
 
   return {
     update (newConfig?: OffsetConfig) {
+      if (newConfig?.debounce === true) newConfig.debounce = 100
       if (newConfig?.store !== config?.store) {
         newConfig?.store?.set(lastOffset)
       }
-      if (!!newConfig?.allowToSettle !== !!config?.allowToSettle) {
+      if (newConfig?.debounce !== config?.debounce) {
+        window.removeEventListener('resize', resolvedchange)
+        resolvedchange = newConfig?.debounce ? debounced(lookforoffsetchange, newConfig.debounce as any) : lookforoffsetchange
+        window.addEventListener('resize', resolvedchange, { passive: true })
         observer.disconnect()
-        observer = new MutationObserver(newConfig?.allowToSettle ? debouncedlookforoffsetchange : lookforoffsetchange)
+        observer = new MutationObserver(resolvedchange)
         observer.observe(document.body, {
           subtree: true,
           childList: true,
           attributes: true,
           characterData: true
         })
-        if (newConfig?.allowToSettle) {
-          window.removeEventListener('resize', lookforoffsetchange)
-          window.addEventListener('resize', debouncedlookforoffsetchange, { passive: true })
-        } else {
-          window.removeEventListener('resize', debouncedlookforoffsetchange)
-          window.addEventListener('resize', lookforoffsetchange, { passive: true })
-        }
       }
       config = newConfig
     },
     destroy () {
-      window.removeEventListener('resize', lookforoffsetchange)
+      window.removeEventListener('resize', resolvedchange)
       observer.disconnect()
     }
   }

@@ -2,17 +2,19 @@
   import { writable } from 'svelte/store'
   import type { ElementOffsets } from '../../actions/offset'
   import { offset } from '../../actions/offset'
-  export let allowToSettle = false
+  export let debounce = false
   let myoffset = writable<ElementOffsets>({})
 </script>
 
 <div class='resizable'>resize this div</div>
-<div use:offset={{ store: myoffset, allowToSettle }} class="offset">
+<div use:offset={{ store: myoffset, debounce }} class="offset">
   This div's offset...<br>
   Left: {$myoffset.left}<br>
-  Top: {$myoffset.top}
+  Top: {$myoffset.top}<br>
+  Right: {$myoffset.right}<br>
+  Bottom: {$myoffset.bottom}
 </div>
-allowToSettle: {allowToSettle}
+debounce: {debounce}
 
 <style>
   div {

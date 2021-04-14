@@ -8,12 +8,12 @@ storiesOf('Actions', module)
   }))
   .add('offset debounced', () => ({
     Component: Offset,
-    props: { allowToSettle: true }
+    props: { debounce: true }
   }))
   .add('resize', () => ({
     Component: Resize
   }))
   .add('resize debounced', () => ({
     Component: Resize,
-    props: { allowToSettle: true }
+    props: { debounce: true }
   }))

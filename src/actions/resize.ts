@@ -9,11 +9,12 @@ export interface ElementSize {
 }
 
 interface ResizeConfig {
-  allowToSettle?: boolean
+  debounce?: boolean|number
   store?: SettableSubject<ElementSize>
 }
 
 export function resize (el: HTMLElement, config?: ResizeConfig) {
+  if (config?.debounce === true) config.debounce = 100
   let lastSize: ElementSize = {}
   function watch () {
     const current = { clientWidth: el.clientWidth, clientHeight: el.clientHeight, offsetWidth: el.offsetWidth, offsetHeight: el.offsetHeight }
@@ -24,18 +25,19 @@ export function resize (el: HTMLElement, config?: ResizeConfig) {
     }
   }
 
-  let observer = new ResizeObserver(config?.allowToSettle ? debounced(watch, 100) : watch)
+  let observer = new ResizeObserver(config?.debounce ? debounced(watch, config.debounce) : watch)
   observer.observe(el)
   watch()
 
   return {
     update (newConfig?: ResizeConfig) {
+      if (newConfig?.debounce === true) newConfig.debounce = 100
       if (newConfig?.store !== config?.store) {
         newConfig?.store?.set(lastSize)
       }
-      if (!!newConfig?.allowToSettle !== !!config?.allowToSettle) {
+      if (!!newConfig?.debounce !== !!config?.debounce) {
         observer.disconnect()
-        observer = new ResizeObserver(newConfig?.allowToSettle ? debounced(watch, 100) : watch)
+        observer = new ResizeObserver(newConfig?.debounce ? debounced(watch, newConfig.debounce) : watch)
         observer.observe(el)
       }
       config = newConfig
