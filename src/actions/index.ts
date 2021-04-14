@@ -1,3 +1,5 @@
 export * from './a11y'
 export * from './glue'
+export * from './offset'
 export * from './portal'
+export * from './resize'
