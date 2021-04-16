@@ -30,12 +30,12 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false }
     } else if (autoalign === 'topleft') {
       el.style.top = 'auto'
       el.style.left = `${offset.left}px`
-      el.style.bottom = `${offset.top - (cover ? target.offsetHeight : 0)}px`
+      el.style.bottom = `${offset.bottom - (cover ? target.offsetHeight : 0)}px`
       el.style.right = 'auto'
     } else if (autoalign === 'topright') {
       el.style.top = 'auto'
       el.style.left = 'auto'
-      el.style.bottom = `${offset.top - (cover ? target.offsetHeight : 0)}px`
+      el.style.bottom = `${offset.bottom - (cover ? target.offsetHeight : 0)}px`
       el.style.right = `${offset.right}px`
     }
   }
