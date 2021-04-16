@@ -1,12 +1,20 @@
-import { bodyOffset, debounced } from '../lib'
+import { bodyOffset, debounced, SettableSubject } from '../lib'
 
-interface GlueArgs {
+export type GlueAlignOpts = 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright'
+
+export interface GlueArgs {
   target: HTMLElement
-  align?: 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright'
+  align?: GlueAlignOpts
   cover?: boolean
+  store?: SettableSubject<GlueAlignStore>
 }
 
-export function glue (el: HTMLElement, { target, align = 'auto', cover = false }: GlueArgs) {
+export interface GlueAlignStore {
+  valign: 'bottom'|'top'
+  halign: 'left'|'right'
+}
+
+export function glue (el: HTMLElement, { target, align = 'auto', cover = false, store }: GlueArgs) {
   function reposition () {
     if (!target) return
     const offset = bodyOffset(target)
@@ -22,21 +30,25 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false }
       el.style.left = `${offset.left}px`
       el.style.bottom = 'auto'
       el.style.right = 'auto'
+      store?.set({ valign: 'bottom', halign: 'left' })
     } else if (autoalign === 'bottomright') {
       el.style.top = `${offset.top + (cover ? 0 : target.offsetHeight)}px`
       el.style.left = 'auto'
       el.style.bottom = 'auto'
       el.style.right = `${offset.right}px`
+      store?.set({ valign: 'bottom', halign: 'right' })
     } else if (autoalign === 'topleft') {
       el.style.top = 'auto'
       el.style.left = `${offset.left}px`
       el.style.bottom = `${offset.bottom + (cover ? 0 : target.offsetHeight)}px`
       el.style.right = 'auto'
+      store?.set({ valign: 'top', halign: 'left' })
     } else if (autoalign === 'topright') {
       el.style.top = 'auto'
       el.style.left = 'auto'
       el.style.bottom = `${offset.bottom + (cover ? 0 : target.offsetHeight)}px`
       el.style.right = `${offset.right}px`
+      store?.set({ valign: 'top', halign: 'right' })
     }
   }
   const debouncedreposition = debounced(reposition, 200)
