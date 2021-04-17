@@ -1,6 +1,6 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "description": "Svelte components that are generically useful.",
   "main": "dist/index.js",
   "module": "esm/index.js",

@@ -4,7 +4,7 @@
   import { createEventDispatcher, onDestroy, tick } from 'svelte'
   import { randomid } from 'txstate-utils'
   import type { PopupMenuItem } from '../types'
-  import { DeepStore } from '../lib'
+  import { DeepStore, SettableSubject } from '../lib'
   const dispatch = createEventDispatcher()
 
   export let menushown = false
@@ -20,7 +20,7 @@
   export let selected: PopupMenuItem|undefined = undefined
   export let showSelected = true
   export let width:string|undefined = undefined
-  export let computedalign = new DeepStore<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
+  export let computedalign: SettableSubject<GlueAlignStore> = new DeepStore<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
 
   let menuelement: HTMLElement|undefined
   let hilited: number|undefined = undefined
