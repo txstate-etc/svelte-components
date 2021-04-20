@@ -8,7 +8,7 @@
   export let hidefocuslabel = "focus moved to dialog"
   import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte'
   import { tabbable } from 'tabbable'
-import ScreenReaderOnly from './ScreenReaderOnly.svelte'
+  import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
   let lockelement: HTMLElement
   let abovelockelement: HTMLElement
