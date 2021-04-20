@@ -2,10 +2,10 @@ export function classes (...classNames: (string | undefined)[]) {
   return classNames.filter(Boolean).join(' ')
 }
 
-export function debounced (cb: Function, timeout: number) {
-  let timer: number
-  return () => {
+export function debounced (fn: Function, timeout: number) {
+  let timer: NodeJS.Timeout
+  return (...args: any[]) => {
     clearTimeout(timer)
-    timer = setTimeout(cb, timeout)
+    timer = setTimeout(() => fn(...args), timeout)
   }
 }
