@@ -1,12 +1,12 @@
-import { bodyOffset, debounced, SettableSubject } from '../lib'
+import { ElementOffsets, SettableSubject, watchForPositionChange } from '../lib'
 
 export type GlueAlignOpts = 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright'
 
-export interface GlueArgs {
+export interface GlueArgs<T extends GlueAlignStore = GlueAlignStore> {
   target: HTMLElement
   align?: GlueAlignOpts
   cover?: boolean
-  store?: SettableSubject<GlueAlignStore>
+  store?: SettableSubject<T>
 }
 
 export interface GlueAlignStore {
@@ -15,9 +15,11 @@ export interface GlueAlignStore {
 }
 
 export function glue (el: HTMLElement, { target, align = 'auto', cover = false, store }: GlueArgs) {
-  function reposition () {
+  document.body.style.position = 'relative'
+  let halign: GlueAlignStore['halign']
+  let valign: GlueAlignStore['valign']
+  function reposition (offset: Required<ElementOffsets>) {
     if (!target) return
-    const offset = bodyOffset(target)
     let autoalign = align
     if (align === 'auto') {
       const rect = target.getBoundingClientRect()
@@ -25,61 +27,64 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       const topbottom = window.innerHeight - rect.bottom > rect.top ? 'bottom' : 'top'
       autoalign = topbottom + leftright as 'auto'
     }
+    const targetHeight = target.offsetHeight
     if (autoalign === 'bottomleft') {
-      el.style.top = `${offset.top + (cover ? 0 : target.offsetHeight)}px`
-      el.style.left = `${offset.left}px`
-      el.style.bottom = 'auto'
-      el.style.right = 'auto'
-      store?.set({ valign: 'bottom', halign: 'left' })
+      requestAnimationFrame(() => {
+        el.style.top = `${offset.top + (cover ? 0 : targetHeight)}px`
+        el.style.left = `${offset.left}px`
+        el.style.bottom = ''
+        el.style.right = ''
+      })
+      valign = 'bottom'
+      halign = 'left'
     } else if (autoalign === 'bottomright') {
-      el.style.top = `${offset.top + (cover ? 0 : target.offsetHeight)}px`
-      el.style.left = 'auto'
-      el.style.bottom = 'auto'
-      el.style.right = `${offset.right}px`
-      store?.set({ valign: 'bottom', halign: 'right' })
+      requestAnimationFrame(() => {
+        el.style.top = `${offset.top + (cover ? 0 : targetHeight)}px`
+        el.style.left = ''
+        el.style.bottom = ''
+        el.style.right = `${offset.right}px`
+      })
+      valign = 'bottom'
+      halign = 'right'
     } else if (autoalign === 'topleft') {
-      el.style.top = 'auto'
-      el.style.left = `${offset.left}px`
-      el.style.bottom = `${offset.bottom + (cover ? 0 : target.offsetHeight)}px`
-      el.style.right = 'auto'
-      store?.set({ valign: 'top', halign: 'left' })
+      requestAnimationFrame(() => {
+        el.style.top = ''
+        el.style.left = `${offset.left}px`
+        el.style.bottom = `${offset.bottom + (cover ? 0 : targetHeight)}px`
+        el.style.right = ''
+      })
+      valign = 'top'
+      halign = 'left'
     } else if (autoalign === 'topright') {
-      el.style.top = 'auto'
-      el.style.left = 'auto'
-      el.style.bottom = `${offset.bottom + (cover ? 0 : target.offsetHeight)}px`
-      el.style.right = `${offset.right}px`
-      store?.set({ valign: 'top', halign: 'right' })
+      requestAnimationFrame(() => {
+        el.style.top = ''
+        el.style.left = ''
+        el.style.bottom = `${offset.bottom + (cover ? 0 : targetHeight)}px`
+        el.style.right = `${offset.right}px`
+      })
+      valign = 'top'
+      halign = 'right'
     }
+    store?.update(v => ({ ...v, valign, halign }))
   }
-  const debouncedreposition = debounced(reposition, 200)
-  const observer = new MutationObserver(debouncedreposition)
+  const { destroy, update } = watchForPositionChange(target, reposition)
 
   document.body.appendChild(el)
-  function update ({ target: utarget, align: ualign = 'auto', cover: ucover = false }: GlueArgs) {
-    target = utarget
-    align = ualign
-    cover = ucover
-    if (!target) {
-      window.removeEventListener('resize', debouncedreposition)
-      observer.disconnect()
-    } else {
-      reposition()
-      window.addEventListener('resize', debouncedreposition, { passive: true })
-      observer.observe(document.body, {
-        subtree: true,
-        childList: true,
-        attributes: true,
-        characterData: true
-      })
-    }
-  }
-  function destroy () {
-    if (el.parentNode) el.parentNode.removeChild(el)
-    window.removeEventListener('resize', debouncedreposition)
-  }
-  update({ target, align, cover })
   return {
-    update,
-    destroy
+    update ({ target: utarget, align: ualign = 'auto', cover: ucover = false, store: ustore }: GlueArgs) {
+      if (target !== utarget) {
+        update(utarget, reposition)
+        target = utarget
+      }
+      align = ualign
+      cover = ucover
+      if (ustore && ustore !== store) {
+        ustore.update(v => ({ ...v, valign, halign }))
+        store = ustore
+      }
+    },
+    destroy () {
+      destroy()
+    }
   }
 }
