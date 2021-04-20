@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { GlueAlignStore } from '../actions'
+  import type { GlueAlignOpts, GlueAlignStore } from '../actions'
   import { glue } from '../actions'
   import { createEventDispatcher, onDestroy, tick } from 'svelte'
   import { randomid } from 'txstate-utils'
@@ -15,7 +15,7 @@
   export let menuItemSelectedClass = ''
   export let items: PopupMenuItem[] = []
   export let buttonelement: HTMLElement
-  export let align: 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright' = 'auto'
+  export let align: GlueAlignOpts = 'auto'
   export let cover = false
   export let selected: PopupMenuItem|undefined = undefined
   export let showSelected = true
