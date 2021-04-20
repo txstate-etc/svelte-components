@@ -1,6 +1,6 @@
 <script lang="ts">
   import { writable } from 'svelte/store'
-  import type { ElementOffsets } from '../../actions/offset'
+  import type { ElementOffsets } from '../../lib/repositioned'
   import { offset } from '../../actions/offset'
   export let debounce = false
   let myoffset = writable<ElementOffsets>({})
