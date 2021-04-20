@@ -1,5 +1,6 @@
 export * from './bodyoffset'
 export * from './deepstore'
 export * from './derivedstore'
+export * from './repositioned'
 export * from './safestore'
 export * from './util'
