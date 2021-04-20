@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { sticky } from '../actions'
   import { DeepStore, classes } from '../lib'
   import type { CollapsingTableColumn, PopupMenuItem } from '../types'
   import { derived } from 'svelte/store'
@@ -19,10 +20,12 @@
   export let defaultCellWidth = 150
   export let PopupMenu = DefaultPopupMenu
   export let slots: Record<string, boolean> = $$slots
+  export let stickyheader: boolean = false
   let columns: CollapsingTableColumn[]
   let width: number = 320
   let selected: PopupMenuItem | undefined
   let identifyingkeys: string[] = []
+  $: optionalsticky = stickyheader ? sticky : () => {}
   $: firstrow = items?.[0] ?? {}
   $: columns = config ?? Object.keys(firstrow).map(key => ({ key }))
   function reactToColumns (columns: CollapsingTableColumn[]) {
@@ -74,27 +77,29 @@
 
 <div bind:clientWidth={width}>
   <table class={tableClass}>
-    <thead><tr class={headerRowClass}>
-      {#each $state.keepcolumns as column, i (column.key)}
-        <th
-          class={classes(column.headerCellClass, headerCellClass)}
-          class:defaultIcon={!slots.dropicon && $state.dropdowncolumn === column}
-          bind:this={headers[i]}
-          role={$state.dropdowncolumn === column ? 'button' : undefined }
-          tabindex={$state.dropdowncolumn === column ? 0 : undefined }
-        >
-          <slot name="headercell" {column} key={column.key} title={column.title || column.key} item={undefined} value={undefined}>
-            {column.title || column.key}
-          </slot>
-          {#if $state.dropdowncolumn === column}
-            <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
-            <slot name="dropicon" {column} item={undefined} value={undefined}>
-              <i aria-hidden="true"></i>
+    {#key stickyheader}
+      <thead use:optionalsticky><tr class={headerRowClass}>
+        {#each $state.keepcolumns as column, i (column.key)}
+          <th
+            class={classes(column.headerCellClass, headerCellClass)}
+            class:defaultIcon={!slots.dropicon && $state.dropdowncolumn === column}
+            bind:this={headers[i]}
+            role={$state.dropdowncolumn === column ? 'button' : undefined }
+            tabindex={$state.dropdowncolumn === column ? 0 : undefined }
+          >
+            <slot name="headercell" {column} key={column.key} title={column.title || column.key} item={undefined} value={undefined}>
+              {column.title || column.key}
             </slot>
-          {/if}
-        </th>
-      {/each}
-    </tr></thead>
+            {#if $state.dropdowncolumn === column}
+              <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
+              <slot name="dropicon" {column} item={undefined} value={undefined}>
+                <i aria-hidden="true"></i>
+              </slot>
+            {/if}
+          </th>
+        {/each}
+      </tr></thead>
+    {/key}
     <tbody>
       {#each items as item, i (itemkeys[i])}
         <tr class={bodyRowClass}>
