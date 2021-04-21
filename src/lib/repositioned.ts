@@ -3,9 +3,10 @@ import { bodyOffset } from './bodyoffset'
 
 export type ElementOffsets = Partial<ReturnType<typeof bodyOffset>>
 
-export function watchForPositionChange (el: HTMLElement, cb: (offset: Required<ElementOffsets>) => void) {
+export function watchForPositionChange (el: HTMLElement|undefined, cb: (offset: Required<ElementOffsets>) => void) {
   let lastoffset: ElementOffsets = {}
   function watch () {
+    if (!el) return
     const offset = bodyOffset(el)
     if (!equal(offset, lastoffset)) {
       lastoffset = offset

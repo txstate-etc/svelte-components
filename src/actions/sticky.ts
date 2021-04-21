@@ -1,16 +1,16 @@
-import { SettableSubject } from '../lib'
+import { bodyOffset, SettableSubject } from '../lib'
 import { ElementOffsets, watchForPositionChange } from '../lib/repositioned'
 
 export interface StickyArgs <T extends StickyStore = StickyStore> {
+  target?: HTMLElement
   store?: SettableSubject<T>
 }
 
 export interface StickyStore {
-  floating: boolean
+  floating?: boolean
 }
 
 export function sticky (el: HTMLElement, config?: StickyArgs) {
-  let offsetParent: HTMLElement
   let floating = false
   let scrollstart = 1000000
   let scrollend = 1000000
@@ -28,18 +28,26 @@ export function sticky (el: HTMLElement, config?: StickyArgs) {
     })
   }
 
+  let lastOffsetParent: HTMLElement = el.offsetParent as HTMLElement
   function onpositionchange (offset: Required<ElementOffsets>) {
-    offsetParent = el.offsetParent as HTMLElement
+    const offsetParent = el.offsetParent
+    if (!(offsetParent instanceof HTMLElement)) return
+    if (lastOffsetParent !== offsetParent) {
+      offset = bodyOffset(offsetParent)
+      update(offsetParent, onpositionchange)
+      lastOffsetParent = offsetParent
+    }
     mintop = el.offsetTop
     scrollstart = offset.top + mintop
-    scrollend = Math.max(scrollstart, scrollstart + offsetParent.clientHeight - el.offsetHeight - 1)
+    scrollend = Math.max(scrollstart, scrollstart + (config?.target ?? offsetParent).clientHeight - el.offsetHeight - 1)
     onscroll()
   }
 
-  const { destroy } = watchForPositionChange(el.offsetParent as HTMLElement, onpositionchange)
+  const { destroy, update } = watchForPositionChange(el.offsetParent as HTMLElement, onpositionchange)
   window.addEventListener('scroll', onscroll)
 
   function stickyUpdate (newConfig?: StickyArgs) {
+    if (newConfig?.target !== config?.target && el.offsetParent instanceof HTMLElement) onpositionchange(bodyOffset(el.offsetParent))
     if (newConfig?.store !== config?.store) newConfig?.store?.set({ floating })
     config = newConfig
   }
