@@ -1,6 +1,9 @@
 <script lang="ts">
   import { sticky } from '../../actions'
+  import type { StickyStore } from '../../actions'
+  import { DeepStore } from '../../lib';
   let target: HTMLElement
+  let store = new DeepStore<StickyStore>({})
 </script>
 
 <div class='above'>above</div>
@@ -29,7 +32,7 @@
 </table>
 <div class="extendedcontainer" bind:this={target}>
   <table>
-    <thead use:sticky={{ target }}>
+    <thead use:sticky={{ target, store }}>
       <tr><th>Person</th><th>Calories</th><th>Fat</th><th>Protein</th></tr>
     </thead>
     <tbody>
