@@ -11,7 +11,7 @@ export interface StickyStore {
 }
 
 export function sticky (el: HTMLElement, config?: StickyArgs) {
-  let floating = false
+  let floating: boolean
   let scrollstart = 1000000
   let scrollend = 1000000
   let mintop = 0
@@ -19,12 +19,12 @@ export function sticky (el: HTMLElement, config?: StickyArgs) {
   let scrollTimer: number
   function onscroll () {
     const scroll = window.scrollY
+    const wasFloating = floating
+    floating = scroll >= scrollstart
+    if (floating !== wasFloating) config?.store?.update(v => ({ ...v, floating }))
     cancelAnimationFrame(scrollTimer)
     scrollTimer = requestAnimationFrame(() => {
       el.style.transform = `translateY(${mintop + Math.max(Math.min(scroll, scrollend) - scrollstart, 0)}px)`
-      const wasFloating = floating
-      floating = scroll >= scrollstart
-      if (floating !== wasFloating) config?.store?.update(v => ({ ...v, floating }))
     })
   }
 
@@ -47,9 +47,10 @@ export function sticky (el: HTMLElement, config?: StickyArgs) {
   window.addEventListener('scroll', onscroll)
 
   function stickyUpdate (newConfig?: StickyArgs) {
-    if (newConfig?.target !== config?.target && el.offsetParent instanceof HTMLElement) onpositionchange(bodyOffset(el.offsetParent))
+    const targetmismatch = newConfig?.target !== config?.target
     if (newConfig?.store !== config?.store) newConfig?.store?.set({ floating })
     config = newConfig
+    if (targetmismatch && el.offsetParent instanceof HTMLElement) onpositionchange(bodyOffset(el.offsetParent))
   }
 
   function stickyDestroy () {
