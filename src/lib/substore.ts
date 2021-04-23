@@ -1,5 +1,5 @@
 import { get, set } from 'txstate-utils'
-import { DeepStore, UsableSubject, WritableSubject } from './deepstore'
+import { DeepStore, WritableSubject } from './deepstore'
 
 /**
  * Create a store that represents a part of a larger store. Updates to the parent store will propagate
@@ -16,12 +16,12 @@ import { DeepStore, UsableSubject, WritableSubject } from './deepstore'
  * If you create one of these in a component, be sure to call .complete() in onDestroy to free up memory.
  */
 export class SubStore<SubType, ParentType = any> extends DeepStore<SubType> {
-  protected parentStore: UsableSubject<ParentType>|WritableSubject<ParentType>
-  protected setter?: (value: SubType, state: ParentType) => ParentType
+  protected parentStore: WritableSubject<ParentType>
+  protected setter: (value: SubType, state: ParentType) => ParentType
 
-  constructor (store: UsableSubject<ParentType>, getter: string)
+  constructor (store: WritableSubject<ParentType>, getter: string)
   constructor (store: WritableSubject<ParentType>, getter: (value: ParentType) => SubType, setter: (value: SubType, state: ParentType) => ParentType)
-  constructor (store: UsableSubject<ParentType>|WritableSubject<ParentType>, getter: keyof ParentType|string|((value: ParentType) => SubType), setter?: (value: SubType, state: ParentType) => ParentType) {
+  constructor (store: WritableSubject<ParentType>, getter: string|((value: ParentType) => SubType), setter?: (value: SubType, state: ParentType) => ParentType) {
     if (typeof getter === 'string') {
       const accessor = getter
       getter = parentValue => get(parentValue, accessor)
@@ -29,7 +29,7 @@ export class SubStore<SubType, ParentType = any> extends DeepStore<SubType> {
     }
     super({} as any)
     this.parentStore = store
-    this.setter = setter
+    this.setter = setter!
     const unsubscribe = store.subscribe(v => {
       super.set((getter as any)(v))
     })
@@ -37,8 +37,7 @@ export class SubStore<SubType, ParentType = any> extends DeepStore<SubType> {
   }
 
   set (value: SubType) {
-    const pStore: WritableSubject<ParentType> = this.parentStore as WritableSubject<ParentType>
-    pStore.update(parentValue => this.setter!(value, parentValue))
+    this.parentStore.update(parentValue => this.setter(value, parentValue))
   }
 
   clone (state: SubType) {
