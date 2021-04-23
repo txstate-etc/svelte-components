@@ -14,7 +14,6 @@ export function sticky (el: HTMLElement, config?: StickyArgs) {
   let floating: boolean
   let scrollstart = 1000000
   let scrollend = 1000000
-  let mintop = 0
 
   let scrollTimer: number
   function onscroll () {
@@ -24,33 +23,34 @@ export function sticky (el: HTMLElement, config?: StickyArgs) {
     if (floating !== wasFloating) config?.store?.update(v => ({ ...v, floating }))
     cancelAnimationFrame(scrollTimer)
     scrollTimer = requestAnimationFrame(() => {
-      el.style.transform = `translateY(${mintop + Math.max(Math.min(scroll, scrollend) - scrollstart, 0)}px)`
+      el.style.transform = `translateY(${Math.max(Math.min(scroll, scrollend) - scrollstart, 0)}px)`
     })
   }
 
   let lastOffsetParent: HTMLElement = el.offsetParent as HTMLElement
-  function onpositionchange (offset: Required<ElementOffsets>) {
+  function onpositionchange (offset: Required<ElementOffsets>[]) {
     const offsetParent = el.offsetParent
     if (!(offsetParent instanceof HTMLElement)) return
     if (lastOffsetParent !== offsetParent) {
-      offset = bodyOffset(offsetParent)
+      offset[0] = bodyOffset(offsetParent)
       update(offsetParent, onpositionchange)
       lastOffsetParent = offsetParent
     }
-    mintop = el.offsetTop
-    scrollstart = offset.top + mintop
-    scrollend = Math.max(scrollstart, scrollstart + (config?.target ?? offsetParent).clientHeight - el.offsetHeight - 1)
+    scrollstart = offset[0].top + el.offsetTop
+    const containeroffset = config?.target ? offset[1] : offset[0]
+    scrollend = Math.max(scrollstart, containeroffset.top + (config?.target ?? offsetParent).clientHeight - el.offsetHeight)
     onscroll()
   }
 
-  const { destroy, update } = watchForPositionChange(el.offsetParent as HTMLElement, onpositionchange)
+  const { destroy, update } = config?.target
+    ? watchForPositionChange([el.offsetParent as HTMLElement, config.target], onpositionchange)
+    : watchForPositionChange([el.offsetParent as HTMLElement], onpositionchange)
   window.addEventListener('scroll', onscroll)
 
   function stickyUpdate (newConfig?: StickyArgs) {
-    const targetmismatch = newConfig?.target !== config?.target
+    update(newConfig?.target ? [el.offsetParent as HTMLElement, newConfig.target] : [el.offsetParent as HTMLElement], onpositionchange)
     if (newConfig?.store !== config?.store) newConfig?.store?.set({ floating })
     config = newConfig
-    if (targetmismatch && el.offsetParent instanceof HTMLElement) onpositionchange(bodyOffset(el.offsetParent))
   }
 
   function stickyDestroy () {

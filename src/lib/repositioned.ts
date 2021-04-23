@@ -1,16 +1,19 @@
 import equal from 'fast-deep-equal'
+import { toArray } from 'txstate-utils'
 import { bodyOffset } from './bodyoffset'
 
 export type ElementOffsets = Partial<ReturnType<typeof bodyOffset>>
 
-export function watchForPositionChange (el: HTMLElement|undefined, cb: (offset: Required<ElementOffsets>) => void) {
-  let lastoffset: ElementOffsets = {}
+export function watchForPositionChange (el: HTMLElement[]|HTMLElement|undefined, cb: ((offset: Required<ElementOffsets>) => void)|((offsets: Required<ElementOffsets>[]) => void)) {
+  let lastoffsets: ElementOffsets[] = []
+  let els = toArray(el)
   function watch () {
-    if (!el) return
-    const offset = bodyOffset(el)
-    if (!equal(offset, lastoffset)) {
-      lastoffset = offset
-      cb(offset)
+    if (!els.length) return
+    const offsets = els.map(bodyOffset)
+
+    if (offsets.some((offset, i) => !equal(offset, lastoffsets[i]))) {
+      lastoffsets = offsets
+      Array.isArray(el) ? (cb as any)(offsets) : (cb as any)(offsets[0])
     }
   }
   let observer = new MutationObserver(watch)
@@ -25,11 +28,14 @@ export function watchForPositionChange (el: HTMLElement|undefined, cb: (offset: 
   watch()
 
   return {
-    update (newEl: HTMLElement, newCb: (offset: Required<ElementOffsets>) => void) {
+    update (newEl: HTMLElement[]|HTMLElement|undefined, newCb: ((offset: Required<ElementOffsets>) => void)|((offsets: Required<ElementOffsets>[]) => void)) {
       const changed = newEl !== el || newCb !== cb
-      el = newEl
-      cb = newCb
-      if (changed) watch()
+      if (changed) {
+        el = newEl
+        els = toArray(el)
+        cb = newCb
+        watch()
+      }
     },
     destroy () {
       window.removeEventListener('resize', watch)
