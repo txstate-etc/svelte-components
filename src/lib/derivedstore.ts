@@ -1,36 +1,50 @@
-import { DeepStore, UsableSubject, WritableSubject } from './deepstore'
-import { get, set } from 'txstate-utils'
+import { DeepStore, UsableSubject } from './deepstore'
+import { get } from 'txstate-utils'
+import { get as getVal } from 'svelte/store'
 
-export class DerivedStore<DerivedType, ParentType> extends DeepStore<DerivedType> {
-  protected parentStore: UsableSubject<ParentType>|WritableSubject<ParentType>
-  protected setter?: (value: DerivedType, state: ParentType) => ParentType
-
-  constructor (store: UsableSubject<ParentType>, getter: string|((value: ParentType) => DerivedType))
-  constructor (store: WritableSubject<ParentType>, getter: string|((value: ParentType) => DerivedType), setter: (value: DerivedType, state: ParentType) => ParentType)
-  constructor (store: UsableSubject<ParentType>|WritableSubject<ParentType>, getter: string|((value: ParentType) => DerivedType), setter?: (value: DerivedType, state: ParentType) => ParentType) {
+/**
+ * Watch one or more parent stores for changes. Each time, run a function to derive
+ * a new state from the parent state(s). Subscribers will only be notified if the
+ * derived state has changed (uses fast-deep-equal).
+ *
+ * If only one parent store, it's possible to use a dot-prop string as the getter.
+ *
+ * If you create one of these in a component, be sure to call .complete() in onDestroy
+ * to free up memory.
+ */
+export class DerivedStore<DerivedType, ParentType = any> extends DeepStore<DerivedType> {
+  constructor (store: UsableSubject<ParentType>, getter: (value: ParentType) => DerivedType)
+  constructor (store: UsableSubject<ParentType>, getter: string)
+  constructor (store: UsableSubject<any>[], getter: (value: any[]) => DerivedType)
+  constructor (store: UsableSubject<any>|UsableSubject<any>[], getter: string|((value: any) => DerivedType)|((values: any[]) => DerivedType)) {
     if (typeof getter === 'string') {
       const accessor = getter
-      getter = parentValue => get(parentValue, accessor)
-      setter = (newValue, parentValue) => set(parentValue, accessor, newValue)
+      getter = (parentValue: any) => get(parentValue, accessor)
     }
     super({} as any)
-    this.parentStore = store
-    this.setter = setter
-    const unsubscribe = store.subscribe(v => {
-      super.set((getter as any)(v))
-    })
-    this.cleanup(unsubscribe)
-  }
-
-  set (value: DerivedType) {
-    if (!this.setter) throw new Error('tried to update a read-only DerivedStore')
-    const pStore: WritableSubject<ParentType> = this.parentStore as WritableSubject<ParentType>
-    pStore.update(parentValue => this.setter!(value, parentValue))
-  }
-
-  clone (state: DerivedType) {
-    // parent store could be a SafeStore - if so we should use its clone function
-    // so that the derived store is also safe against mutations
-    return (this.parentStore as DeepStore<any>)?.clone?.(state) ?? state
+    if (Array.isArray(store)) {
+      const values = store.map(getVal)
+      for (let i = 0; i < store.length; i++) {
+        let unsubscribe
+        if (store instanceof DeepStore) {
+          unsubscribe = store[i].subscribe(v => {
+            values[i] = store.clone(v)
+            super.set((getter as (values: any[]) => DerivedType)(values))
+          })
+        } else {
+          unsubscribe = store[i].subscribe(v => {
+            values[i] = v
+            super.set((getter as (values: any[]) => DerivedType)(values))
+          })
+        }
+        this.cleanup(unsubscribe)
+      }
+      super.set((getter as (values: any[]) => DerivedType)(values))
+    } else {
+      const unsubscribe = store.subscribe(v => {
+        super.set((getter as (value: any) => DerivedType)(v))
+      })
+      this.cleanup(unsubscribe)
+    }
   }
 }
