@@ -8,23 +8,21 @@ export interface StickyArgs <T extends StickyStore = StickyStore> {
 
 export interface StickyStore {
   floating?: boolean
+  translateY?: number
 }
 
 export function sticky (el: HTMLElement, config?: StickyArgs) {
   let floating: boolean
-  let scrollstart = 1000000
-  let scrollend = 1000000
+  let translateY: number
+  let scrollstart = Number.MAX_SAFE_INTEGER
+  let scrollend = Number.MAX_SAFE_INTEGER
 
-  let scrollTimer: number
   function onscroll () {
     const scroll = window.scrollY
-    const wasFloating = floating
     floating = scroll >= scrollstart
-    if (floating !== wasFloating) config?.store?.update(v => ({ ...v, floating }))
-    cancelAnimationFrame(scrollTimer)
-    scrollTimer = requestAnimationFrame(() => {
-      el.style.transform = `translateY(${Math.max(Math.min(scroll, scrollend) - scrollstart, 0)}px)`
-    })
+    translateY = Math.max(Math.min(scroll - 1, scrollend) - scrollstart, 0)
+    config?.store?.update(v => ({ ...v, translateY, floating }))
+    el.style.transform = `translateY(${translateY}px)`
   }
 
   let lastOffsetParent: HTMLElement = el.offsetParent as HTMLElement
@@ -42,15 +40,13 @@ export function sticky (el: HTMLElement, config?: StickyArgs) {
     onscroll()
   }
 
-  const { destroy, update } = config?.target
-    ? watchForPositionChange([el.offsetParent as HTMLElement, config.target], onpositionchange)
-    : watchForPositionChange([el.offsetParent as HTMLElement], onpositionchange)
+  const { destroy, update } = watchForPositionChange([el.offsetParent as HTMLElement, config?.target], onpositionchange)
   window.addEventListener('scroll', onscroll)
 
   function stickyUpdate (newConfig?: StickyArgs) {
-    update(newConfig?.target ? [el.offsetParent as HTMLElement, newConfig.target] : [el.offsetParent as HTMLElement], onpositionchange)
-    if (newConfig?.store !== config?.store) newConfig?.store?.set({ floating })
+    if (newConfig?.store !== config?.store) newConfig?.store?.update(v => ({ ...v, translateY, floating }))
     config = newConfig
+    update([el.offsetParent as HTMLElement, config?.target], onpositionchange)
   }
 
   function stickyDestroy () {

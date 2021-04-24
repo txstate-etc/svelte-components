@@ -1,16 +1,14 @@
 import equal from 'fast-deep-equal'
-import { toArray } from 'txstate-utils'
+import { isNotNull, toArray } from 'txstate-utils'
 import { bodyOffset } from './bodyoffset'
 
 export type ElementOffsets = Partial<ReturnType<typeof bodyOffset>>
 
-export function watchForPositionChange (el: HTMLElement[]|HTMLElement|undefined, cb: ((offset: Required<ElementOffsets>) => void)|((offsets: Required<ElementOffsets>[]) => void)) {
+export function watchForPositionChange (el: (HTMLElement|undefined)[]|HTMLElement|undefined, cb: ((offset: Required<ElementOffsets>) => void)|((offsets: Required<ElementOffsets>[]) => void)) {
   let lastoffsets: ElementOffsets[] = []
-  let els = toArray(el)
+  let els = toArray(el).filter(isNotNull)
   function watch () {
-    if (!els.length) return
     const offsets = els.map(bodyOffset)
-
     if (offsets.some((offset, i) => !equal(offset, lastoffsets[i]))) {
       lastoffsets = offsets
       Array.isArray(el) ? (cb as any)(offsets) : (cb as any)(offsets[0])
@@ -28,11 +26,11 @@ export function watchForPositionChange (el: HTMLElement[]|HTMLElement|undefined,
   watch()
 
   return {
-    update (newEl: HTMLElement[]|HTMLElement|undefined, newCb: ((offset: Required<ElementOffsets>) => void)|((offsets: Required<ElementOffsets>[]) => void)) {
+    update (newEl: (HTMLElement|undefined)[]|HTMLElement|undefined, newCb: ((offset: Required<ElementOffsets>) => void)|((offsets: Required<ElementOffsets>[]) => void)) {
       const changed = newEl !== el || newCb !== cb
       if (changed) {
         el = newEl
-        els = toArray(el)
+        els = toArray(el).filter(isNotNull)
         cb = newCb
         watch()
       }
