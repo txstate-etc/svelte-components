@@ -19,10 +19,11 @@ export function sticky (el: HTMLElement, config?: StickyArgs) {
 
   function onscroll () {
     const scroll = window.scrollY
+    const newTranslateY = Math.max(Math.min(scroll - 1, scrollend) - scrollstart, 0)
+    if (newTranslateY !== translateY) el.style.transform = `translateY(${newTranslateY}px)`
     floating = scroll >= scrollstart
-    translateY = Math.max(Math.min(scroll - 1, scrollend) - scrollstart, 0)
+    translateY = newTranslateY
     config?.store?.update(v => ({ ...v, translateY, floating }))
-    el.style.transform = `translateY(${translateY}px)`
   }
 
   let lastOffsetParent: HTMLElement = el.offsetParent as HTMLElement
