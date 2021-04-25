@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { sticky } from '../actions'
   import { DeepStore, classes } from '../lib'
   import type { CollapsingTableColumn, PopupMenuItem } from '../types'
   import { derived } from 'svelte/store'
@@ -25,7 +24,6 @@
   let width: number = 320
   let selected: PopupMenuItem | undefined
   let identifyingkeys: string[] = []
-  $: optionalsticky = stickyheader ? sticky : () => {}
   $: firstrow = items?.[0] ?? {}
   $: columns = config ?? Object.keys(firstrow).map(key => ({ key }))
   function reactToColumns (columns: CollapsingTableColumn[]) {
@@ -77,29 +75,27 @@
 
 <div bind:clientWidth={width}>
   <table class={tableClass}>
-    {#key stickyheader}
-      <thead use:optionalsticky><tr class={headerRowClass}>
-        {#each $state.keepcolumns as column, i (column.key)}
-          <th
-            class={classes(column.headerCellClass, headerCellClass)}
-            class:defaultIcon={!slots.dropicon && $state.dropdowncolumn === column}
-            bind:this={headers[i]}
-            role={$state.dropdowncolumn === column ? 'button' : undefined }
-            tabindex={$state.dropdowncolumn === column ? 0 : undefined }
-          >
-            <slot name="headercell" {column} key={column.key} title={column.title || column.key} item={undefined} value={undefined}>
-              {column.title || column.key}
+    <thead class:stickyheader><tr class={headerRowClass}>
+      {#each $state.keepcolumns as column, i (column.key)}
+        <th
+          class={classes(column.headerCellClass, headerCellClass)}
+          class:defaultIcon={!slots.dropicon && $state.dropdowncolumn === column}
+          bind:this={headers[i]}
+          role={$state.dropdowncolumn === column ? 'button' : undefined }
+          tabindex={$state.dropdowncolumn === column ? 0 : undefined }
+        >
+          <slot name="headercell" {column} key={column.key} title={column.title || column.key} item={undefined} value={undefined}>
+            {column.title || column.key}
+          </slot>
+          {#if $state.dropdowncolumn === column}
+            <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
+            <slot name="dropicon" {column} item={undefined} value={undefined}>
+              <i aria-hidden="true"></i>
             </slot>
-            {#if $state.dropdowncolumn === column}
-              <ScreenReaderOnly>, click to choose another column to show</ScreenReaderOnly>
-              <slot name="dropicon" {column} item={undefined} value={undefined}>
-                <i aria-hidden="true"></i>
-              </slot>
-            {/if}
-          </th>
-        {/each}
-      </tr></thead>
-    {/key}
+          {/if}
+        </th>
+      {/each}
+    </tr></thead>
     <tbody>
       {#each items as item, i (itemkeys[i])}
         <tr class={bodyRowClass}>
@@ -140,5 +136,10 @@
     position: absolute;
     right: 0.4em;
     top: calc(50% - 0.08em);
+  }
+  .stickyheader th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
   }
 </style>
