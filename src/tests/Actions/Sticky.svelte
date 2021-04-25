@@ -1,9 +1,6 @@
 <script lang="ts">
-  import { sticky } from '../../actions'
-  import type { StickyStore } from '../../actions'
-  import { DeepStore } from '../../lib';
+  import { sticky, stickyfixed } from '../../actions'
   let target: HTMLElement
-  let store = new DeepStore<StickyStore>({})
 </script>
 
 <div class='above'>above</div>
@@ -32,7 +29,7 @@
 </table>
 <div class="extendedcontainer" bind:this={target}>
   <table>
-    <thead use:sticky={{ target, store }}>
+    <thead use:stickyfixed={{ target }}>
       <tr><th>Person</th><th>Calories</th><th>Fat</th><th>Protein</th></tr>
     </thead>
     <tbody>
@@ -53,9 +50,11 @@
   .extendedcontainer { padding-bottom: 50px; border: 1px solid black; }
   table {
     position: relative;
+    box-sizing: border-box;
   }
   table th {
     background: lightgray;
+    border: 2px solid black;
   }
   th:first-child, td:first-child {
     width: 20em;

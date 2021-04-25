@@ -12,6 +12,26 @@ export interface StickyStore {
 
 let scrolled = false
 
+/**
+ * A robust implementation of stickyness based on `transform: translateY()`. Only use when
+ * `position: sticky` won't work for you. If `position: sticky` does work for you, use it,
+ * it performs better.
+ *
+ * Reasons `position: sticky` might not work:
+ * 1) it cannot work on a thead or tr, only td and th (and non-table elements)
+ * 2) it gets confused if any parent elements have an `overflow` set, even `overflow: hidden`
+ * 3) it always stays within the boundaries of the closest parent element that has a `position`
+ *     * use:sticky accepts a `target` element as a parameter, defining the bounding container
+ *
+ * Note that if the element you place this on has other transforms, this is going to overwrite them.
+ *
+ * The main drawback to this approach is that it cannot do its work before scroll on mobile, only after,
+ * so on mobile you are going to see it visually lag a little during scrolling.
+ *
+ * You may also want to try use:stickyfixed. It is based on setting `position: fixed` when appropriate,
+ * and therefore animates better than this. However, it has a lot more work to do and is more
+ * fragile if your markup/CSS situation is very complex.
+ */
 export function sticky (el: HTMLElement, config?: StickyArgs) {
   let floating: boolean
   let translateY: number
