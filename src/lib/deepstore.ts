@@ -40,15 +40,16 @@ export class DeepStore<T> implements Writable<T> {
   protected subscribers: Map<string, (s: T) => void>
   protected cleanups: (() => void)[] = []
   private valueStore?: Writable<T>
+  private pause = false
 
   constructor (value: T|Writable<T>) {
+    this.subscribers = new Map()
     if (isWritable(value)) {
       this.valueStore = value
       this.cleanup(this.valueStore.subscribe(v => this.set(v)))
     } else {
       this.value = this.clone(value)
     }
-    this.subscribers = new Map()
   }
 
   clone (value: T) {
@@ -56,12 +57,17 @@ export class DeepStore<T> implements Writable<T> {
   }
 
   set (value: T) {
+    if (this.pause) return
     if (!deepEqual(value, this.value)) {
       this.value = this.clone(value)
       for (const [id, run] of this.subscribers) {
         run(value)
       }
-      this.valueStore?.set(value)
+      if (this.valueStore) {
+        this.pause = true
+        this.valueStore.set(value)
+        this.pause = false
+      }
     }
   }
 
