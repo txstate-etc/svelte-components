@@ -42,7 +42,7 @@ export class SubStore<SubType, ParentType = any> extends DeepStore<SubType> {
 
   clone (state: SubType) {
     // parent store could be a SafeStore - if so we should use its clone function
-    // so that the derived store is also safe against mutations
+    // so that the substore is also safe against mutations
     return (this.parentStore as DeepStore<any>)?.clone?.(state) ?? state
   }
 }

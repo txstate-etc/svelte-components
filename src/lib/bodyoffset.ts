@@ -22,7 +22,7 @@ function getTranslate (element: HTMLElement) {
   const matrix = style.transform
 
   // No transform property. Simply return 0 values.
-  if (matrix === 'none' || typeof matrix === 'undefined') {
+  if (matrix === 'none' || !matrix) {
     return {
       x: 0,
       y: 0,
