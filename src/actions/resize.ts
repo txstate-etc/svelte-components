@@ -25,6 +25,8 @@ export function resize (el: HTMLElement, config?: ResizeConfig) {
     }
   }
 
+  if (!ResizeObserver) return watch() // support SSR
+
   let observer = new ResizeObserver(config?.debounce ? debounced(watch, config.debounce) : watch)
   observer.observe(el)
   watch()
