@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { GlueAlignOpts, GlueAlignStore } from '../actions'
-  import { glue } from '../actions'
+  import { glue, portal } from '../actions'
   import { createEventDispatcher, onDestroy, tick } from 'svelte'
   import { randomid } from 'txstate-utils'
   import type { PopupMenuItem } from '../types'
@@ -21,6 +21,7 @@
   export let showSelected = true
   export let width:string|undefined = undefined
   export let computedalign: SettableSubject<GlueAlignStore> = new DeepStore<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
+  export let usePortal: HTMLElement|true|undefined = undefined
 
   let menuelement: HTMLElement|undefined
   let hilited: number|undefined = undefined
@@ -172,7 +173,7 @@
 </script>
 
 {#if menushown}
-  <div use:glue={{ target: buttonelement, align, cover, store: computedalign }} class={menuContainerClass}>
+  <div use:portal={usePortal === true ? document.body : usePortal} use:glue={{ target: buttonelement, align, cover, store: computedalign }} class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
       {#each items as item, i}
         {#if showSelected || (selected && item.value === selected.value)}

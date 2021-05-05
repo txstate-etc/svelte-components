@@ -1,19 +1,29 @@
 export function bodyOffset (ele: HTMLElement) {
-  const offset = bodyOffsetRecursive(ele)
+  return targetOffset(ele, document.body)
+}
+
+export function targetOffset (ele: HTMLElement, target: HTMLElement) {
+  const offset = targetOffsetRecursive(ele, target)
   return {
     ...offset,
-    right: document.body.offsetWidth - offset.left - ele.offsetWidth,
-    bottom: document.body.offsetHeight - offset.top - ele.offsetHeight
+    right: target.offsetWidth - offset.left - ele.offsetWidth,
+    bottom: target.offsetHeight - offset.top - ele.offsetHeight
   }
 }
 
-function bodyOffsetRecursive (ele: HTMLElement, currentOffset?: { top: number, left: number }): { top: number, left: number } {
+export function sharedOffsetParent (a: HTMLElement, b: HTMLElement) {
+  let c = a.offsetParent as HTMLElement
+  while (c instanceof HTMLElement && !c.contains(b)) c = c.offsetParent as HTMLElement
+  return c
+}
+
+function targetOffsetRecursive (ele: HTMLElement, target: HTMLElement, currentOffset?: { top: number, left: number }): { top: number, left: number } {
   const { x, y } = getTranslate(ele)
   const offset = {
     top: ele.offsetTop + (currentOffset?.top ?? 0) + y,
     left: ele.offsetLeft + (currentOffset?.left ?? 0) + x
   }
-  if (ele.offsetParent instanceof HTMLElement && ele.offsetParent !== document.body) return bodyOffsetRecursive(ele.offsetParent, offset)
+  if (ele.offsetParent instanceof HTMLElement && target !== ele.offsetParent && target.contains(ele.offsetParent)) return targetOffsetRecursive(ele.offsetParent, target, offset)
   return offset
 }
 

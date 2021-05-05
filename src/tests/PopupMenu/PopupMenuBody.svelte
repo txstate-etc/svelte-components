@@ -13,5 +13,22 @@
   ]
 </script>
 
-<button data-testid="button" class="ui gold button" bind:this={button}>Popup Menu</button>
-<PopupMenu buttonelement={button} {items}></PopupMenu>
+<div class="topspacer"></div>
+<div class="container">
+  <div class="container">
+    <button data-testid="button" class="ui gold button" bind:this={button}>Popup Menu</button>
+  </div>
+  <div class="topspacer"></div>
+  <div class="container">
+    <PopupMenu buttonelement={button} {items}></PopupMenu>
+  </div>
+</div>
+
+<style>
+  .topspacer {
+    height: 20px;
+  }
+  .container {
+    position: relative;
+  }
+</style>

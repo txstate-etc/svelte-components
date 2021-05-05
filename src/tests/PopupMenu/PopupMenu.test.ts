@@ -1,10 +1,10 @@
 import '@testing-library/jest-dom'
 import { render, waitFor } from '@testing-library/svelte'
 
-import PopupMenuTest from './PopupMenuTest.svelte'
+import PopupMenuSimple from './PopupMenuSimple.svelte'
 
 test('menu toggles when button is clicked', async () => {
-  const { getByTestId, queryByText } = render(PopupMenuTest)
+  const { getByTestId, queryByText } = render(PopupMenuSimple)
   const button = await getByTestId('button')
   expect(queryByText('Monday')).not.toBeInTheDocument()
   button.click()
@@ -14,7 +14,7 @@ test('menu toggles when button is clicked', async () => {
 })
 
 test('has five menu items', async () => {
-  const { getByTestId, queryByText } = render(PopupMenuTest)
+  const { getByTestId, queryByText } = render(PopupMenuSimple)
   const button = await getByTestId('button')
   button.click()
   await waitFor(() => {
