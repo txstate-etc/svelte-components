@@ -30,7 +30,7 @@
   let firstactive = 0
   let lastactive = items.length - 1
 
-  async function reactToItems (...args: any) {
+  async function reactToItems (..._: any[]) {
     firstactive = items.findIndex(itm => !itm.disabled)
     lastactive = items.length - [...items].reverse().findIndex(itm => !itm.disabled) - 1
     if (hilited && items[hilited]?.disabled) hilited = firstactive
