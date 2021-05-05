@@ -26,6 +26,15 @@
   let hilited: number|undefined = undefined
   let itemelements: HTMLElement[] = []
   const menuid = randomid()
+  let firstactive = 0
+  let lastactive = items.length - 1
+
+  async function reactToItems (...args: any) {
+    firstactive = items.findIndex(itm => !itm.disabled)
+    lastactive = items.length - [...items].reverse().findIndex(itm => !itm.disabled) - 1
+    if (hilited && items[hilited]?.disabled) hilited = firstactive
+  }
+  $: reactToItems(items)
 
   async function reactToMenuShown (_: boolean) {
     if (!buttonelement) {
@@ -47,7 +56,9 @@
 
   function move (idx: number) {
     if (!menushown) return
-    hilited = Math.max(0, Math.min(items.length - 1, idx))
+    if (items[idx]?.disabled) return
+    hilited = Math.max(firstactive, Math.min(lastactive, idx))
+    itemelements[hilited].scrollIntoView({ block: 'center' })
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
   }
 
@@ -55,18 +66,22 @@
     if (e.code === 'ArrowDown') {
       e.preventDefault()
       if (menushown) {
-        move((hilited ?? -1) + 1)
+        let i = (hilited ?? firstactive - 1) + 1
+        while(items[i]?.disabled) i++
+        move(i)
       } else {
         menushown = true
-        move(0)
+        move(firstactive)
       }
     } else if (e.code === 'ArrowUp') {
       e.preventDefault()
       if (menushown) {
-        move((hilited ?? items.length) - 1)
+        let i = (hilited ?? lastactive + 1) - 1
+        while(items[i]?.disabled) i--
+        move(i)
       } else {
         menushown = true
-        move(items.length - 1)
+        move(lastactive)
       }
     } else if (e.code === 'Enter') {
       e.preventDefault()
@@ -78,7 +93,7 @@
         }
       } else {
         menushown = true
-        move(0)
+        move(firstactive)
       }
     } else if (e.code === 'Space') {
       // buttonelement might be a text input if this popup is searchable,
@@ -99,7 +114,7 @@
         if (buttonelement.tagName !== 'INPUT') {
           e.preventDefault()
           menushown = true
-          move(0)
+          move(firstactive)
         }
       }
     } else if (menushown && e.code === 'Escape') {
@@ -147,6 +162,7 @@
   $: reactToButtonElement(buttonelement)
 
   const onclick = (item: PopupMenuItem) => () => {
+    if (item.disabled) return
     menushown = false
     selected = item
     dispatch('change', item.value)
@@ -164,6 +180,7 @@
             id={`${menuid}-${i}`}
             bind:this={itemelements[i]}
             class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass || '' : ''} ${selected && selected.value === item.value ? menuItemSelectedClass || '' : ''}`}
+            class:disabled={!!item.disabled}
             class:hilited={!menuItemHilitedClass && i === hilited}
             class:selected={showSelected && !menuItemSelectedClass && selected && selected.value === item.value}
             on:click={onclick(item)}
@@ -190,12 +207,32 @@
     border: 1px solid slategray;
     border-radius: 3px;
     min-width: 10em;
+    max-height: 20em;
+    overflow-y: auto;
+  }
+  ul.defaultmenu li.disabled {
+    color: rgba(0,0,0,0.6);
+  }
+  ul.defaultmenu::-webkit-scrollbar {
+    appearance: none;
+    width: 7px;
+  }
+  ul.defaultmenu::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    box-shadow: 0 0 1px rgba(255,255,255,.5);
+  }
+  ul.defaultmenu::-webkit-scrollbar-track {
+    background-color: rgba(0,0,0,.1);
   }
   li {
     cursor: pointer;
   }
   li.hilited {
     background: lightblue;
+  }
+  li.disabled {
+    cursor: auto;
   }
   li.selected {
     position: relative;
