@@ -2,6 +2,7 @@ import { storiesOf } from '@storybook/svelte'
 import PopupMenuComplex from './PopupMenuComplex.svelte'
 import PopupMenuSimple from './PopupMenuSimple.svelte'
 import PopupMenuBody from './PopupMenuBody.svelte'
+import PopupMenuButtonIsParent from './PopupMenuButtonIsParent.svelte'
 
 storiesOf('PopupMenu', module)
   .add('simple example', () => ({
@@ -12,6 +13,9 @@ storiesOf('PopupMenu', module)
   }))
   .add('body placement', () => ({
     Component: PopupMenuBody
+  }))
+  .add('button is parent', () => ({
+    Component: PopupMenuButtonIsParent
   }))
   .add('scrollable example', () => ({
     Component: PopupMenuComplex,

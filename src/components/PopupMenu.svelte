@@ -162,7 +162,9 @@
   }
   $: reactToButtonElement(buttonelement)
 
-  const onclick = (item: PopupMenuItem) => () => {
+  const onclick = (item: PopupMenuItem) => (e: MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
     if (item.disabled) return
     menushown = false
     selected = item

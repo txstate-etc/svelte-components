@@ -27,7 +27,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
   function reposition (offset: Required<ElementOffsets>) {
     if (!target || !sharedOffset || !(el.offsetParent instanceof HTMLElement)) return
     let autoalign = align
-    const parentoffset = el.offsetParent === sharedOffset ? { top: 0, left: 0, bottom: 0, right: 0 } : targetOffset(el.offsetParent, sharedOffset)
+    const parentoffset = el.offsetParent === sharedOffset && target !== sharedOffset ? { top: 0, left: 0, bottom: 0, right: 0 } : targetOffset(el.offsetParent, sharedOffset)
     if (align === 'auto') {
       const rect = target.getBoundingClientRect()
       const leftright = window.innerWidth - rect.right > rect.left ? 'left' : 'right'
