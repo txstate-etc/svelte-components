@@ -173,7 +173,7 @@
 </script>
 
 {#if menushown}
-  <div use:portal={usePortal === true ? document.body : usePortal} use:glue={{ target: buttonelement, align, cover, store: computedalign }} class={menuContainerClass}>
+  <div use:portal={usePortal === true ? document.body : (usePortal || null)} use:glue={{ target: buttonelement, align, cover, store: computedalign }} class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
       {#each items as item, i}
         {#if showSelected || (selected && item.value === selected.value)}
