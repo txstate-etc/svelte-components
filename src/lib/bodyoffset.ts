@@ -12,6 +12,7 @@ export function targetOffset (ele: HTMLElement, target: HTMLElement) {
 }
 
 export function sharedOffsetParent (a: HTMLElement, b: HTMLElement) {
+  if (!a || !b) return undefined
   if (a.contains(b) && (a.firstElementChild as HTMLElement).offsetParent === a) return a
   if (b.contains(a) && (b.firstElementChild as HTMLElement).offsetParent === b) return b
   let c = a.offsetParent as HTMLElement
