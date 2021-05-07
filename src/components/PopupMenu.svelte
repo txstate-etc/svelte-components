@@ -22,6 +22,7 @@
   export let width:string|undefined = undefined
   export let computedalign: SettableSubject<GlueAlignStore> = new DeepStore<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
   export let usePortal: HTMLElement|true|undefined = undefined
+  export let emptyText = '¯\\_(ツ)_/¯'
 
   let menuelement: HTMLElement|undefined
   let hilited: number|undefined = undefined
@@ -192,6 +193,9 @@
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={selected && selected.value === item.value}>{item.label || item.value}</slot></li>
         {/if}
       {/each}
+      {#if items.length === 0}
+        <li class={`${menuItemClass} disabled`}><slot name="noresults">{emptyText}</slot></li>
+      {/if}
     </ul>
   </div>
 {/if}

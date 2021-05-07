@@ -45,3 +45,9 @@ storiesOf('PopupMenu', module)
       ]
     }
   }))
+  .add('empty example', () => ({
+    Component: PopupMenuComplex,
+    props: {
+      items: []
+    }
+  }))
