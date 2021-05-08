@@ -5,6 +5,7 @@
   import { randomid } from 'txstate-utils'
   import type { PopupMenuItem } from '../types'
   import { DeepStore, SettableSubject } from '../lib'
+import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
 
   export let menushown = false
@@ -22,7 +23,7 @@
   export let width:string|undefined = undefined
   export let computedalign: SettableSubject<GlueAlignStore> = new DeepStore<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
   export let usePortal: HTMLElement|true|undefined = undefined
-  export let emptyText = '¯\\_(ツ)_/¯'
+  export let emptyText: string|undefined = undefined
 
   let menuelement: HTMLElement|undefined
   let hilited: number|undefined = undefined
@@ -189,12 +190,20 @@
             class:selected={showSelected && !menuItemSelectedClass && selected && selected.value === item.value}
             on:click={onclick(item)}
             role="option"
-            tabindex=-1
+            aria-disabled={item.disabled}
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={selected && selected.value === item.value}>{item.label || item.value}</slot></li>
         {/if}
       {/each}
       {#if items.length === 0}
-        <li class={`${menuItemClass} disabled`}><slot name="noresults">{emptyText}</slot></li>
+        <li role="option" class={`${menuItemClass} disabled`} aria-live="assertive">
+          <slot name="noresults">
+            {#if !emptyText}
+              <span aria-hidden="true">{'¯\\_(ツ)_/¯'}</span><ScreenReaderOnly>{emptyText || 'empty popup menu'}</ScreenReaderOnly>
+            {:else}
+              {emptyText}
+            {/if}
+          </slot>
+        </li>
       {/if}
     </ul>
   </div>
