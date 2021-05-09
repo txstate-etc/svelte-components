@@ -2,6 +2,7 @@
   import PopupMenu from '../../components/PopupMenu.svelte'
   let button: HTMLElement
 
+  export let showSelected = false
   export let items = [
     { value: '0', label: 'Sunday', disabled: true },
     { value: '1', label: 'Monday' },
@@ -16,7 +17,7 @@
 <div class="topspacer"></div>
 <div class="container">
   <button data-testid="button" class="ui gold button" bind:this={button}>Popup Menu</button>
-  <PopupMenu buttonelement={button} {items}></PopupMenu>
+  <PopupMenu buttonelement={button} {items} {showSelected}></PopupMenu>
 </div>
 
 <style>

@@ -5,7 +5,7 @@
   import { randomid } from 'txstate-utils'
   import type { PopupMenuItem } from '../types'
   import { DeepStore, SettableSubject } from '../lib'
-import ScreenReaderOnly from './ScreenReaderOnly.svelte'
+  import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
 
   export let menushown = false
@@ -133,7 +133,9 @@ import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   }
 
   async function onblur (e: FocusEvent) {
-    if (!(e.relatedTarget instanceof HTMLElement && menuelement?.contains(e.relatedTarget))) menushown = false
+    // tabindex=-1 protects our menu elements from triggering this
+    // without negative tabindex this would fire before click and ruin everything
+    menushown = false
   }
 
   function cleanup (element: HTMLElement) {
@@ -179,8 +181,8 @@ import ScreenReaderOnly from './ScreenReaderOnly.svelte'
 {#if menushown}
   <div use:portal={usePortal === true ? document.body : (usePortal || null)} use:glue={{ target: buttonelement, align, cover, store: computedalign }} class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
-      {#each items as item, i}
-        {#if showSelected || (selected && item.value === selected.value)}
+      {#each items as item, i (item.value)}
+        {#if showSelected || !selected || item.value !== selected.value}
           <li
             id={`${menuid}-${i}`}
             bind:this={itemelements[i]}
@@ -190,6 +192,7 @@ import ScreenReaderOnly from './ScreenReaderOnly.svelte'
             class:selected={showSelected && !menuItemSelectedClass && selected && selected.value === item.value}
             on:click={onclick(item)}
             role="option"
+            tabindex=-1
             aria-disabled={item.disabled}
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={selected && selected.value === item.value}>{item.label || item.value}</slot></li>
         {/if}

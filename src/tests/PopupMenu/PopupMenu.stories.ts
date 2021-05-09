@@ -8,6 +8,12 @@ storiesOf('PopupMenu', module)
   .add('simple example', () => ({
     Component: PopupMenuSimple
   }))
+  .add('hide selected', () => ({
+    Component: PopupMenuSimple,
+    props: {
+      showSelected: false
+    }
+  }))
   .add('complex placement', () => ({
     Component: PopupMenuComplex
   }))
