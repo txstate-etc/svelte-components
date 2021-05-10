@@ -18,26 +18,30 @@
   export let buttonelement: HTMLElement
   export let align: GlueAlignOpts = 'auto'
   export let cover = false
-  export let selected: PopupMenuItem|undefined = undefined
   export let showSelected = true
   export let width:string|undefined = undefined
   export let computedalign: SettableSubject<GlueAlignStore> = new DeepStore<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
   export let usePortal: HTMLElement|true|undefined = undefined
   export let emptyText: string|undefined = undefined
+  export let hilited: number|undefined = undefined
+  export let selected: PopupMenuItem|undefined = undefined
 
   let menuelement: HTMLElement|undefined
-  let hilited: number|undefined = undefined
   let itemelements: HTMLElement[] = []
   const menuid = randomid()
   let firstactive = 0
   let lastactive = items.length - 1
 
+  function hiddenItem (item: PopupMenuItem) {
+    return !!item && !showSelected && item.value === selected?.value
+  }
+
   async function reactToItems (..._: any[]) {
-    firstactive = items.findIndex(itm => !itm.disabled)
-    lastactive = items.length - [...items].reverse().findIndex(itm => !itm.disabled) - 1
+    firstactive = items.findIndex(itm => !itm.disabled && !hiddenItem(itm))
+    lastactive = items.length - [...items].reverse().findIndex(itm => !itm.disabled && !hiddenItem(itm)) - 1
     if (hilited && items[hilited]?.disabled) hilited = firstactive
   }
-  $: reactToItems(items)
+  $: reactToItems(items, selected)
 
   async function reactToMenuShown (_: boolean) {
     if (!buttonelement) {
@@ -70,7 +74,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? firstactive - 1) + 1
-        while(items[i]?.disabled) i++
+        while(items[i]?.disabled || hiddenItem(items[i])) i++
         move(i)
       } else {
         menushown = true
@@ -80,7 +84,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? lastactive + 1) - 1
-        while(items[i]?.disabled) i--
+        while(items[i]?.disabled || hiddenItem(items[i])) i--
         move(i)
       } else {
         menushown = true
@@ -133,9 +137,8 @@
   }
 
   async function onblur (e: FocusEvent) {
-    // tabindex=-1 protects our menu elements from triggering this
-    // without negative tabindex this would fire before click and ruin everything
-    menushown = false
+    // tabindex=-1 on our menu elements means e.relatedTarget will be set
+    if (!(e.relatedTarget instanceof HTMLElement && menuelement?.contains(e.relatedTarget))) menushown = false
   }
 
   function cleanup (element: HTMLElement) {
