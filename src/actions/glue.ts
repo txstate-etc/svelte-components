@@ -49,7 +49,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         el.style.top = `${offset.top + (cover ? 0 : targetHeight) - parentoffset.top}px`
         el.style.left = ''
         el.style.bottom = ''
-        el.style.right = `${offset.right}px`
+        el.style.right = `${offset.right - parentoffset.right}px`
       })
       valign = 'bottom'
       halign = 'right'
