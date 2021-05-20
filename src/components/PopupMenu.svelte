@@ -70,7 +70,7 @@
   }
 
   function onkeydown (e: KeyboardEvent) {
-    if (e.code === 'ArrowDown') {
+    if (e.key === 'ArrowDown') {
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? firstactive - 1) + 1
@@ -80,7 +80,7 @@
         menushown = true
         move(firstactive)
       }
-    } else if (e.code === 'ArrowUp') {
+    } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? lastactive + 1) - 1
@@ -90,7 +90,7 @@
         menushown = true
         move(lastactive)
       }
-    } else if (e.code === 'Enter') {
+    } else if (e.key === 'Enter') {
       e.preventDefault()
       if (menushown) {
         menushown = false
@@ -102,7 +102,7 @@
         menushown = true
         move(firstactive)
       }
-    } else if (e.code === 'Space') {
+    } else if (e.key === ' ') {
       // buttonelement might be a text input if this popup is searchable,
       // so we want to allow spaces to be entered without changing the menu situation
       if (menushown) {
@@ -124,7 +124,7 @@
           move(firstactive)
         }
       }
-    } else if (menushown && e.code === 'Escape') {
+    } else if (menushown && e.key === 'Escape') {
       e.preventDefault()
       e.stopPropagation()
       menushown = false

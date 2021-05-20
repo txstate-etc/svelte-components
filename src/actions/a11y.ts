@@ -5,7 +5,7 @@
  */
 export function button (node: HTMLElement) {
   function keydown (e: KeyboardEvent) {
-    if (e.code === 'Enter') {
+    if (e.key === 'Enter') {
       if (!e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault()
         e.stopPropagation()
