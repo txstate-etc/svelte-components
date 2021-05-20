@@ -2,18 +2,26 @@
   export let lockbackdrop = false
   export let hidefocus = true
   export let hidefocuslabel: string|undefined = undefined
+  export let returnfocusto: HTMLElement|undefined = undefined
   import FocusLock from './FocusLock.svelte'
-  import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher, onMount } from 'svelte'
   import { portal } from '../actions';
+
   const dispatch = createEventDispatcher()
   const endmodal = () => {
     dispatch('dismiss')
   }
+  onMount(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  })
 </script>
 
 <div use:portal class="modal-backdrop" on:click={() => lockbackdrop || endmodal()}>
   <div class="modal-container" role="dialog" on:click|stopPropagation>
-    <FocusLock on:escape={endmodal} {hidefocus} {hidefocuslabel}>
+    <FocusLock escapable={!lockbackdrop} on:escape={endmodal} {hidefocus} {hidefocuslabel} {returnfocusto} on:escape={() => lockbackdrop || endmodal()}>
       <slot></slot>
     </FocusLock>
   </div>

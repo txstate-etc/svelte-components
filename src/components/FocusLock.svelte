@@ -6,8 +6,10 @@
   export let returnfocusto: HTMLElement|null = null
   export let hidefocus = true
   export let hidefocuslabel = "focus moved to dialog"
+  export let escapable = true
   import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte'
   import { tabbable } from 'tabbable'
+  import { button } from '../actions'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
   let lockelement: HTMLElement
@@ -49,7 +51,7 @@
     }
   }
   const keydown = (e: KeyboardEvent) => {
-    if (active && e.key === "Escape") {
+    if (active && e.key === "Escape" && escapable) {
       e.stopPropagation()
       e.preventDefault()
       dispatch('escape')
@@ -66,7 +68,7 @@
 <svelte:window on:keydown={keydown} on:focusin={focusin}/>
 <div bind:this={abovelockelement} tabindex="0"></div>
 <div bind:this={lockelement} on:keydown={keydown}>
-  {#if hidefocus}<div class="hiddenfocus" tabindex="0" on:blur={() =>{ hidefocus = false }}><ScreenReaderOnly>{hidefocuslabel}</ScreenReaderOnly></div>{/if}
+  {#if hidefocus}<div class="hiddenfocus" use:button on:blur={() =>{ hidefocus = false }} on:click={() => escapable && dispatch('escape')}><ScreenReaderOnly>{hidefocuslabel}{#if escapable}, click to escape or use escape key at any time{/if}</ScreenReaderOnly></div>{/if}
   <slot></slot>
 </div>
 <div tabindex="0"></div>
