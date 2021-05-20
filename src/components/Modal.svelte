@@ -20,11 +20,9 @@
 </script>
 
 <div use:portal class="modal-backdrop" on:click={() => lockbackdrop || endmodal()}>
-  <div class="modal-container" role="dialog" on:click|stopPropagation>
-    <FocusLock escapable={!lockbackdrop} on:escape={endmodal} {hidefocus} {hidefocuslabel} {returnfocusto} on:escape={() => lockbackdrop || endmodal()}>
-      <slot></slot>
-    </FocusLock>
-  </div>
+  <FocusLock class="modal-container" escapable={!lockbackdrop} on:escape={endmodal} {hidefocus} {hidefocuslabel} {returnfocusto} on:escape={() => lockbackdrop || endmodal()}>
+    <slot></slot>
+  </FocusLock>
 </div>
 
 <style>
@@ -38,7 +36,7 @@
     overflow: auto;
     z-index: 100;
   }
-  .modal-container {
+  .modal-backdrop :global(.modal-container) {
     position: absolute;
     left: 50%;
     top: 50%;

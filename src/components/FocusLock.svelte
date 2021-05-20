@@ -5,8 +5,11 @@
 <script lang="ts">
   export let returnfocusto: HTMLElement|null = null
   export let hidefocus = true
-  export let hidefocuslabel = "focus moved to dialog"
+  export let hidefocuslabel = "focus is above dialog"
   export let escapable = true
+  let className = ''
+  export { className as class }
+
   import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte'
   import { tabbable } from 'tabbable'
   import { button } from '../actions'
@@ -52,7 +55,6 @@
   }
   const keydown = (e: KeyboardEvent) => {
     if (active && e.key === "Escape" && escapable) {
-      e.stopPropagation()
       e.preventDefault()
       dispatch('escape')
     }
@@ -65,13 +67,14 @@
   }
 </script>
 
-<svelte:window on:keydown={keydown} on:focusin={focusin}/>
-<div bind:this={abovelockelement} tabindex="0"></div>
-<div bind:this={lockelement} on:keydown={keydown}>
-  {#if hidefocus}<div class="hiddenfocus" use:button on:blur={() =>{ hidefocus = false }} on:click={() => escapable && dispatch('escape')}><ScreenReaderOnly>{hidefocuslabel}{#if escapable}, click to escape or use escape key at any time{/if}</ScreenReaderOnly></div>{/if}
-  <slot></slot>
+<div class={className} role="alertdialog" aria-modal="true" on:click|stopPropagation on:keydown|stopPropagation={keydown} on:focusin={focusin}>
+  <div bind:this={abovelockelement} tabindex="0"></div>
+  <div bind:this={lockelement} on:keydown={keydown}>
+    {#if hidefocus}<div class="hiddenfocus" use:button on:blur={() =>{ hidefocus = false }} on:click={() => escapable && dispatch('escape')}><ScreenReaderOnly>{hidefocuslabel}{#if escapable}, click to escape or use escape key at any time{/if}</ScreenReaderOnly></div>{/if}
+    <slot></slot>
+  </div>
+  <div tabindex="0"></div>
 </div>
-<div tabindex="0"></div>
 
 <style>
   .hiddenfocus {
