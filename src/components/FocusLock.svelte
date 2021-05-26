@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  export let returnfocusto: HTMLElement|null = null
+  export let returnfocusto: HTMLElement|null|undefined = undefined
   export let hidefocus = true
   export let hidefocuslabel = "focus is above dialog"
   export let escapable = true
@@ -12,7 +12,7 @@
 
   import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte'
   import { tabbable } from 'tabbable'
-  import { button } from '../actions'
+  import { buttonify } from '../actions'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
   let lockelement: HTMLElement
@@ -25,16 +25,17 @@
       pause: () => { active = false },
       unpause: () => { active = true }
     })
-    if (!returnfocusto) {
-      returnfocusto = document.querySelector(':focus')
+    if (typeof returnfocusto === 'undefined') {
+      returnfocusto = document.querySelector(':focus') as HTMLElement
     }
     setInitialFocus()
   })
   onDestroy(async () => {
     const wasactive = active
+    const focuswasinside = lockelement.matches(':focus-within')
     active = false
     await tick()
-    if (returnfocusto && wasactive) {
+    if (returnfocusto && wasactive && focuswasinside) {
       returnfocusto.focus()
     }
     FocusLockStack.pop()
@@ -70,7 +71,7 @@
 <div class={className} role="alertdialog" aria-modal="true" on:click|stopPropagation on:keydown|stopPropagation={keydown} on:focusin={focusin}>
   <div bind:this={abovelockelement} tabindex="0"></div>
   <div bind:this={lockelement} on:keydown={keydown}>
-    {#if hidefocus}<div class="hiddenfocus" use:button on:blur={() =>{ hidefocus = false }} on:click={() => escapable && dispatch('escape')}><ScreenReaderOnly>{hidefocuslabel}{#if escapable}, click to escape or use escape key at any time{/if}</ScreenReaderOnly></div>{/if}
+    {#if hidefocus}<div class="hiddenfocus" use:buttonify on:blur={() =>{ hidefocus = false }} on:click={() => escapable && dispatch('escape')}><ScreenReaderOnly>{hidefocuslabel}{#if escapable}, click to escape or use escape key at any time{/if}</ScreenReaderOnly></div>{/if}
     <slot></slot>
   </div>
   <div tabindex="0"></div>
