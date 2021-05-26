@@ -3,7 +3,7 @@
  * role="button" and the tabindex attribute set. You are still responsible for making sure it has
  * readable content or a good label.
  */
-export function button (node: HTMLElement) {
+export function buttonify (node: HTMLElement) {
   function keydown (e: KeyboardEvent) {
     if (e.key === 'Enter') {
       if (!e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
