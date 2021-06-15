@@ -14,15 +14,6 @@ export function buttonify (node: HTMLElement) {
     }
   }
 
-  function click (e: MouseEvent|CustomEvent) {
-    if (!(e instanceof CustomEvent)) {
-      e.preventDefault()
-      e.stopPropagation()
-      node.dispatchEvent(new CustomEvent('click'))
-    }
-  }
-
-  node.addEventListener('click', click)
   node.addEventListener('keydown', keydown)
   if (node.tabIndex < 0) node.tabIndex = 0
   node.setAttribute('role', 'button')
@@ -30,7 +21,6 @@ export function buttonify (node: HTMLElement) {
 
   return {
     destroy () {
-      node.removeEventListener('click', click)
       node.removeEventListener('keydown', keydown)
     }
   }
