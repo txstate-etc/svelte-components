@@ -4,7 +4,7 @@
 </script>
 
 {#if shown}
-<Modal on:dismiss={() => shown = false}>
+<Modal on:escape={() => shown = false}>
   <form>
     <div class="formfield">
       <label for="firstname">First Name:</label><input id="firstname" type="text" name="firstname">
@@ -23,7 +23,7 @@
   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tempus nulla ut nulla auctor, quis sodales massa laoreet. Duis erat lacus, gravida vitae massa vel, semper accumsan urna. Morbi gravida dui sit amet sodales luctus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum eget pulvinar dui. Vivamus quis eros eu ex semper consectetur nec at elit. Praesent faucibus arcu a nisi semper, eu tempus felis vehicula. Suspendisse potenti.</p>
 
   <p>Donec luctus nulla mattis ipsum aliquam imperdiet. Vestibulum nec finibus enim. Proin et arcu arcu. Quisque feugiat leo velit, vitae mollis felis ornare sed. Suspendisse sollicitudin, libero sed ullamcorper finibus, diam turpis eleifend velit, ut suscipit orci mauris id purus. Donec dapibus facilisis mauris a venenatis. Maecenas gravida velit maximus nibh tincidunt, eget auctor tellus efficitur. Aenean varius tristique lacus, sit amet placerat sem tempor at. Sed imperdiet fermentum nibh, sit amet tempor est cursus ac.</p>
-  <button on:click={() => shown = true}>Show Modal</button>
+  <button data-testid="button" on:click={() => shown = true}>Show Modal</button>
   <p>Praesent augue magna, maximus at mattis eget, euismod nec neque. Phasellus ut dolor a turpis molestie fermentum. Phasellus condimentum, ipsum sed rutrum maximus, diam ex ultrices sapien, quis iaculis nisi arcu at turpis. Morbi aliquam mattis posuere. Integer pretium diam diam, non lobortis quam consectetur laoreet. Sed posuere blandit venenatis. Nulla gravida maximus arcu non consectetur.</p>
 
   <p>Cras egestas massa mattis dictum imperdiet. Nulla bibendum nisl ipsum, ut scelerisque arcu consectetur vitae. Integer convallis id nunc sit amet faucibus. Maecenas suscipit diam orci, ac suscipit dolor convallis sed. Mauris vel tellus eget nunc mattis faucibus sit amet sed lorem. Cras lobortis, massa at vestibulum dignissim, quam tellus sagittis purus, eget dictum dolor quam in leo. Aliquam condimentum, ante sit amet semper laoreet, lacus est scelerisque mi, nec mollis diam massa et massa. Donec sagittis massa quis diam dictum, sit amet convallis mauris tincidunt. Nam vulputate ligula quis ex condimentum, in sollicitudin dolor accumsan. Donec volutpat dui in faucibus tempus. Proin vitae tincidunt ex. Proin ut ultricies diam. Praesent sed purus in purus efficitur fermentum vulputate quis dolor. Morbi viverra quam ac dolor facilisis consectetur.</p>

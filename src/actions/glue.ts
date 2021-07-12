@@ -90,8 +90,6 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         update(target, sharedOffset, reposition)
       }
     },
-    destroy () {
-      destroy()
-    }
+    destroy
   }
 }

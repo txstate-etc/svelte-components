@@ -1,4 +1,4 @@
-export * from './a11y'
+export * from './buttonify'
 export * from './glue'
 export * from './offset'
 export * from './portal'

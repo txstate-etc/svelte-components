@@ -4,7 +4,7 @@
   import { createEventDispatcher, onDestroy, tick } from 'svelte'
   import { randomid } from 'txstate-utils'
   import type { PopupMenuItem } from '../types'
-  import { DeepStore, SettableSubject } from '../lib'
+  import { Store } from '../lib'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
 
@@ -20,12 +20,12 @@
   export let cover = false
   export let showSelected = true
   export let width:string|undefined = undefined
-  export let computedalign: SettableSubject<GlueAlignStore> = new DeepStore<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
+  export let computedalign = new Store<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
   export let usePortal: HTMLElement|true|undefined = undefined
   export let emptyText: string|undefined = undefined
-  export let hilited: number|undefined = undefined
-  export let selected: PopupMenuItem|undefined = undefined
+  export let value: string|undefined = undefined
 
+  let hilited: number|undefined = undefined
   let menuelement: HTMLElement|undefined
   let itemelements: HTMLElement[] = []
   const menuid = randomid()
@@ -33,7 +33,7 @@
   let lastactive = items.length - 1
 
   function hiddenItem (item: PopupMenuItem) {
-    return !!item && !showSelected && item.value === selected?.value
+    return !!item && !showSelected && item.value === value
   }
 
   async function reactToItems (..._: any[]) {
@@ -41,7 +41,7 @@
     lastactive = items.length - [...items].reverse().findIndex(itm => !itm.disabled && !hiddenItem(itm)) - 1
     if (hilited && items[hilited]?.disabled) hilited = firstactive
   }
-  $: reactToItems(items, selected)
+  $: reactToItems(items, value)
 
   async function reactToMenuShown (_: boolean) {
     if (!buttonelement) {
@@ -95,8 +95,8 @@
       if (menushown) {
         menushown = false
         if (typeof hilited !== 'undefined') {
-          selected = items[hilited]
-          dispatch('change', items[hilited].value)
+          value = items[hilited]?.value
+          dispatch('change', items[hilited])
         }
       } else {
         menushown = true
@@ -109,8 +109,8 @@
         if (typeof hilited !== 'undefined') {
           e.preventDefault()
           menushown = false
-          selected = items[hilited]
-          dispatch('change', items[hilited].value)
+          value = items[hilited]?.value
+          dispatch('change', items[hilited])
         } else {
           if (buttonelement.tagName !== 'INPUT') {
             e.preventDefault()
@@ -146,6 +146,7 @@
       element.removeEventListener('click', onbuttonclick)
       element.removeEventListener('keydown', onkeydown)
       element.removeEventListener('blur', onblur)
+      element.removeAttribute('aria-disabled')
       element.removeAttribute('aria-haspopup')
       element.removeAttribute('aria-expanded')
       element.removeAttribute('aria-controls')
@@ -174,30 +175,30 @@
     e.preventDefault()
     if (item.disabled) return
     menushown = false
-    selected = item
-    dispatch('change', item.value)
+    value = item.value
+    dispatch('change', item)
   }
 
-  $: hasSelected = showSelected && !!items.find(itm => itm.value === selected?.value)
+  $: hasSelected = showSelected && items.some(itm => itm.value === value)
 </script>
 
 {#if menushown}
   <div use:portal={usePortal === true ? document.body : (usePortal || null)} use:glue={{ target: buttonelement, align, cover, store: computedalign }} class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
       {#each items as item, i (item.value)}
-        {#if showSelected || !selected || item.value !== selected.value}
+        {#if showSelected || item.value !== value}
           <li
             id={`${menuid}-${i}`}
             bind:this={itemelements[i]}
-            class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass || '' : ''} ${selected && selected.value === item.value ? menuItemSelectedClass || '' : ''}`}
+            class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass || '' : ''} ${value === item.value ? menuItemSelectedClass || '' : ''}`}
             class:disabled={!!item.disabled}
             class:hilited={!menuItemHilitedClass && i === hilited}
-            class:selected={showSelected && !menuItemSelectedClass && selected && selected.value === item.value}
+            class:selected={showSelected && !menuItemSelectedClass && value === item.value}
             on:click={onclick(item)}
             role="option"
             tabindex=-1
             aria-disabled={item.disabled}
-          ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={selected && selected.value === item.value}>{item.label || item.value}</slot></li>
+          ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
         {/if}
       {/each}
       {#if items.length === 0}

@@ -1,5 +1,6 @@
 import { get, set } from 'txstate-utils'
-import { DeepStore, WritableSubject } from './deepstore'
+import { Store } from './store'
+import { WritableSubject } from './activestore'
 
 /**
  * Create a store that represents a part of a larger store. Updates to the parent store will propagate
@@ -12,28 +13,23 @@ import { DeepStore, WritableSubject } from './deepstore'
  * generated. For example, a parent store containing state { deep: { value: 'here' }, hello: 'world' }
  * could be used with the getter string "deep.value". The SubStore's initial state would be "here", and
  * updating it to "there" would update the parent store state to { deep: { value: 'there' }, hello: 'world' }
- *
- * If you create one of these in a component, be sure to call .complete() in onDestroy to free up memory.
  */
-export class SubStore<SubType, ParentType = any> extends DeepStore<SubType> {
+export class SubStore<SubType, ParentType = any> extends Store<SubType> {
   protected parentStore: WritableSubject<ParentType>
   protected setter: (value: SubType, state: ParentType) => ParentType
 
-  constructor (store: WritableSubject<ParentType>, getter: string)
-  constructor (store: WritableSubject<ParentType>, getter: (value: ParentType) => SubType, setter: (value: SubType, state: ParentType) => ParentType)
-  constructor (store: WritableSubject<ParentType>, getter: string|((value: ParentType) => SubType), setter?: (value: SubType, state: ParentType) => ParentType) {
+  constructor (store: WritableSubject<ParentType>, getter: keyof ParentType|string|((value: ParentType) => SubType), setter?: (value: SubType, state: ParentType) => ParentType) {
+    super({} as any)
     if (typeof getter === 'string') {
       const accessor = getter
       getter = parentValue => get(parentValue, accessor)
       setter = (newValue, parentValue) => set(parentValue, accessor, newValue)
     }
-    super({} as any)
     this.parentStore = store
     this.setter = setter!
-    const unsubscribe = store.subscribe(v => {
+    this.registerSource(() => store.subscribe(v => {
       super.set((getter as any)(v))
-    })
-    this.cleanup(unsubscribe)
+    }))
   }
 
   set (value: SubType) {
@@ -43,6 +39,13 @@ export class SubStore<SubType, ParentType = any> extends DeepStore<SubType> {
   clone (state: SubType) {
     // parent store could be a SafeStore - if so we should use its clone function
     // so that the substore is also safe against mutations
-    return (this.parentStore as DeepStore<any>)?.clone?.(state) ?? state
+    return (this.parentStore as Store<any>)?.clone?.(state) ?? state
   }
+}
+
+export function subStore <SubType, ParentType, A extends keyof ParentType> (store: WritableSubject<ParentType>, accessor: A): SubStore<ParentType[A], ParentType>
+export function subStore <SubType, ParentType = any> (store: WritableSubject<ParentType>, accessor: string): SubStore<SubType, ParentType>
+export function subStore <SubType, ParentType> (store: WritableSubject<ParentType>, getter: (value: ParentType) => SubType, setter: (value: SubType, state: ParentType) => ParentType): SubStore<SubType, ParentType>
+export function subStore <SubType, ParentType> (store: WritableSubject<ParentType>, getter: keyof ParentType|string|((value: ParentType) => SubType), setter?: (value: SubType, state: ParentType) => ParentType) {
+  return new SubStore(store, getter, setter)
 }

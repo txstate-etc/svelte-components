@@ -4,8 +4,9 @@
 
 <script lang="ts">
   export let returnfocusto: HTMLElement|null|undefined = undefined
+  export let initialfocus: string|undefined = undefined
   export let hidefocus = true
-  export let hidefocuslabel = "focus is above dialog"
+  export let hidefocuslabel = "focus is above modal dialog, start tabbing"
   export let escapable = true
   let className = ''
   export { className as class }
@@ -18,6 +19,8 @@
   let lockelement: HTMLElement
   let abovelockelement: HTMLElement
   let active = true
+  let listenforescape = false
+  if (initialfocus) hidefocus = false
   onMount(() => {
     const prevFocusLock = FocusLockStack.slice(-1)[0]
     if (prevFocusLock) prevFocusLock.pause()
@@ -28,14 +31,19 @@
     if (typeof returnfocusto === 'undefined') {
       returnfocusto = document.querySelector(':focus') as HTMLElement
     }
-    setInitialFocus()
+    if (initialfocus) {
+      const focusEl = lockelement.querySelector(initialfocus)
+      if (focusEl instanceof HTMLElement) focusEl.focus()
+    } else {
+      setInitialFocus()
+    }
+    setTimeout(() => listenforescape = true, 0)
   })
   onDestroy(async () => {
     const wasactive = active
-    const focuswasinside = lockelement.matches(':focus-within')
     active = false
     await tick()
-    if (returnfocusto && wasactive && focuswasinside) {
+    if (returnfocusto && wasactive) {
       returnfocusto.focus()
     }
     FocusLockStack.pop()
@@ -66,8 +74,14 @@
       else setInitialFocus()
     }
   }
+  const windowclick = (e: MouseEvent) => {
+    if (listenforescape && active) {
+      returnfocusto = undefined
+      dispatch('escape')
+    }
+  }
 </script>
-
+<svelte:window on:click={windowclick} />
 <div class={className} role="alertdialog" aria-modal="true" on:click|stopPropagation on:keydown|stopPropagation={keydown} on:focusin={focusin}>
   <div bind:this={abovelockelement} tabindex="0"></div>
   <div bind:this={lockelement} on:keydown={keydown}>

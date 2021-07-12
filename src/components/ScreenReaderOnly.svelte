@@ -1,7 +1,7 @@
-<script>
-  export let id = ''
-  export let arialive = ''
-  export let ariaatomic = ''
+<script lang="ts">
+  export let id: string|undefined = undefined
+  export let arialive: svelte.JSX.AriaAttributes['aria-live'] = undefined
+  export let ariaatomic: svelte.JSX.AriaAttributes['aria-atomic'] = undefined
 </script>
 
 <style>
@@ -23,4 +23,4 @@
   }
 </style>
 
-<span id={id} class="sr-only" aria-live={arialive} aria-atomic={ariaatomic}><slot/></span>
+<span {id} class="sr-only" aria-live={arialive} aria-atomic={ariaatomic}><slot/></span>

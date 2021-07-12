@@ -1,10 +1,9 @@
-import { writable } from 'svelte/store'
-import { DeepStore } from '../..'
-import { SubStore } from '../../lib/substore'
+import { get, writable } from 'svelte/store'
+import { Store, subStore, convertStore, SafeStore, derivedStore } from '../../lib'
 
-const teststore = new DeepStore({ deep: { value: 'here' }, hello: 'world' })
+const teststore = new Store({ deep: { value: 'here' }, hello: 'world' })
 
-test('deepstore notifies subscribers when updated, but not when nothing changes', async () => {
+test('store notifies subscribers when updated, but not when nothing changes', async () => {
   let updatecount = 0
   const unsubscribe = teststore.subscribe(v => updatecount++)
   expect(updatecount).toEqual(1)
@@ -20,38 +19,56 @@ test('deepstore notifies subscribers when updated, but not when nothing changes'
 
 test('deepstore can stay in sync with a writable', async () => {
   const store = writable(0)
-  const syncstore = new DeepStore(store)
-  let storevalue
-  let syncstorevalue
-  const unsubscribe = store.subscribe(v => { storevalue = v })
-  const unsubscribe2 = syncstore.subscribe(v => { syncstorevalue = v })
+  const syncstore = convertStore(store)
   store.set(5)
-  expect(storevalue).toEqual(5)
-  expect(syncstorevalue).toEqual(5)
+  expect(get(store)).toEqual(5)
+  expect(get(syncstore)).toEqual(5)
   syncstore.set(20)
-  expect(storevalue).toEqual(20)
-  expect(syncstorevalue).toEqual(20)
-  unsubscribe()
-  unsubscribe2()
+  expect(get(store)).toEqual(20)
+  expect(get(syncstore)).toEqual(20)
+})
+
+test('derivedstore can stay in sync with one parent store', async () => {
+  const derivedstore = derivedStore(teststore, v => v.deep.value)
+  teststore.update(v => ({ ...v, deep: { ...v.deep, value: 'there' } }))
+  expect(get(derivedstore)).toEqual('there')
+  teststore.update(v => ({ ...v, deep: { ...v.deep, value: 'here' } }))
+  expect(get(derivedstore)).toEqual('here')
+})
+
+test('derivedstore can stay in sync with two parent stores', async () => {
+  const a = new Store(1)
+  const b = new Store(1)
+  const sumstore = derivedStore([a, b], ([va, vb]) => va + vb)
+  expect(get(sumstore)).toEqual(2)
+  a.set(4)
+  expect(get(sumstore)).toEqual(5)
+  b.set(4)
+  expect(get(sumstore)).toEqual(8)
 })
 
 test('substore should stay in sync with parent', async () => {
-  const substore = new SubStore(teststore, 'deep.value')
-  let storevalue: any
-  let substorevalue: any
-  const unsubscribe = teststore.subscribe(v => { storevalue = v })
-  const unsubscribe2 = substore.subscribe(v => { substorevalue = v })
+  const substore = subStore(teststore, 'deep.value')
 
-  expect(substorevalue).toEqual('here')
+  expect(get(substore)).toEqual('here')
   substore.set('there')
-  expect(substorevalue).toEqual('there')
-  expect(storevalue.deep.value).toEqual('there')
+  expect(get(substore)).toEqual('there')
+  expect(get(teststore).deep.value).toEqual('there')
 
   teststore.update(v => ({ ...v, deep: { value: 'here' } }))
-  expect(substorevalue).toEqual('here')
-  expect(storevalue.deep.value).toEqual('here')
+  expect(get(substore)).toEqual('here')
+  expect(get(teststore).deep.value).toEqual('here')
+})
 
+test('safestore should be safe against mutations', async () => {
+  const safestore = new SafeStore({ hello: 'there' })
+  let count = 0
+  const unsubscribe = safestore.subscribe(v => {
+    count++
+    if (count === 1) expect(v.hello).toEqual('there')
+    else expect(v.hello).toEqual('friend')
+  })
+  safestore.update(v => { v.hello = 'friend'; return v })
+  expect(count).toBeGreaterThan(1)
   unsubscribe()
-  unsubscribe2()
-  substore.complete()
 })

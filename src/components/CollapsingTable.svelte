@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DeepStore, classes } from '../lib'
+  import { Store, classes } from '../lib'
   import type { CollapsingTableColumn, PopupMenuItem } from '../types'
   import { derived } from 'svelte/store'
   import DefaultPopupMenu from './PopupMenu.svelte'
@@ -45,7 +45,7 @@
 
   $: itemkeys = items.map(item => item.id ?? item._id ?? identifyingkeys.map(k => item[k]).join('.'))
 
-  const state = new DeepStore({
+  const state = new Store({
     keepcolumns: [] as (CollapsingTableColumn & { widthPercent?: number })[],
     hiddencolumns: [] as CollapsingTableColumn[],
     dropdowncolumn: undefined as (CollapsingTableColumn & { widthPercent?: number }) | undefined
@@ -113,7 +113,7 @@
   </table>
 </div>
 {#if $menuitems.length > 0}
-<svelte:component this={PopupMenu} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={$menuitems} buttonelement={menubuttonelement} bind:selected></svelte:component>
+  <svelte:component this={PopupMenu} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={$menuitems} buttonelement={menubuttonelement} on:change={e => selected = e.detail}></svelte:component>
 {/if}
 
 <style>

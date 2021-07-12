@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let condition: boolean|undefined = undefined
+  export let condition: boolean|undefined
   export let component: Function|undefined = undefined
   export let a = false
   export let span = false

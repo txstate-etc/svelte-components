@@ -1,26 +1,31 @@
 <script lang="ts">
-  export let lockbackdrop = false
+  export let escapable = true
   export let hidefocus = true
   export let hidefocuslabel: string|undefined = undefined
   export let returnfocusto: HTMLElement|undefined = undefined
+  export let initialfocus: string|undefined = undefined
+  export let containerClass = ''
+  export let opaque = false
   import FocusLock from './FocusLock.svelte'
   import { createEventDispatcher, onMount } from 'svelte'
   import { portal } from '../actions';
 
   const dispatch = createEventDispatcher()
   const endmodal = () => {
-    dispatch('dismiss')
+    dispatch('escape')
   }
   onMount(() => {
+    document.body.style.marginRight = (window.innerWidth - document.body.clientWidth) + 'px'
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = ''
+      document.body.style.marginRight = ''
     }
   })
 </script>
 
-<div use:portal class="modal-backdrop" on:click={() => lockbackdrop || endmodal()}>
-  <FocusLock class="modal-container" escapable={!lockbackdrop} on:escape={endmodal} {hidefocus} {hidefocuslabel} {returnfocusto} on:escape={() => lockbackdrop || endmodal()}>
+<div use:portal class="modal-backdrop" class:opaque on:click|stopPropagation|preventDefault={() => escapable && endmodal()}>
+  <FocusLock class="modal-container {containerClass}" {escapable} on:escape {hidefocus} {hidefocuslabel} {returnfocusto} {initialfocus}>
     <slot></slot>
   </FocusLock>
 </div>
@@ -30,16 +35,20 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background-color: var(--modal-bg, rgba(0, 0, 0, 0.7));
-    overflow: auto;
     z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center
+  }
+  .modal-backdrop.opaque {
+    background-color: var(--modal-bg-opaque, #4c4c4c);
   }
   .modal-backdrop :global(.modal-container) {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    max-width: 100vw;
+    max-height: 100vh;
+    overflow: auto;
   }
 </style>

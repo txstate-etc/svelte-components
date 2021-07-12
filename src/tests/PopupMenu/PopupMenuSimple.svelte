@@ -1,6 +1,6 @@
 <script lang="ts">
+  import { hashify } from 'txstate-utils'
   import PopupMenu from '../../components/PopupMenu.svelte'
-  let button: HTMLElement
 
   export let showSelected = false
   export let items = [
@@ -12,12 +12,18 @@
     { value: '5', label: 'Friday' },
     { value: '6', label: 'Saturday', disabled: true }
   ]
+
+  let button: HTMLElement
+  let value: string
+  $: itemsByValue = hashify(items, 'value')
+  $: selected = itemsByValue[value]
 </script>
 
 <div class="topspacer"></div>
 <div class="container">
   <button data-testid="button" class="ui gold button" bind:this={button}>Popup Menu</button>
-  <PopupMenu buttonelement={button} {items} {showSelected}></PopupMenu>
+  <div>selected: {#if selected}{selected.value}, {selected.label}{:else}none{/if}</div>
+  <PopupMenu bind:value buttonelement={button} {items} {showSelected}></PopupMenu>
 </div>
 
 <style>

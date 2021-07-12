@@ -2,7 +2,7 @@ import { bodyOffset, ElementOffsets, watchForPositionChange } from '../lib'
 import { StickyArgs } from './sticky'
 
 /**
- * An implementation of stickyness based on `transform: translateY()`. Only use when
+ * An implementation of stickyness based on `positon: fixed`. Only use when
  * `position: sticky` won't work for you. If `position: sticky` does work for you, use it,
  * it performs better.
  *
@@ -12,10 +12,10 @@ import { StickyArgs } from './sticky'
  * 3) it always stays within the boundaries of the closest parent element that has a `position`
  *     * use:sticky accepts a `target` element as a parameter, defining the bounding container
  *
- * Note that this implementation sacrifices simplicity for animation performance. It does a lot of
- * work like cloning the element you place it on, placing the cloned element next to yours in the DOM,
- * setting widths to match between them, watching for mutations to keep them in sync, etc. Some of
- * this work may get foiled if you have a complex html/css/js situation.
+ * Note that this implementation gets great animation performance at the cost of extra complexity.
+ * It does a lot of work like cloning the element you place it on, placing the cloned element next
+ * to yours in the DOM, setting widths to match between them, watching for mutations to keep them
+ * in sync, etc. Some of this work may get foiled if you have a complex html/css/js situation.
  *
  * You may also want to try use:sticky. It is based on setting `transform: translateY()` as appropriate,
  * and is less fragile than this. However, it cannot do its work before the scroll on mobile, only after,
