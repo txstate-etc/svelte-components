@@ -112,7 +112,9 @@
     {#if slots.footer}<tfoot><slot name="footer" item={undefined} key={undefined} value={undefined}></slot></tfoot>{/if}
   </table>
 </div>
+{#if $menuitems.length > 0}
 <svelte:component this={PopupMenu} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={$menuitems} buttonelement={menubuttonelement} bind:selected></svelte:component>
+{/if}
 
 <style>
   table { width: 100%; }
