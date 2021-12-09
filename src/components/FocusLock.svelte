@@ -4,8 +4,9 @@
 
 <script lang="ts">
   export let returnfocusto: HTMLElement|null|undefined = undefined
+  export let initialfocus: string|undefined = undefined
   export let hidefocus = true
-  export let hidefocuslabel = "focus is above dialog"
+  export let hidefocuslabel = "focus is above modal dialog, start tabbing"
   export let escapable = true
   let className = ''
   export { className as class }
@@ -18,6 +19,7 @@
   let lockelement: HTMLElement
   let abovelockelement: HTMLElement
   let active = true
+  if (initialfocus) hidefocus = false
   onMount(() => {
     const prevFocusLock = FocusLockStack.slice(-1)[0]
     if (prevFocusLock) prevFocusLock.pause()
@@ -28,7 +30,12 @@
     if (typeof returnfocusto === 'undefined') {
       returnfocusto = document.querySelector(':focus') as HTMLElement
     }
-    setInitialFocus()
+    if (initialfocus) {
+      const focusEl = lockelement.querySelector(initialfocus)
+      if (focusEl instanceof HTMLElement) focusEl.focus()
+    } else {
+      setInitialFocus()
+    }
   })
   onDestroy(async () => {
     const wasactive = active

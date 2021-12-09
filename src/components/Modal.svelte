@@ -3,6 +3,7 @@
   export let hidefocus = true
   export let hidefocuslabel: string|undefined = undefined
   export let returnfocusto: HTMLElement|undefined = undefined
+  export let initialfocus: string|undefined = undefined
   import FocusLock from './FocusLock.svelte'
   import { createEventDispatcher, onMount } from 'svelte'
   import { portal } from '../actions';
@@ -20,7 +21,7 @@
 </script>
 
 <div use:portal class="modal-backdrop" on:click={() => lockbackdrop || endmodal()}>
-  <FocusLock class="modal-container" escapable={!lockbackdrop} on:escape={endmodal} {hidefocus} {hidefocuslabel} {returnfocusto} on:escape={() => lockbackdrop || endmodal()}>
+  <FocusLock class="modal-container" escapable={!lockbackdrop} on:escape={endmodal} {hidefocus} {hidefocuslabel} {returnfocusto} {initialfocus} on:escape={() => lockbackdrop || endmodal()}>
     <slot></slot>
   </FocusLock>
 </div>
