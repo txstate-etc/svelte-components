@@ -1,10 +1,12 @@
 <script lang="ts">
+import { autofocus } from '../../actions/a11y';
+
   import Modal from '../../components/Modal.svelte'
   let shown = true
 </script>
 
 {#if shown}
-<Modal on:dismiss={() => shown = false}>
+<Modal initialfocus='input[type="submit"' on:dismiss={() => shown = false}>
   <form>
     <div class="formfield">
       <label for="firstname">First Name:</label><input id="firstname" type="text" name="firstname">
