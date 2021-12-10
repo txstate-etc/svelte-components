@@ -25,9 +25,3 @@ export function buttonify (node: HTMLElement) {
     }
   }
 }
-
-export function autofocus (node: HTMLElement) {
-  window.setTimeout(() => {
-    if (node?.focus) { node.focus() }
-  }, 0)
-}

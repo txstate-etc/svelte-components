@@ -3,6 +3,6 @@ services:
   storybook:
     build: .
     ports:
-      - 80:6006
+      - 89:6006
     volumes:
       - ./src:/usr/app/src
