@@ -7,7 +7,6 @@
   import FocusLock from './FocusLock.svelte'
   import { createEventDispatcher, onMount } from 'svelte'
   import { portal } from '../actions';
-
   const dispatch = createEventDispatcher()
   const endmodal = () => {
     dispatch('dismiss')

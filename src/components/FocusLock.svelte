@@ -39,7 +39,13 @@
   })
   onDestroy(async () => {
     const wasactive = active
-    const focuswasinside = lockelement.matches(':focus-within')
+    let focuswasinside
+    try {
+      focuswasinside = lockelement.matches(':focus-within')
+    } catch (e: any) {
+      // browser doesn't support :focus-within
+      focuswasinside = true
+    }
     active = false
     await tick()
     if (returnfocusto && wasactive && focuswasinside) {
