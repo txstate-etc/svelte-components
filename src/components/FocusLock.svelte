@@ -13,6 +13,7 @@
 
   import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte'
   import { tabbable } from 'tabbable'
+  import { sleep } from 'txstate-utils'
   import { buttonify } from '../actions'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
@@ -21,7 +22,7 @@
   let active = true
   let listenforescape = false
   if (initialfocus) hidefocus = false
-  onMount(() => {
+  onMount(async () => {
     const prevFocusLock = FocusLockStack.slice(-1)[0]
     if (prevFocusLock) prevFocusLock.pause()
     FocusLockStack.push({
@@ -31,6 +32,7 @@
     if (typeof returnfocusto === 'undefined') {
       returnfocusto = document.querySelector(':focus') as HTMLElement
     }
+    await sleep(1) // sapper resets focus on page load, so we'll wait a millisecond in case our modal is on screen at load
     if (initialfocus) {
       const focusEl = lockelement.querySelector(initialfocus)
       if (focusEl instanceof HTMLElement) focusEl.focus()
