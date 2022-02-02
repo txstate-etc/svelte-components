@@ -1,5 +1,4 @@
-import equal from 'fast-deep-equal'
-import { isNotNull, randomid, toArray } from 'txstate-utils'
+import { equal, isNotNull, randomid, toArray } from 'txstate-utils'
 import { bodyOffset, targetOffset } from './bodyoffset.js'
 import type { ElementOffsets } from './bodyoffset.js'
 

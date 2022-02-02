@@ -172,7 +172,7 @@ method. So you can write a SubStore that accepts default svelte stores as well a
 `derivedStore` is designed to allow you to compile data from one or more parent stores into another
 read-only store. Each time any parent store changes, we'll run a function to derive a new state from
 the parent state(s). This is extremely similar to svelte's `derived` store, but subscribers will only
-be notified if the derived state has changed (uses fast-deep-equal instead of svelte's shallow equality).
+be notified if the derived state has changed (uses a deep-equal instead of svelte's shallow equality).
 ```typescript
 const num1Store = new Store(5)
 const num2Store = new Store(7)
