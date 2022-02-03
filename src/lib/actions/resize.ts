@@ -17,7 +17,20 @@ interface ResizeConfig {
 
 export class ResizeStore extends Store<ElementSize> {
   constructor (initialState?: ElementSize) {
-    super(initialState ?? { clientWidth: 1024, clientHeight: 1024, offsetWidth: 1024, offsetHeight: 1024 })
+    super(initialState ?? typeof window === 'undefined'
+      ? {
+          clientWidth: 1024,
+          clientHeight: 1024,
+          offsetWidth: 1024,
+          offsetHeight: 1024
+        }
+      : {
+          clientWidth: window.innerWidth,
+          clientHeight: window.innerHeight,
+          offsetWidth: window.innerWidth,
+          offsetHeight: window.innerHeight
+        }
+    )
   }
 }
 
