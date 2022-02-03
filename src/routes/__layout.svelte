@@ -43,6 +43,14 @@
       sublinks: [
         { label: 'sticky header', href: '/collapsingtable/stickyheader' }
       ]
+    },
+    {
+      label: 'Cards',
+      href: '/cards',
+      subtitle: 'Components for generating a pinterest-style card layout.',
+      sublinks: [
+        { label: 'preserve order', href: '/cards/preserve' }
+      ]
     }
   ]
   $: current = links.find(l => l.href === '/' ? $page.url.pathname === '/' : $page.url.pathname.startsWith(l.href))
