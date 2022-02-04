@@ -9,6 +9,13 @@
   const { width, order, linebreak } = registerBlock(block)
 </script>
 
+<li class="cardlayout-card {className}" bind:this={block.element} use:resize on:resize={recalculate} style="margin-bottom: {$gutter}px; width: {$width}; order: {$order};">
+  <slot></slot>
+</li>
+{#if $linebreak}
+  <li aria-hidden="true" class="cardlayout-columnbreak" style:order={$order}></li>
+{/if}
+
 <style>
   .cardlayout-columnbreak {
     width: 0;
@@ -16,10 +23,3 @@
     visibility: hidden;
   }
 </style>
-
-<li class="cardlayout-card {className}" bind:this={block.element} use:resize on:resize={recalculate} style="margin-bottom: {$gutter}px; width: {$width}; order: {$order};">
-  <slot></slot>
-</li>
-{#if $linebreak}
-  <li aria-hidden="true" class="cardlayout-columnbreak" style="order: {$order};"></li>
-{/if}

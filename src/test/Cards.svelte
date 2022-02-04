@@ -35,6 +35,17 @@
   }
 </script>
 
+<CardLayout className={className} maxwidth={maxwidth} preserveorder={preserveorder}>
+  {#each cards as card, i}
+    <Card><div class="card card{i + 1}" style:padding-top={card.ptop + '%'} tabindex=0><span>Card {i + 1}</span></div></Card>
+  {/each}
+</CardLayout>
+
+<button on:click={mutateall}>Randomize All</button>
+<button on:click={mutatecard}>Randomize Card</button>
+<button on:click={addcard}>Add Card</button>
+<button on:click={add20}>Add 20 Cards</button>
+
 <style>
   .card {
     position: relative;
@@ -51,14 +62,3 @@
     transform: translate(-50%,-50%);
   }
 </style>
-
-<CardLayout className={className} maxwidth={maxwidth} preserveorder={preserveorder}>
-  {#each cards as card, i}
-    <Card><div class="card card{i + 1}" style="padding-top: {card.ptop}%;" tabindex=0><span>Card {i + 1}</span></div></Card>
-  {/each}
-</CardLayout>
-
-<button on:click={mutateall}>Randomize All</button>
-<button on:click={mutatecard}>Randomize Card</button>
-<button on:click={addcard}>Add Card</button>
-<button on:click={add20}>Add 20 Cards</button>

@@ -166,29 +166,18 @@
   onMount(() => triggerrecalc(layoutelement.clientWidth))
 </script>
 
+<ul class="cardlayout {className}" style:height={`${fullheight + gutter}px`} bind:this={layoutelement} use:resize on:resize={onResize}>
+  <slot></slot>
+</ul>
+
 <style>
   .cardlayout {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 150%;
     list-style: none;
     padding: 0;
     margin: 0;
-    overflow: hidden;
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
     align-content: space-between;
   }
-  div {
-    position: relative;
-    overflow: hidden;
-  }
 </style>
-<div style:height={`${fullheight}px`}>
-  <ul class="cardlayout {className}" bind:this={layoutelement} use:resize on:resize={onResize}>
-    <slot></slot>
-  </ul>
-</div>
