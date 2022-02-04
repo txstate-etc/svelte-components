@@ -65,31 +65,42 @@
         optimal = [blocks]
         if (columns > 1) {
           const totalheight = blocks.reduce((totalheight, block) => totalheight + block.height + gutter, 0)
-          const minheight = Math.max(totalheight / columns, ...blocks.map(b => b.height))
+          const tallestblock = Math.max(...blocks.map(b => b.height))
+          const minheight = Math.max(totalheight / columns, tallestblock)
           let shortestoverall = totalheight
           // 2d packing problem is NP-hard so this is an O(n) heuristic
           // optimal configuration would be if each column is `minheight` so start there
-          // then relax it in a few increments and see if the overall height shrinks
-          for (let colmaxheight = minheight; colmaxheight < 1.5 * minheight; colmaxheight += 0.1 * minheight) {
+          // then relax it in increments and see if the overall height shrinks
+          const increment = Math.min(minheight, tallestblock) * 0.05
+          for (let colmaxheight = minheight; colmaxheight < minheight + tallestblock + gutter; colmaxheight += increment) {
             let colheight = 0
             let colidx = 0
             let tallestcol = 0
+            let tallestcolidx = 0
             const arrangement = []
             for (const block of blocks) {
               if (colheight + block.height > colmaxheight && colidx < columns - 1) {
+                if (colheight > tallestcol) {
+                  tallestcol = colheight
+                  tallestcolidx = colidx
+                }
                 colidx++
-                if (colheight > tallestcol) tallestcol = colheight
                 colheight = 0
               }
               if (!arrangement[colidx]) arrangement[colidx] = []
               arrangement[colidx].push(block)
               colheight += block.height + gutter
             }
-            if (colheight > tallestcol) tallestcol = colheight
+            if (colheight > tallestcol) {
+              tallestcol = colheight
+              tallestcolidx = colidx
+            }
             if (tallestcol < shortestoverall) {
               shortestoverall = tallestcol
               optimal = arrangement
             }
+            // if leftmost column is tallest, increasing the allowable height can never make the overall height shorter
+            if (tallestcolidx === 0) break
           }
         }
       } else {

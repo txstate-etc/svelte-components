@@ -1,7 +1,7 @@
 <script lang="ts">
   import CardLayout from '$lib/components/CardLayout.svelte'
   import Card from '$lib/components/Card.svelte'
-  export let maxwidth = undefined
+  export let maxwidth = 300
   export let className = 'test1'
   export let preserveorder = false
   let cards = [
