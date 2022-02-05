@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, tick, setContext, onMount } from 'svelte'
   import { writable } from 'svelte/store'
+  import { browser } from '$app/env'
   import { ElementSize, resize } from '$lib/actions'
   import { CARDLAYOUT } from '$lib/types'
   import type { Block } from '$lib/types'
@@ -21,8 +22,8 @@
       })
       block.order = writable(defaultOrder++)
       block.linebreak = writable(false)
-      const cols = savecolumns || 3
-      block.width = writable(`calc(${100.0 / cols}% - ${gutter * (cols - 1) / cols}px`)
+      const cols = savecolumns || Math.ceil(1024 / maxwidth)
+      block.width = writable(`calc(${100.0 / cols}% - ${gutter * (cols - 1) / cols}px)`)
       return block
     },
     recalculate: () => {
@@ -51,11 +52,11 @@
   let optimal: Block[][]
   let fullheight = 0
   let hardrequired = false
-  async function recalculate (realw: number, ssr?: boolean) {
+  async function recalculate (realw: number) {
     const columns = Math.ceil(realw / maxwidth)
     const guttereach = gutter * (columns - 1) / columns
     const cycling = detectcycle(realw)
-    if (columns !== savecolumns && !ssr) {
+    if (columns !== savecolumns) {
       for (const block of blocks) block.width.set(`calc(${100.0 / columns}% - ${guttereach}px`)
       await tick()
     }
@@ -167,7 +168,7 @@
   onMount(() => triggerrecalc(layoutelement.clientWidth))
 </script>
 
-<ul class="cardlayout {className}" style:height={`${fullheight + gutter}px`} bind:this={layoutelement} use:resize on:resize={onResize}>
+<ul class="cardlayout {className}" class:ssr={!browser} style:height={browser ? `${fullheight + gutter}px` : undefined} bind:this={layoutelement} use:resize on:resize={onResize}>
   <slot></slot>
 </ul>
 
@@ -180,5 +181,8 @@
     flex-wrap: wrap;
     flex-direction: column;
     align-content: space-between;
+  }
+  .cardlayout.ssr {
+    flex-direction: row;
   }
 </style>
