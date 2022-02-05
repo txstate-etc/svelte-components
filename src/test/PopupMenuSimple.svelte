@@ -21,7 +21,7 @@
 
 <div class="topspacer"></div>
 <div class="container">
-  <button data-testid="button" class="ui gold button" bind:this={button}>Popup Menu</button>
+  <button id="test-button" class="ui gold button" bind:this={button}>Popup Menu</button>
   <div>selected: {#if selected}{selected.value}, {selected.label}{:else}none{/if}</div>
   <PopupMenu bind:value buttonelement={button} {items} {showSelected}></PopupMenu>
 </div>

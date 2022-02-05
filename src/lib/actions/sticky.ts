@@ -50,7 +50,7 @@ export function sticky (el: HTMLElement, config?: StickyArgs) {
     }
   }
 
-  function onscroll (e: Event) {
+  function onscroll (_: Event) {
     recalc(window.scrollY)
   }
 

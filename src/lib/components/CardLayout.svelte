@@ -3,6 +3,7 @@
   import { writable } from 'svelte/store'
   import { ElementSize, resize } from '$lib/actions'
   import { CARDLAYOUT } from '$lib/types'
+  import type { Block } from '$lib/types'
   export let maxwidth = 500
   export let preserveorder = false
   export let gutter = 10
@@ -11,7 +12,7 @@
   const gutterstore = writable(gutter)
   let defaultOrder = 0
   setContext(CARDLAYOUT, {
-    registerBlock: block => {
+    registerBlock: (block: Block) => {
       blocks.push(block)
       hardrecalc()
       onDestroy(() => {
@@ -30,10 +31,10 @@
     gutter: gutterstore
   })
   $: gutterstore.set(gutter)
-  let layoutelement
+  let layoutelement: HTMLElement
   let cycle1 = 0
   let cycle2 = 0
-  function detectcycle (w) {
+  function detectcycle (w: number) {
     if (cycle1 === 0 && Math.abs(w - cycle2) > 5) {
       cycle1 = w
     } else if (cycle2 === 0 && Math.abs(w - cycle1) > 5) {
@@ -47,7 +48,7 @@
     return false
   }
   let savecolumns = 0
-  let optimal
+  let optimal: Block[][]
   let fullheight = 0
   let hardrequired = false
   async function recalculate (realw: number, ssr?: boolean) {
@@ -71,7 +72,7 @@
           // 2d packing problem is NP-hard so this is an O(n) heuristic
           // optimal configuration would be if each column is `minheight` so start there
           // then relax it in increments and see if the overall height shrinks
-          const increment = Math.min(minheight, tallestblock) * 0.05
+          const increment = Math.max(1, Math.floor(Math.min(minheight, tallestblock) * 0.05))
           for (let colmaxheight = minheight; colmaxheight < minheight + tallestblock + gutter; colmaxheight += increment) {
             let colheight = 0
             let colidx = 0
@@ -105,7 +106,7 @@
         }
       } else {
         optimal = []
-        const heights = Array.apply(null, Array(columns)).map(h => 0) // initializes heights to an array of zeroes
+        const heights: number[] = Array.apply(null, Array(columns)).map((_: any) => 0) // initializes heights to an array of zeroes
         // begin sorting blocks into columns
         for (const block of blocks) {
           // find the column with the smallest current height

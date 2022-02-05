@@ -78,7 +78,7 @@
         move(i)
       } else {
         menushown = true
-        move(firstactive)
+        tick().then(() => move(firstactive))
       }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
@@ -88,7 +88,7 @@
         move(i)
       } else {
         menushown = true
-        move(lastactive)
+        tick().then(() => move(lastactive))
       }
     } else if (e.key === 'Enter') {
       e.preventDefault()
@@ -100,7 +100,7 @@
         }
       } else {
         menushown = true
-        move(firstactive)
+        tick().then(() => move(firstactive))
       }
     } else if (e.key === ' ') {
       // buttonelement might be a text input if this popup is searchable,
@@ -121,7 +121,7 @@
         if (buttonelement.tagName !== 'INPUT') {
           e.preventDefault()
           menushown = true
-          move(firstactive)
+          tick().then(() => move(firstactive))
         }
       }
     } else if (menushown && e.key === 'Escape') {
@@ -131,14 +131,18 @@
     }
   }
 
+  let blurTimer: any
   function onbuttonclick (e: MouseEvent) {
     e.preventDefault()
+    cancelAnimationFrame(blurTimer)
     menushown = !menushown
   }
 
   async function onblur (e: FocusEvent) {
     // tabindex=-1 on our menu elements means e.relatedTarget will be set
-    if (!(e.relatedTarget instanceof HTMLElement && menuelement?.contains(e.relatedTarget))) menushown = false
+    if (!(e.relatedTarget instanceof HTMLElement && menuelement?.contains(e.relatedTarget))) {
+      blurTimer = requestAnimationFrame(() => { menushown = false })
+    }
   }
 
   function cleanup (element: HTMLElement) {

@@ -19,7 +19,7 @@
     return Math.ceil(Math.random() * 150) + 20
   }
   function mutateall () {
-    cards = cards.map(c => ({ ptop: randheight() }))
+    cards = cards.map(_ => ({ ptop: randheight() }))
   }
   function mutatecard () {
     const which = Math.floor(Math.random() * cards.length)
