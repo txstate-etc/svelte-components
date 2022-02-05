@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test'
-import { sleep } from 'txstate-utils'
+import { goto } from './common.js'
 
 test.describe('Image Layout', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/cards')
-    await sleep(200)
+    await goto(page, '/cards')
   })
 
   test('should show all 9 cards', async ({ page }) => {
@@ -26,8 +25,7 @@ test.describe('Image Layout', () => {
 })
 test.describe('Preserve Order Layout', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/cards/preserve')
-    await sleep(200)
+    await goto(page, '/cards/preserve')
   })
 
   test('should preserve card order when instructed', async ({ page }) => {

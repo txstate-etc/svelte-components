@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test'
+import { goto } from './common.js'
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/collapsingtable')
+  await goto(page, '/collapsingtable')
 })
 
 test('has two rows in tbody', async ({ page }) => {

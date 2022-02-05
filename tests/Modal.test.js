@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test'
-import { sleep } from 'txstate-utils'
+import { goto } from './common.js'
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/modal')
-  await sleep(200)
+  await goto(page, '/modal')
 })
 
 test('modal is active on first render, escape dismisses, hitting enter on the button brings it back, escaping puts focus on the button', async ({ page }) => {

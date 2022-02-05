@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test'
-import { sleep } from 'txstate-utils'
+import { goto } from './common.js'
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/popupmenu')
-  await sleep(200)
+  await goto(page, '/popupmenu')
 })
 
 test('menu toggles when button is clicked', async ({ page }) => {
