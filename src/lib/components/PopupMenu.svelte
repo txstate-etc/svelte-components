@@ -51,9 +51,10 @@
     }
     await tick()
     if (!menushown) {
-      hilited = undefined
       buttonelement.removeAttribute('aria-controls')
       buttonelement.setAttribute('aria-expanded', 'false')
+      if (hilited) buttonelement.removeAttribute('aria-activedescendant')
+      hilited = undefined
     } else {
       buttonelement.setAttribute('aria-controls', menuid)
       buttonelement.setAttribute('aria-expanded', 'true')

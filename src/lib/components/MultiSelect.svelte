@@ -32,7 +32,7 @@
     const rawOptions = await debouncedGetOptions(saveval)
     if (inputvalue !== saveval) return // ignore any results that are out of date
     options = rawOptions.filter(o => !selectedSet.has(o.value))
-    if (inputelement === document.activeElement) menushown = true
+    if (typeof document !== 'undefined' && inputelement === document.activeElement) menushown = true
   }
   $: reactToInput(inputvalue, debouncedGetOptions, selectedSet)
   $: availablemessage = options.filter(o => o.value).length + ' autocomplete choices available'
@@ -44,7 +44,9 @@
     popupvalue = undefined
   }
   function removeSelection (opt: typeof selected[number], idx: number, nextfocus = 1) {
-    if (hilitedpill === opt.value) hilitedpill = selected[idx + nextfocus]?.value
+    if (hilitedpill === opt.value) {
+      hilitedpill = selected[idx + nextfocus]?.value
+    }
     selected = selected.filter(s => s.value !== opt.value)
   }
 
@@ -74,14 +76,21 @@
   function inputfocus () {
     reactToInput()
   }
+
+  function reactToHilite (..._: any) {
+    if (!inputelement) return
+    if (hilitedpill) inputelement.setAttribute('aria-activedescendant', id + hilitedpill)
+    else inputelement.removeAttribute('aria-activedescendant')
+  }
+  $: reactToHilite(hilitedpill, id)
 </script>
 
 <fieldset>
   <ul class="multiselect-selected" role="listbox" on:click={() => inputelement.focus()}>
     {#each selected as option, i}
-      <li role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
+      <li id={id + option.value} role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
         on:click|preventDefault|stopPropagation={() => removeSelection(option, i, 1)}
-        aria-selected="true" aria-labelledby="leg-{id}">
+        aria-selected="true">
         {option.label || option.value}
         <ScreenReaderOnly>, click to remove</ScreenReaderOnly>
       </li>
@@ -91,11 +100,11 @@
         bind:this={inputelement} bind:value={inputvalue}
         on:focus={inputfocus} on:keydown={inputkeydown}
         autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list"
-        aria-labelledby="leg-{id}" aria-describedby="{descriptionid}">
+        aria-describedby="{descriptionid}">
     </li>
   </ul>
   <ScreenReaderOnly id={descriptionid} arialive="assertive">
-    <span>{selected.length ? selected.length + ' selected' : 'select multiple'}, up down to choose, left right to hilite existing choices</span>
+    <span>{selected.length ? selected.length + ' selected' : 'select multiple, none selected'}, up down to choose, left right to hilite existing choices</span>
     {#if menushown}<span>{availablemessage}, touch users explore to find autocomplete menu</span>{/if}
   </ScreenReaderOnly>
   <slot></slot>
@@ -123,35 +132,34 @@
     min-width: 0;
     width: 100%;
     height: 100%;
-    font-size: 16px;
   }
   .multiselect-selected {
     display: flex;
     flex-wrap: wrap;
     align-items: stretch;
-    padding: 5px;
-    border: 1px solid #666666;
-    border-radius: 5px;
+    padding: var(--multiselect-padding, 0.3em);
+    border: var(--multiselect-border, 1px solid #666666);
+    border-radius: var(--multiselect-radius, 0.3em);
   }
   .multiselect-selected li {
     flex-grow: 0;
-    margin-right: 5px;
+    margin-right: 0.3em;
   }
   .multiselect-selected li.input {
     flex-grow: 1;
   }
   .multiselect-pill {
-    height: 28px;
-    border-radius: 14px;
+    line-height: 1;
+    border-radius: var(--multiselect-pill-radius, 0.8em);
+    border: var(--multiselect-pill-border, 1px solid gray);
     background-color: var(--multiselect-pill-bg, transparent);
-    border: 1px solid var(--multiselect-pill-border, gray);
     color: var(--multiselect-pill-text, black);
-    padding: 4px 8px;
+    padding: var(--multiselect-pill-padding, 0.3em 0.5em);
   }
   .multiselect-pill.hilited {
     outline: 0;
     background-color: var(--multiselect-pill-selected, gray);
-    border: 1px solid var(--multiselect-pill-selected-border, transparent);
+    border: var(--multiselect-pill-selected-border, 1px solid transparent);
     color: var(--multiselect-pill-selected-text, white);
   }
   .multiselect-selected:focus-within {
