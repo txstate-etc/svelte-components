@@ -25,8 +25,7 @@
   export let usePortal: HTMLElement|true|undefined = undefined
   export let emptyText: string|undefined = undefined
   export let value: string|undefined = undefined
-
-  let hilited: number|undefined = undefined
+  export let hilited: number|undefined = undefined
   let menuelement: HTMLElement|undefined
   const itemelements: HTMLElement[] = []
   const menuid = randomid()

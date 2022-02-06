@@ -77,10 +77,14 @@
     reactToInput()
   }
 
+  let popuphilited
+  $: if (popuphilited != null) hilitedpill = undefined
   function reactToHilite (..._: any) {
     if (!inputelement) return
-    if (hilitedpill) inputelement.setAttribute('aria-activedescendant', id + hilitedpill)
-    else inputelement.removeAttribute('aria-activedescendant')
+    if (hilitedpill) {
+      popuphilited = undefined
+      inputelement.setAttribute('aria-activedescendant', id + hilitedpill)
+    } else inputelement.removeAttribute('aria-activedescendant')
   }
   $: reactToHilite(hilitedpill, id)
 </script>
@@ -109,7 +113,7 @@
   </ScreenReaderOnly>
   <slot></slot>
 </fieldset>
-<svelte:component this={PopupMenu} bind:menushown bind:value={popupvalue} align='bottomleft' {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement} on:change={addSelection}></svelte:component>
+<svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft' {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement} on:change={addSelection}></svelte:component>
 
 <style>
   fieldset {
