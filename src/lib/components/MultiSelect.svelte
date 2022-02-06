@@ -118,17 +118,30 @@
 <style>
   fieldset {
     border: 0;
+    padding: 0;
+    margin: 0;
   }
   fieldset * {
     box-sizing: border-box;
   }
-  ul {
+  .multiselect-selected {
     margin: 0;
     padding: 0;
     list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    padding: var(--multiselect-padding, 0.3em);
+    border: var(--multiselect-border, 1px solid #666666);
+    border-radius: var(--multiselect-radius, 0.3em);
   }
-  li {
-    cursor: pointer;
+  .multiselect-selected:focus-within {
+    outline-width: var(--multiselect-focus-width, 2px);
+    outline-style: solid;
+    outline-color: var(--multiselect-focus-color, Highlight);
+  }
+  li.input {
+    flex-grow: 1;
   }
   input {
     outline: 0;
@@ -137,22 +150,10 @@
     width: 100%;
     height: 100%;
   }
-  .multiselect-selected {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    padding: var(--multiselect-padding, 0.3em);
-    border: var(--multiselect-border, 1px solid #666666);
-    border-radius: var(--multiselect-radius, 0.3em);
-  }
-  .multiselect-selected li {
+  .multiselect-pill {
+    cursor: pointer;
     flex-grow: 0;
     margin-right: 0.3em;
-  }
-  .multiselect-selected li.input {
-    flex-grow: 1;
-  }
-  .multiselect-pill {
     line-height: 1;
     border-radius: var(--multiselect-pill-radius, 0.8em);
     border: var(--multiselect-pill-border, 1px solid gray);
@@ -165,10 +166,5 @@
     background-color: var(--multiselect-pill-selected, gray);
     border: var(--multiselect-pill-selected-border, 1px solid transparent);
     color: var(--multiselect-pill-selected-text, white);
-  }
-  .multiselect-selected:focus-within {
-    outline-width: var(--multiselect-focus-width, 2px);
-    outline-style: solid;
-    outline-color: var(--multiselect-focus-color, Highlight);
   }
 </style>
