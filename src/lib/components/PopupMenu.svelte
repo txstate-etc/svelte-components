@@ -6,6 +6,7 @@
   import type { GlueAlignOpts, GlueAlignStore } from '$lib/actions'
   import type { PopupMenuItem } from '$lib/types'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
+  import { modifierKey } from '$lib/util'
   const dispatch = createEventDispatcher()
 
   export let menushown = false
@@ -56,8 +57,8 @@
     } else {
       buttonelement.setAttribute('aria-controls', menuid)
       buttonelement.setAttribute('aria-expanded', 'true')
+      buttonelement.focus()
     }
-    buttonelement.focus()
   }
   $: reactToMenuShown(menushown)
 
@@ -70,6 +71,7 @@
   }
 
   function onkeydown (e: KeyboardEvent) {
+    if (modifierKey(e)) return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       if (menushown) {

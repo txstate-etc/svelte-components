@@ -51,7 +51,8 @@
       sublinks: [
         { label: 'preserve order', href: '/cards/preserve' }
       ]
-    }
+    },
+    { label: 'MultiSelect', href: '/multiselect', subtitle: 'A component for selecting multiple items from a list.' }
   ]
   $: current = links.find(l => l.href === '/' ? $page.url.pathname === '/' : $page.url.pathname.startsWith(l.href))
   $: title = current?.label
