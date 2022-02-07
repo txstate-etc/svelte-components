@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import { randomid } from 'txstate-utils'
+  import { randomid, sleep } from 'txstate-utils'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import DefaultPopupMenu from './PopupMenu.svelte'
   import { debouncedPromise, modifierKey, selectionIsLeft } from '$lib/util'
@@ -33,11 +33,12 @@
     const rawOptions = await debouncedGetOptions(saveval)
     if (inputvalue !== saveval) return // ignore any results that are out of date
     options = rawOptions.filter(o => !selectedSet.has(o.value))
+    await sleep(100)
+    // needed to sleep a little bit or this will turn the menu on only to have popupmenu's click handler toggle it back off
     if (typeof document !== 'undefined' && inputelement === document.activeElement) menushown = true
   }
   $: reactToInput(inputvalue, debouncedGetOptions, selectedSet)
   $: availablemessage = options.filter(o => o.value).length + ' autocomplete choices available'
-
   function addSelection (e: CustomEvent & { detail: PopupMenuItem }) {
     inputvalue = ''
     const opt = { ...e.detail, label: e.detail.label || e.detail.value }
@@ -75,7 +76,7 @@
     }
   }
   function inputfocus () {
-    reactToInput()
+    reactToInput(true)
   }
 
   let popuphilited
@@ -94,7 +95,7 @@
 </script>
 
 <fieldset>
-  <ul class="multiselect-selected" role="listbox" on:click={() => inputelement.focus()}>
+  <ul class="multiselect-selected" role="listbox">
     {#each selected as option, i}
       <li id={id + option.value} role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
         on:click|preventDefault|stopPropagation={() => removeSelection(option, i, 1)}

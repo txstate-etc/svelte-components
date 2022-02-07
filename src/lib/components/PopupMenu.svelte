@@ -57,7 +57,7 @@
     } else {
       buttonelement.setAttribute('aria-controls', menuid)
       buttonelement.setAttribute('aria-expanded', 'true')
-      buttonelement.focus()
+      if (buttonelement !== document.activeElement) buttonelement.focus()
     }
   }
   $: reactToMenuShown(menushown)
@@ -143,7 +143,7 @@
   async function onblur (e: FocusEvent) {
     // tabindex=-1 on our menu elements means e.relatedTarget will be set
     if (!(e.relatedTarget instanceof HTMLElement && menuelement?.contains(e.relatedTarget))) {
-      blurTimer = requestAnimationFrame(() => { menushown = false })
+      blurTimer = requestAnimationFrame(() => { if (buttonelement !== document.activeElement) menushown = false })
     }
   }
 
