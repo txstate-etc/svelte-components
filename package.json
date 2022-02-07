@@ -1,8 +1,9 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "1.0.4",
+  "version": "1.1.2",
   "description": "Svelte components that are generically useful.",
   "scripts": {
+    "prepublishOnly": "echo \"Do not publish from the root. Run npm run package and publish the package directory.\"; exit 1;",
     "dev": "svelte-kit dev",
     "build": "svelte-kit build",
     "package": "svelte-kit package",
@@ -31,5 +32,11 @@
     "tslib": "^2.3.1",
     "typescript": "^4.4.3"
   },
-  "type": "module"
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:txstate-etc/svelte-components.git"
+  },
+  "author": "Nick Wing",
+  "license": "MIT"
 }
