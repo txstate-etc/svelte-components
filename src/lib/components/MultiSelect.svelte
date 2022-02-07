@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import { randomid } from 'txstate-utils'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import DefaultPopupMenu from './PopupMenu.svelte'
@@ -87,6 +88,9 @@
     } else inputelement.removeAttribute('aria-activedescendant')
   }
   $: reactToHilite(hilitedpill, id)
+
+  const dispatch = createEventDispatcher()
+  $: dispatch('change', selected)
 </script>
 
 <fieldset>
