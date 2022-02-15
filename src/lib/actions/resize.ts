@@ -41,7 +41,7 @@ export function resize (el: HTMLElement, config?: ResizeConfig) {
     const current = { clientWidth: el.clientWidth, clientHeight: el.clientHeight, offsetWidth: el.offsetWidth, offsetHeight: el.offsetHeight }
     if (!equal(lastSize, current)) {
       lastSize = current
-      if (config?.store) config.store.set(current)
+      if (config?.store) config.store.update(v => ({ ...v, ...current }))
       el.dispatchEvent(new CustomEvent('resize', { detail: current }))
     }
   }
@@ -56,7 +56,7 @@ export function resize (el: HTMLElement, config?: ResizeConfig) {
     update (newConfig?: ResizeConfig) {
       if (newConfig?.debounce === true) newConfig.debounce = 100
       if (newConfig?.store !== config?.store) {
-        newConfig?.store?.set(lastSize)
+        newConfig?.store?.update(v => ({ ...v, ...lastSize }))
       }
       if (!!newConfig?.debounce !== !!config?.debounce) {
         observer.disconnect()

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { sleep } from 'txstate-utils'
 import { goto } from './common.js'
 
 test.describe('Image Layout', () => {
@@ -13,6 +14,7 @@ test.describe('Image Layout', () => {
   test('should place each card further from the top than the last', async ({ page }) => {
     const cards = page.locator('.cardlayout-card')
     await expect(cards).toHaveCount(9)
+    await sleep(50)
 
     let lastoffset = 0
     for (let i = 0; i < 9; i++) {
@@ -31,6 +33,8 @@ test.describe('Preserve Order Layout', () => {
   test('should preserve card order when instructed', async ({ page }) => {
     const cards = page.locator('.cardlayout-card')
     await expect(cards).toHaveCount(9)
+    await sleep(50)
+
     let lastleft = 0
     for (let i = 0; i < 9; i++) {
       const left = (await cards.nth(i).boundingBox()).x
