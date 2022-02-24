@@ -19,7 +19,8 @@
         { label: 'offset debounced', href: '/actions/offsetdebounce' },
         { label: 'resize', href: '/actions/resize' },
         { label: 'resize debounced', href: '/actions/resizedebounce' },
-        { label: 'sticky', href: '/actions/sticky' }
+        { label: 'sticky', href: '/actions/sticky' },
+        { label: 'element queries', href: '/actions/elementqueries' }
       ]
     },
     { label: 'Modal', href: '/modal', subtitle: 'A component for accessible modal dialogs.' },

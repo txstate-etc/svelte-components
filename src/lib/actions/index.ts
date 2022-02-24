@@ -1,4 +1,5 @@
 export * from './buttonify.js'
+export * from './elementqueries.js'
 export * from './glue.js'
 export * from './offset.js'
 export * from './portal.js'
