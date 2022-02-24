@@ -6,7 +6,6 @@ class ElementQueries {
   #hasInit = false
   #mutationobserver?: MutationObserver
   #boundRefresh = this.refresh.bind(this)
-  #lastw?: number
   #subscribers = 0
   #stores = new Map<HTMLElement, WritableSubject<{ width: number }>>()
 
@@ -26,9 +25,8 @@ class ElementQueries {
         for (let k = 1600; k >= w && k > 700; k -= 100) { attrstr += `${k}px `; finalw = k }
         for (let k = 700; k >= w; k -= 50) { attrstr += `${k}px `; finalw = k }
         if (attrstr !== attrs[j]) el.setAttribute('data-eq', attrstr)
-        if (this.#lastw !== finalw && this.#stores.has(el)) {
-          this.#stores.get(el).update(v => ({ ...v, width: finalw }))
-          this.#lastw = finalw
+        if (this.#stores.has(el)) {
+          this.#stores.get(el).update(v => v.width === finalw ? v : { ...v, width: finalw })
         }
       }
     }
@@ -116,10 +114,7 @@ class ElementQueries {
     this.#subscribers++
     if (store) this.#stores.set(el, store)
     else this.#stores.delete(el)
-    if (!this.#hasInit) {
-      this.#hasInit = true
-      this.#activateRaw()
-    }
+    this.#activateRaw()
     return () => {
       if (--this.#subscribers === 0) this.#deactivate()
     }
