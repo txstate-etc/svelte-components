@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onDestroy, tick, setContext, onMount } from 'svelte'
   import { writable } from 'svelte/store'
-  import { browser } from '$app/env'
   import { ElementSize, resize } from '$lib/actions'
   import { CARDLAYOUT } from '$lib/types'
   import type { Block } from '$lib/types'
@@ -9,6 +8,7 @@
   export let preserveorder = false
   export let gutter = 10
   export let className = ''
+  const ssr = navigator.userAgent.includes('jsdom')
   const blocks = []
   const gutterstore = writable(gutter)
   let defaultOrder = 0
@@ -168,7 +168,7 @@
   onMount(() => triggerrecalc(layoutelement.clientWidth))
 </script>
 
-<ul class="cardlayout {className}" class:ssr={!browser} style:height={browser ? `${fullheight + gutter}px` : undefined} bind:this={layoutelement} use:resize on:resize={onResize}>
+<ul class="cardlayout {className}" class:ssr style:height={ssr ? undefined : `${fullheight + gutter}px`} bind:this={layoutelement} use:resize on:resize={onResize}>
   <slot></slot>
 </ul>
 
