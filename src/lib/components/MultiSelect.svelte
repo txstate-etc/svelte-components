@@ -107,7 +107,7 @@
     {/each}
     <li class="input">
       <input type="text" id={id} name={name} {disabled} placeholder={placeholder}
-        bind:this={inputelement} bind:value={inputvalue}
+        bind:this={inputelement} bind:value={inputvalue} on:blur
         on:focus={inputfocus} on:keydown={inputkeydown}
         autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list"
         aria-describedby="{descriptionid}">
