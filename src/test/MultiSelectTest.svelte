@@ -24,3 +24,6 @@
 
 <label for={secondid}>Fruit with value and label</label><br>
 <MultiSelect bind:id={secondid} name="test2" selected={[{ value: 'orange', label: 'Orange' }, { value: 'banana', label: 'Banana' }]} placeholder='Choose some fruit' getOptions={getOptionsSecond} />
+
+<label for={secondid}>Disabled fruit with value and label</label><br>
+<MultiSelect bind:id={secondid} name="test2" disabled selected={[{ value: 'orange', label: 'Orange' }, { value: 'banana', label: 'Banana' }]} placeholder='Choose some fruit' getOptions={getOptionsSecond} />

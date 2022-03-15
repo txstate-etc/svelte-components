@@ -8,6 +8,7 @@
 
   export let id = randomid()
   export let name: string
+  export let disabled = false
   export let getOptions: (search: string) => Promise<PopupMenuItem[]>|PopupMenuItem[]
   export let menuContainerClass: string|undefined = undefined
   export let menuClass: string|undefined = undefined
@@ -95,17 +96,17 @@
 </script>
 
 <fieldset>
-  <ul class="multiselect-selected" role="listbox">
+  <ul class="multiselect-selected" class:disabled role="listbox">
     {#each selected as option, i}
       <li id={id + option.value} role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
-        on:click|preventDefault|stopPropagation={() => removeSelection(option, i, 1)}
+        on:click|preventDefault|stopPropagation={() => !disabled && removeSelection(option, i, 1)} on:mousedown={e => disabled && e.preventDefault()}
         aria-selected="true">
         {option.label || option.value}
         <ScreenReaderOnly>, click to remove</ScreenReaderOnly>
       </li>
     {/each}
     <li class="input">
-      <input type="text" id={id} name={name} placeholder={placeholder}
+      <input type="text" id={id} name={name} {disabled} placeholder={placeholder}
         bind:this={inputelement} bind:value={inputvalue}
         on:focus={inputfocus} on:keydown={inputkeydown}
         autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list"
@@ -165,6 +166,12 @@
     background-color: var(--multiselect-pill-bg, transparent);
     color: var(--multiselect-pill-text, black);
     padding: var(--multiselect-pill-padding, 0.3em 0.5em);
+  }
+  .multiselect-selected.disabled {
+    opacity: 0.5;
+  }
+  .multiselect-selected.disabled .multiselect-pill {
+    cursor: default;
   }
   .multiselect-pill.hilited {
     outline: 0;
