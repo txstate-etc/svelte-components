@@ -20,7 +20,7 @@
   export let PopupMenu = DefaultPopupMenu
 
   let menushown: boolean
-  let options = []
+  let options: PopupMenuItem[] = []
   let hilitedpill: string|undefined
   let inputvalue = ''
   let popupvalue = undefined
