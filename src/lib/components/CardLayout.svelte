@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onDestroy, tick, setContext, onMount } from 'svelte'
   import { writable } from 'svelte/store'
-  import { ElementSize, resize } from '$lib/actions'
+  import { type ElementSize, resize } from '$lib/actions'
   import { CARDLAYOUT } from '$lib/types'
   import type { Block } from '$lib/types'
   export let maxwidth = 500
   export let preserveorder = false
   export let gutter = 10
   export let className = ''
-  const ssr = navigator.userAgent.includes('jsdom')
+  const ssr = typeof navigator === 'undefined' || navigator.userAgent.includes('jsdom')
   const blocks = []
   const gutterstore = writable(gutter)
   let defaultOrder = 0

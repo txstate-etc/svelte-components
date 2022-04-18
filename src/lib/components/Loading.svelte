@@ -1,12 +1,13 @@
 <script lang="ts">
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import { resize, ResizeStore } from '$lib/actions'
-  export let loading: boolean
+  export let loading: boolean|undefined
+  export let height: string|undefined = undefined
   const store = new ResizeStore()
 </script>
 
 {#if loading}
-  <div class="container">
+  <div class="container" style:height={height} style:position={height ? 'relative' : 'absolute'}>
     <div use:resize={{ store }} class="loader" style:border-width="{$store.offsetWidth * 0.1}px"><ScreenReaderOnly>Loading</ScreenReaderOnly></div>
   </div>
 {:else}
@@ -26,6 +27,7 @@
     justify-content: center;
   }
   .loader {
+    box-sizing: content-box;
     width: var(--loading-size, 10%);
     padding-top: var(--loading-size, 10%);
     border-color: var(--loading-bg-color, #FFFFFF);
