@@ -1,4 +1,4 @@
 <script lang="ts">
-  import Cards from '../../test/Cards.svelte'
+  import Cards from '../../../test/Cards.svelte'
 </script>
 <Cards preserveorder></Cards>

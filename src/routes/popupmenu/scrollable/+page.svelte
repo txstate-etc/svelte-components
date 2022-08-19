@@ -1,5 +1,5 @@
 <script lang="ts">
-  import PopupMenuComplex from '../../test/PopupMenuComplex.svelte'
+  import PopupMenuComplex from '../../../test/PopupMenuComplex.svelte'
   const items = [
     { value: '0', label: 'Sunday', disabled: true },
     { value: '1', label: 'Monday' },

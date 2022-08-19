@@ -1,6 +1,6 @@
 <script lang="ts">
   import { writable } from 'svelte/store'
-  import { eq } from '../../lib'
+  import { eq } from '../../../lib'
   let showall = true
   let showsmallest = true
   const largestore = writable({ width: 1600 })

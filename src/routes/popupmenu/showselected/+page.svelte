@@ -1,4 +1,4 @@
 <script lang="ts">
-  import PopupMenuSimple from '../../test/PopupMenuSimple.svelte'
+  import PopupMenuSimple from '../../../test/PopupMenuSimple.svelte'
 </script>
 <PopupMenuSimple showSelected></PopupMenuSimple>
