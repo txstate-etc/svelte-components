@@ -225,7 +225,7 @@
 <style>
   div {
     position: absolute !important;
-    z-index: 2147483647;
+    z-index: var(--popup-z, calc(var(--modal-z, 3000) + 1));
   }
   ul {
     list-style: none;

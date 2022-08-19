@@ -39,7 +39,7 @@
     width: 100vw;
     height: 100vh;
     background-color: var(--modal-bg, rgba(0, 0, 0, 0.7));
-    z-index: 2147483000;
+    z-index: var(--modal-z, 3000);
     display: flex;
     justify-content: center;
     align-items: center
