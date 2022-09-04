@@ -1,7 +1,7 @@
 import type { SettableSubject } from '@txstate-mws/svelte-store'
 import { sharedOffsetParent, targetOffset, watchForPositionChangeInContainer } from '../util/index.js'
 import type { ElementOffsets } from '../util/index.js'
-export type GlueAlignOpts = 'auto'|'bottomleft'|'bottomright'|'topleft'|'topright'
+export type GlueAlignOpts = 'auto' | 'bottomleft' | 'bottomright' | 'topleft' | 'topright'
 
 export interface GlueArgs<T extends GlueAlignStore = GlueAlignStore> {
   target: HTMLElement
@@ -11,8 +11,8 @@ export interface GlueArgs<T extends GlueAlignStore = GlueAlignStore> {
 }
 
 export interface GlueAlignStore {
-  valign: 'bottom'|'top'
-  halign: 'left'|'right'
+  valign: 'bottom' | 'top'
+  halign: 'left' | 'right'
 }
 
 let setBodyRelative = false

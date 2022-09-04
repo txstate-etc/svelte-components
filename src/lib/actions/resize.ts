@@ -11,7 +11,7 @@ export interface ElementSize {
 }
 
 interface ResizeConfig {
-  debounce?: boolean|number
+  debounce?: boolean | number
   store?: SettableSubject<ElementSize>
 }
 

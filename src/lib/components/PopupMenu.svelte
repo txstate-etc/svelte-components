@@ -26,9 +26,9 @@
   export let emptyText: string|undefined = undefined
   export let value: string|undefined = undefined
   export let hilited: number|undefined = undefined
+  export let menuid = randomid()
   let menuelement: HTMLElement|undefined
   const itemelements: HTMLElement[] = []
-  const menuid = randomid()
   let firstactive = 0
   let lastactive = items.length - 1
 
@@ -203,6 +203,7 @@
             on:click={onclick(item)}
             role="option"
             tabindex=-1
+            aria-selected={value === item.value}
             aria-disabled={item.disabled}
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
         {/if}

@@ -1,5 +1,5 @@
-export function portal (el: HTMLElement, target: HTMLElement|null = document.body) {
-  function update (target: HTMLElement|null = document.body) {
+export function portal (el: HTMLElement, target: HTMLElement | null = document.body) {
+  function update (target: HTMLElement | null = document.body) {
     target?.appendChild(el)
   }
   function destroy () {

@@ -4,7 +4,7 @@ import { debounced, watchForPositionChange } from '../util/index.js'
 import type { ElementOffsets } from '../util/index.js'
 
 interface OffsetConfig<T extends ElementOffsets = ElementOffsets> {
-  debounce?: boolean|number
+  debounce?: boolean | number
   store?: WritableSubject<T>
 }
 

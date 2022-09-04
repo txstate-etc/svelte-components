@@ -35,7 +35,7 @@ export function watchForMutations (cb: () => void) {
   }
 }
 
-export function watchForPositionChange (el: (HTMLElement|undefined)[]|HTMLElement|undefined, cb: ((offset: Required<ElementOffsets>) => void)|((offsets: Required<ElementOffsets>[]) => void)) {
+export function watchForPositionChange (el: (HTMLElement | undefined)[] | HTMLElement | undefined, cb: ((offset: Required<ElementOffsets>) => void) | ((offsets: Required<ElementOffsets>[]) => void)) {
   let lastoffsets: ElementOffsets[] = []
   let els = toArray(el).filter(isNotNull)
   function watch () {
@@ -49,7 +49,7 @@ export function watchForPositionChange (el: (HTMLElement|undefined)[]|HTMLElemen
   const { destroy } = watchForMutations(watch)
 
   return {
-    update (newEl: (HTMLElement|undefined)[]|HTMLElement|undefined, newCb: ((offset: Required<ElementOffsets>) => void)|((offsets: Required<ElementOffsets>[]) => void)) {
+    update (newEl: (HTMLElement | undefined)[] | HTMLElement | undefined, newCb: ((offset: Required<ElementOffsets>) => void) | ((offsets: Required<ElementOffsets>[]) => void)) {
       const changed = newEl !== el || newCb !== cb
       if (changed) {
         el = newEl
@@ -62,7 +62,7 @@ export function watchForPositionChange (el: (HTMLElement|undefined)[]|HTMLElemen
   }
 }
 
-export function watchForPositionChangeInContainer (el: HTMLElement|undefined, container: HTMLElement|undefined, cb: (offset: Required<ElementOffsets>) => void) {
+export function watchForPositionChangeInContainer (el: HTMLElement | undefined, container: HTMLElement | undefined, cb: (offset: Required<ElementOffsets>) => void) {
   let lastoffset: ElementOffsets
 
   function watch () {
@@ -77,7 +77,7 @@ export function watchForPositionChangeInContainer (el: HTMLElement|undefined, co
   const { destroy } = watchForMutations(watch)
 
   return {
-    update (newEl: HTMLElement|undefined, newContainer: HTMLElement|undefined, newCb: (offset: Required<ElementOffsets>) => void) {
+    update (newEl: HTMLElement | undefined, newContainer: HTMLElement | undefined, newCb: (offset: Required<ElementOffsets>) => void) {
       const changed = newEl !== el || newContainer !== container || newCb !== cb
       if (changed) {
         el = newEl
