@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onDestroy, tick, setContext, onMount } from 'svelte'
   import { writable } from 'svelte/store'
-  import { type ElementSize, resize } from '$lib/actions'
+  import { type ElementSize, resize, type HTMLActionEntry, passActions } from '$lib/actions'
   import { CARDLAYOUT } from '$lib/types'
   import type { Block } from '$lib/types'
   export let maxwidth = 500
   export let preserveorder = false
   export let gutter = 10
   export let className = ''
+  export let use: HTMLActionEntry[] = []
   const ssr = typeof navigator === 'undefined' || navigator.userAgent.includes('jsdom')
   const blocks = []
   const gutterstore = writable(gutter)
@@ -168,7 +169,7 @@
   onMount(() => triggerrecalc(layoutelement.clientWidth))
 </script>
 
-<ul class="cardlayout {className}" class:ssr style:height={ssr ? undefined : `${fullheight + gutter}px`} bind:this={layoutelement} use:resize on:resize={onResize}>
+<ul class="cardlayout {className}" class:ssr style:height={ssr ? undefined : `${fullheight + gutter}px`} bind:this={layoutelement} use:resize on:resize={onResize} use:passActions={use}>
   <slot></slot>
 </ul>
 

@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test'
-import { goto } from './common.js'
 
 test.beforeEach(async ({ page }) => {
-  await goto(page, '/modal')
+  await page.goto('/modal')
 })
 
 test('modal is active on first render, escape dismisses, hitting enter on the button brings it back, escaping puts focus on the button', async ({ page }) => {

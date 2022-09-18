@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test'
-import { goto } from './common.js'
 
 test.beforeEach(async ({ page }) => {
-  await goto(page, '/multiselect')
+  await page.goto('/multiselect')
 })
 
 test('menus open on focus', async ({ page }) => {

@@ -209,10 +209,10 @@
         {/if}
       {/each}
       {#if items.length === 0}
-        <li role="option" class={`${menuItemClass} disabled`} aria-live="assertive">
+        <li role="option" class={`${menuItemClass} disabled`} aria-live="assertive" aria-selected={false}>
           <slot name="noresults">
             {#if !emptyText}
-              <span aria-hidden="true">{'¯\\_(ツ)_/¯'}</span><ScreenReaderOnly>{emptyText || 'empty popup menu'}</ScreenReaderOnly>
+              <span aria-hidden="true">{'¯\\_(ツ)_/¯'}</span><ScreenReaderOnly>{emptyText || 'no results found'}</ScreenReaderOnly>
             {:else}
               {emptyText}
             {/if}
