@@ -23,7 +23,14 @@
         { label: 'element queries', href: '/actions/elementqueries' }
       ]
     },
-    { label: 'Modal', href: '/modal', subtitle: 'A component for accessible modal dialogs.' },
+    {
+      label: 'Modal',
+      href: '/modal',
+      subtitle: 'A component for accessible modal dialogs.',
+      sublinks: [
+        { label: 'double modal', href: '/modal/double' }
+      ]
+    },
     {
       label: 'PopupMenu',
       href: '/popupmenu',

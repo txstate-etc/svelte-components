@@ -1,5 +1,6 @@
 <script context="module" lang="ts">
   const FocusLockStack: { pause: () => void, unpause: () => void }[] = []
+  const waitAtick = typeof requestAnimationFrame !== 'undefined' ? resolve => requestAnimationFrame(resolve) : resolve => resolve(0)
 </script>
 
 <script lang="ts">
@@ -19,15 +20,14 @@
   const dispatch = createEventDispatcher()
   let lockelement: HTMLElement
   let abovelockelement: HTMLElement
-  let active = true
-  let listenforescape = false
+  let state: 'init' | 'active' | 'paused' | 'destroyed' = 'init'
   if (initialfocus) hidefocus = false
   onMount(async () => {
     const prevFocusLock = FocusLockStack.slice(-1)[0]
     if (prevFocusLock) prevFocusLock.pause()
     FocusLockStack.push({
-      pause: () => { active = false },
-      unpause: () => { active = true }
+      pause: () => { state = 'paused' },
+      unpause: () => { if (state === 'paused') state = 'active' }
     })
     if (typeof returnfocusto === 'undefined') {
       returnfocusto = document.querySelector(':focus') as HTMLElement
@@ -40,12 +40,19 @@
     } else {
       setInitialFocus()
     }
-    setTimeout(() => { listenforescape = true }, 0)
+    setTimeout(() => { state = 'active' }, 0)
   })
   onDestroy(async () => {
-    const wasactive = active
-    active = false
-    await tick()
+    const wasactive = state !== 'paused'
+    state = 'destroyed'
+
+    // we need to allow the screen to redraw so that we can
+    // change focus back to where it was, and we need
+    // to allow the click event that destroyed us to finish bubbling
+    // before we unpause the next focuslock in the stack or else it
+    // will think it was an "outside" click and kill itself
+    await new Promise(waitAtick)
+
     if (returnfocusto && wasactive) {
       returnfocusto.focus()
     }
@@ -66,19 +73,19 @@
     }
   }
   const keydown = (e: KeyboardEvent) => {
-    if (active && e.key === 'Escape' && escapable) {
+    if (state === 'active' && e.key === 'Escape' && escapable) {
       e.preventDefault()
       dispatch('escape')
     }
   }
   const focusin = (e: FocusEvent) => {
-    if (active && e.target instanceof HTMLElement && !lockelement?.contains(e.target)) {
+    if (state === 'active' && e.target instanceof HTMLElement && !lockelement?.contains(e.target)) {
       if (e.target === abovelockelement) setLastFocus()
       else setInitialFocus()
     }
   }
   const windowclick = (_: MouseEvent) => {
-    if (listenforescape && active) {
+    if (state === 'active') {
       returnfocusto = undefined
       dispatch('escape')
     }
