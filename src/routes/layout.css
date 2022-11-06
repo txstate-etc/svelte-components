@@ -184,9 +184,10 @@ small screens.
   background: rgba(0,0,0,0.7);
   font-size: 10px; /* change this value to increase/decrease button size */
   z-index: 10;
-  width: 3em;
+  width: 5em;
   height: 2em;
   padding: 2.1em 1.6em;
+  cursor: pointer;
 }
 
   .menu-link:hover,
@@ -206,21 +207,21 @@ small screens.
   .menu-link span:before,
   .menu-link span:after {
       background-color: #fff;
-      pointer-events: none;
       width: 2em;
       height: 0.2em;
   }
 
-      .menu-link span:before,
-      .menu-link span:after {
-          position: absolute;
-          margin-top: -0.6em;
-          content: " ";
-      }
+  .menu-link span:before,
+  .menu-link span:after {
+      position: absolute;
+      left: 0;
+      margin-top: -0.6em;
+      content: " ";
+  }
 
-      .menu-link span:after {
-          margin-top: 0.6em;
-      }
+  .menu-link span:after {
+      margin-top: 0.6em;
+  }
 
 
 /* -- Responsive Styles (Media Queries) ------------------------------------- */

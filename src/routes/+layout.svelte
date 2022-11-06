@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores'
+  import './layout.css'
   interface Link {
     label: string
     href: string
@@ -88,10 +89,10 @@
 
 <div id="layout" class:active>
   <!-- Menu toggle -->
-  <a role="button" id="menuLink" class="menu-link" on:click={onClick}>
+  <button id="menuLink" class="menu-link" on:click={onClick}>
     <!-- Hamburger icon -->
     <span></span>
-  </a>
+  </button>
 
   <div id="menu">
     <div class="pure-menu">
@@ -125,9 +126,3 @@
     </div>
   </div>
 </div>
-
-<style>
-  #menuLink {
-    cursor: pointer;
-  }
-</style>
