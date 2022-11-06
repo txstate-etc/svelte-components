@@ -93,11 +93,14 @@
 </script>
 <svelte:window on:click={windowclick} />
 <div class={className} role="alertdialog" aria-modal="true" on:click|stopPropagation on:keydown|stopPropagation={keydown} on:focusin={focusin}>
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div bind:this={abovelockelement} tabindex="0"></div>
   <div bind:this={lockelement} on:keydown={keydown}>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     {#if hidefocus}<div class="hiddenfocus" use:buttonify on:blur={() => { hidefocus = false }} on:click={() => escapable && dispatch('escape')}><ScreenReaderOnly>{hidefocuslabel}{#if escapable}, click to escape or use escape key at any time{/if}</ScreenReaderOnly></div>{/if}
     <slot></slot>
   </div>
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div tabindex="0"></div>
 </div>
 
