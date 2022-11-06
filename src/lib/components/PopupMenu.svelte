@@ -193,6 +193,7 @@
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
       {#each items as item, i (item.value)}
         {#if showSelected || item.value !== value}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
           <li
             id={`${menuid}-${i}`}
             bind:this={itemelements[i]}
