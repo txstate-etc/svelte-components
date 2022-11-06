@@ -98,6 +98,7 @@
 <fieldset>
   <ul class="multiselect-selected" class:disabled role="listbox">
     {#each selected as option, i}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <li id={id + option.value} role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
         on:click|preventDefault|stopPropagation={() => !disabled && removeSelection(option, i, 1)} on:mousedown={e => disabled && e.preventDefault()}
         aria-selected="true">
