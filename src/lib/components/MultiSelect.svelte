@@ -1,9 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import { randomid, sleep } from 'txstate-utils'
+  import { randomid, Cache } from 'txstate-utils'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import DefaultPopupMenu from './PopupMenu.svelte'
-  import { debouncedPromise, modifierKey, selectionIsLeft } from '$lib/util'
+  import { modifierKey, selectionIsLeft } from '$lib/util'
   import type { PopupMenuItem } from '$lib/types'
 
   export let id = randomid()
@@ -20,37 +20,48 @@
   export let PopupMenu = DefaultPopupMenu
 
   let menushown: boolean
+  let loading = false
   let options: PopupMenuItem[] = []
   let hilitedpill: string|undefined
   let inputvalue = ''
   let popupvalue = undefined
   let inputelement: HTMLInputElement
   const descriptionid = randomid()
+  const dispatch = createEventDispatcher()
 
-  $: debouncedGetOptions = debouncedPromise(getOptions, 100, [])
+  const optionsCache = new Cache(async (ipt: string) => {
+    return await getOptions(ipt)
+  }, { freshseconds: 5 })
+
   $: selectedSet = new Set(selected.map(s => s.value))
+  let optionsTimer: number
   async function reactToInput (..._: any) {
-    const saveval = inputvalue
-    const rawOptions = await debouncedGetOptions(saveval)
-    if (inputvalue !== saveval) return // ignore any results that are out of date
-    options = rawOptions.filter(o => !selectedSet.has(o.value))
-    await sleep(100)
-    // needed to sleep a little bit or this will turn the menu on only to have popupmenu's click handler toggle it back off
-    if (typeof document !== 'undefined' && inputelement === document.activeElement) menushown = true
+    loading = true
+    clearTimeout(optionsTimer)
+    setTimeout(async () => {
+      const saveval = inputvalue
+      const rawOptions = await optionsCache.get(saveval)
+      if (inputvalue !== saveval) return // ignore any results that are out of date
+      options = rawOptions.filter(o => !selectedSet.has(o.value))
+      if (typeof document !== 'undefined' && inputelement === document.activeElement && (options.length || inputvalue?.length)) menushown = true
+      loading = false
+    }, 250)
   }
-  $: reactToInput(inputvalue, debouncedGetOptions, selectedSet)
+  $: reactToInput(inputvalue, getOptions, selectedSet)
   $: availablemessage = options.filter(o => o.value).length + ' autocomplete choices available'
   function addSelection (e: CustomEvent & { detail: PopupMenuItem }) {
     inputvalue = ''
     const opt = { ...e.detail, label: e.detail.label || e.detail.value }
     selected = [...selected, opt]
     popupvalue = undefined
+    dispatch('change', selected)
   }
   function removeSelection (opt: typeof selected[number], idx: number, nextfocus = 1) {
     if (hilitedpill === opt.value) {
       hilitedpill = selected[idx + nextfocus]?.value
     }
     selected = selected.filter(s => s.value !== opt.value)
+    dispatch('change', selected)
   }
 
   function inputkeydown (e) {
@@ -76,8 +87,8 @@
       }
     }
   }
-  function inputfocus () {
-    reactToInput(true)
+  async function inputfocus () {
+    reactToInput()
   }
 
   let popuphilited
@@ -90,9 +101,6 @@
     } else inputelement.removeAttribute('aria-activedescendant')
   }
   $: reactToHilite(hilitedpill, id)
-
-  const dispatch = createEventDispatcher()
-  $: dispatch('change', selected)
 </script>
 
 <fieldset>
@@ -120,7 +128,7 @@
   </ScreenReaderOnly>
   <slot></slot>
 </fieldset>
-<svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft' {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement} on:change={addSelection}></svelte:component>
+<svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft' {loading} {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement} on:change={addSelection}></svelte:component>
 
 <style>
   fieldset {

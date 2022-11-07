@@ -22,6 +22,7 @@
   export let showSelected = true
   export let width:string|undefined = undefined
   export let computedalign = new Store<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
+  export let loading = false
   export let usePortal: HTMLElement|true|undefined = undefined
   export let emptyText: string|undefined = undefined
   export let value: string|undefined = undefined
@@ -137,7 +138,7 @@
   function onbuttonclick (e: MouseEvent) {
     e.preventDefault()
     cancelAnimationFrame(blurTimer)
-    menushown = !menushown
+    if (!loading) menushown = !menushown
   }
 
   async function onblur (e: FocusEvent) {

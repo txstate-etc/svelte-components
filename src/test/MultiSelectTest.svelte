@@ -13,8 +13,8 @@
     { value: 'banana', label: 'Banana' }
   ]
   async function getOptionsSecond (val: string) {
-    if (!val) return secondItems
     await sleep(400)
+    if (!val) return secondItems
     return secondItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
 
