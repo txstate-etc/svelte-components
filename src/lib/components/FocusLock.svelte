@@ -84,8 +84,8 @@
       else setInitialFocus()
     }
   }
-  const windowclick = (_: MouseEvent) => {
-    if (state === 'active') {
+  const windowclick = (e: MouseEvent) => {
+    if (state === 'active' && e.target instanceof HTMLElement && e.target.isConnected) {
       returnfocusto = undefined
       dispatch('escape')
     }
