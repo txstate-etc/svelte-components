@@ -26,7 +26,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div use:portal={usePortal} class="modal-backdrop" class:opaque on:click|stopPropagation|preventDefault={() => escapable && endmodal()}>
+<div use:portal={usePortal} class="modal-backdrop" class:opaque on:mousedown|stopPropagation|preventDefault={() => escapable && endmodal()}>
   <FocusLock class="modal-container {containerClass}" {escapable} on:escape {hidefocus} {hidefocuslabel} {returnfocusto} {initialfocus}>
     <slot></slot>
   </FocusLock>

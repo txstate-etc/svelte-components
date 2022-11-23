@@ -91,8 +91,8 @@
     }
   }
 </script>
-<svelte:window on:click={windowclick} />
-<div class={className} role="alertdialog" aria-modal="true" on:click|stopPropagation on:keydown|stopPropagation={keydown} on:focusin={focusin}>
+<svelte:window on:mousedown={windowclick} />
+<div class={className} role="alertdialog" aria-modal="true" on:click|stopPropagation on:mousedown|stopPropagation on:keydown|stopPropagation={keydown} on:focusin={focusin}>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div bind:this={abovelockelement} tabindex="0"></div>
   <div bind:this={lockelement} on:keydown={keydown}>
