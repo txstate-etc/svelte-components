@@ -22,6 +22,7 @@
   export let showSelected = true
   export let width:string|undefined = undefined
   export let computedalign = new Store<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
+  export let adjustparentheight = false
   export let loading = false
   export let usePortal: HTMLElement|true|undefined = undefined
   export let emptyText: string|undefined = undefined
@@ -190,7 +191,7 @@
 </script>
 
 {#if menushown}
-  <div use:portal={usePortal === true ? document.body : (usePortal || null)} use:glue={{ target: buttonelement, align, cover, store: computedalign }} class={menuContainerClass}>
+  <div use:portal={usePortal === true ? undefined : (usePortal || null)} use:glue={{ target: buttonelement, align, cover, adjustparentheight, store: computedalign }} class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
       {#each items as item, i (item.value)}
         {#if showSelected || item.value !== value}

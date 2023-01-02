@@ -17,6 +17,7 @@
   export let selected: { value: string, label: string }[] = []
   export let placeholder = ''
   export let emptyText: string|undefined = undefined
+  export let usePortal: HTMLElement|true|undefined = undefined
   export let PopupMenu = DefaultPopupMenu
 
   let menushown: boolean
@@ -111,7 +112,7 @@
         on:click|preventDefault|stopPropagation={() => !disabled && removeSelection(option, i, 1)} on:mousedown={e => disabled && e.preventDefault()}
         aria-selected="true">
         {option.label || option.value}
-        <ScreenReaderOnly>, click to remove</ScreenReaderOnly>
+        <ScreenReaderOnly>, click to deselect</ScreenReaderOnly>
       </li>
     {/each}
     <li class="input">
@@ -128,7 +129,7 @@
   </ScreenReaderOnly>
   <slot></slot>
 </fieldset>
-<svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft' {loading} {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement} on:change={addSelection}></svelte:component>
+<svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft' {usePortal} {loading} {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement} on:change={addSelection}></svelte:component>
 
 <style>
   fieldset {

@@ -23,7 +23,7 @@
 <div class="container">
   <button id="test-button" class="ui gold button" bind:this={button}>Popup Menu</button>
   <div>selected: {#if selected}{selected.value}, {selected.label}{:else}none{/if}</div>
-  <PopupMenu bind:value buttonelement={button} {items} {showSelected}></PopupMenu>
+  <PopupMenu bind:value buttonelement={button} {items} {showSelected} adjustparentheight align="bottomleft"></PopupMenu>
 </div>
 
 <style>
@@ -32,5 +32,7 @@
   }
   .container {
     position: relative;
+    overflow: hidden;
+    height: 150px;
   }
 </style>

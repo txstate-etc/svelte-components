@@ -7,6 +7,7 @@ export interface GlueArgs<T extends GlueAlignStore = GlueAlignStore> {
   target: HTMLElement
   align?: GlueAlignOpts
   cover?: boolean
+  adjustparentheight?: boolean
   store?: SettableSubject<T>
 }
 
@@ -16,13 +17,15 @@ export interface GlueAlignStore {
 }
 
 let setBodyRelative = false
-export function glue (el: HTMLElement, { target, align = 'auto', cover = false, store }: GlueArgs) {
+export function glue (el: HTMLElement, { target, align = 'auto', cover = false, adjustparentheight = false, store }: GlueArgs) {
   if (!setBodyRelative) {
     setBodyRelative = true
     document.body.style.position = 'relative'
   }
   let halign: GlueAlignStore['halign']
   let valign: GlueAlignStore['valign']
+  const parent: HTMLElement = el.offsetParent as HTMLElement
+  const formerMinHeight: string | undefined = parent.style.minHeight
   let sharedOffset = sharedOffsetParent(el, target)
 
   function reposition (offset: Required<ElementOffsets>) {
@@ -35,6 +38,16 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       const topbottom = window.innerHeight - rect.bottom > rect.top ? 'bottom' : 'top'
       autoalign = topbottom + leftright as 'auto'
     }
+    function adjustParentHeight () {
+      if (!adjustparentheight) return
+      if (parent.style.overflowY === 'auto') return
+      const minHeight = el.offsetTop + el.offsetHeight
+      if (minHeight > parent.clientHeight) {
+        requestAnimationFrame(() => {
+          parent.style.minHeight = String(minHeight) + 'px'
+        })
+      }
+    }
     const targetHeight = target.offsetHeight
     if (autoalign === 'bottomleft') {
       requestAnimationFrame(() => {
@@ -42,6 +55,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         el.style.left = `${offset.left - parentoffset.left}px`
         el.style.bottom = ''
         el.style.right = ''
+        adjustParentHeight()
       })
       valign = 'bottom'
       halign = 'left'
@@ -51,6 +65,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         el.style.left = ''
         el.style.bottom = ''
         el.style.right = `${offset.right - parentoffset.right}px`
+        adjustParentHeight()
       })
       valign = 'bottom'
       halign = 'right'
@@ -60,6 +75,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         el.style.left = `${offset.left - parentoffset.left}px`
         el.style.bottom = `${offset.bottom + (cover ? 0 : targetHeight) - parentoffset.bottom}px`
         el.style.right = ''
+        adjustParentHeight()
       })
       valign = 'top'
       halign = 'left'
@@ -69,13 +85,14 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         el.style.left = ''
         el.style.bottom = `${offset.bottom + (cover ? 0 : targetHeight) - parentoffset.bottom}px`
         el.style.right = `${offset.right - parentoffset.right}px`
+        adjustParentHeight()
       })
       valign = 'top'
       halign = 'right'
     }
     store?.update(v => ({ ...v, valign, halign }))
   }
-  const { destroy, update } = watchForPositionChangeInContainer(target, sharedOffset, reposition)
+  const { destroy: watchDestroy, update } = watchForPositionChangeInContainer(target, sharedOffset, reposition)
 
   return {
     update ({ target: utarget, align: ualign = 'auto', cover: ucover = false, store: ustore }: GlueArgs) {
@@ -91,6 +108,12 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         update(target, sharedOffset, reposition)
       }
     },
-    destroy
+    destroy () {
+      watchDestroy()
+      if (adjustparentheight) {
+        if (formerMinHeight) parent.style.minHeight = formerMinHeight
+        parent.style.removeProperty('min-height')
+      }
+    }
   }
 }
