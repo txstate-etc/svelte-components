@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  const FocusLockStack: { pause: () => void, unpause: () => void }[] = []
+  export const FocusLockStack: { pause: () => void, unpause: () => void }[] = []
   const waitAtick = typeof requestAnimationFrame !== 'undefined' ? resolve => requestAnimationFrame(resolve) : resolve => resolve(0)
 </script>
 
@@ -9,6 +9,13 @@
   export let hidefocus = true
   export let hidefocuslabel = 'focus is above modal dialog, start tabbing'
   export let escapable = true
+  /**
+   * If you expect any popup menus to be added to the body, we need to know that they
+   * are considered to be part of the focus lock, or else the modal will be dismissed
+   * when the user clicks inside
+   * use commas to include multiple selectors
+   */
+  export let includeselector: string | undefined = undefined
   let className = ''
   export { className as class }
 
@@ -85,7 +92,7 @@
     }
   }
   const windowclick = (e: MouseEvent) => {
-    if (state === 'active' && e.target instanceof HTMLElement && e.target.isConnected) {
+    if (state === 'active' && e.target instanceof HTMLElement && e.target.isConnected && (!includeselector || !e.target.closest(includeselector))) {
       returnfocusto = undefined
       dispatch('escape')
     }
