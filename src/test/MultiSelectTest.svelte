@@ -39,3 +39,9 @@
 
 <label for={secondid}>Disabled cars with value and label</label><br>
 <MultiSelect bind:id={secondid} name="test3" disabled selected={[{ value: 'honda', label: 'Honda' }, { value: 'kia', label: 'Kia' }]} placeholder='Choose some cars' getOptions={getOptionsThird} />
+
+<label for={firstid}>Select a single fruit</label><br>
+<MultiSelect bind:id={firstid} name="test1" maxSelections={1} selected={[{ value: 'apple', label: 'apple' }]} getOptions={getOptionsFirst} />
+
+<label for={firstid}>Select up to two fruits</label><br>
+<MultiSelect bind:id={firstid} name="test1" maxSelections={2} selected={[{ value: 'apple', label: 'apple' }]} getOptions={getOptionsFirst} />

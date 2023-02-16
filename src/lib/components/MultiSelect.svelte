@@ -14,6 +14,7 @@
   export let menuClass: string|undefined = undefined
   export let menuItemClass: string|undefined = undefined
   export let menuItemHilitedClass: string|undefined = undefined
+  export let maxSelections = 0
   export let selected: { value: string, label: string }[] = []
   export let placeholder = ''
   export let emptyText: string|undefined = undefined
@@ -35,6 +36,7 @@
   }, { freshseconds: 5 })
 
   $: selectedSet = new Set(selected.map(s => s.value))
+  $: if (maxSelections > 1 && selected.length >= maxSelections && menushown) menushown = false
   let optionsTimer: number
   async function reactToInput (..._: any) {
     loading = true
@@ -53,7 +55,7 @@
   function addSelection (e: CustomEvent & { detail: PopupMenuItem }) {
     inputvalue = ''
     const opt = { ...e.detail, label: e.detail.label || e.detail.value }
-    selected = [...selected, opt]
+    selected = maxSelections === 1 ? [opt] : [...selected, opt]
     popupvalue = undefined
     dispatch('change', selected)
   }
@@ -86,6 +88,8 @@
         removeSelection(selected[selected.length - 1], selected.length - 1, -1)
         e.preventDefault()
       }
+    } else if (e.key !== 'Tab' && maxSelections > 1 && selected.length >= maxSelections) {
+      e.preventDefault()
     }
   }
   async function inputfocus () {
@@ -124,7 +128,7 @@
     </li>
   </ul>
   <ScreenReaderOnly id={descriptionid} arialive="assertive">
-    <span>{selected.length ? selected.length + ' selected' : 'select multiple, none selected'}, up down to choose, left right to hilite existing choices</span>
+    <span>{selected.length ? selected.length + ' selected' : 'none selected'}, select {maxSelections ? 'up to ' + maxSelections : 'multiple'}, up down to choose, left right to hilite existing choices</span>
     {#if menushown}<span>{availablemessage}, touch users explore to find autocomplete menu</span>{/if}
   </ScreenReaderOnly>
   <slot></slot>
