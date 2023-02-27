@@ -61,7 +61,8 @@
         { label: 'preserve order', href: '/cards/preserve' }
       ]
     },
-    { label: 'MultiSelect', href: '/multiselect', subtitle: 'A component for selecting multiple items from a list.' }
+    { label: 'MultiSelect', href: '/multiselect', subtitle: 'A component for selecting multiple items from a list.' },
+    { label: 'Lottie', href: '/lottie', subtitle: 'A component for loading lottie animations.' }
   ]
   $: current = links.find(l => l.href === '/' ? $page.url.pathname === '/' : $page.url.pathname.startsWith(l.href))
   $: title = current?.label
