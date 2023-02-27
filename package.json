@@ -3,7 +3,7 @@
   "version": "1.4.0",
   "description": "Svelte components that are generically useful.",
   "scripts": {
-    "prepublishOnly": "echo \"Do not publish from the root. Run npm run package and publish the package directory.\"; exit 1;",
+    "prepublishOnly": "svelte-package",
     "dev": "vite dev",
     "build": "vite build",
     "package": "svelte-package",
@@ -21,20 +21,29 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.18.1",
-    "@sveltejs/adapter-node": "^1.2.0",
+    "@sveltejs/adapter-auto": "^2.0.0",
     "@sveltejs/kit": "^1.0.1",
     "@sveltejs/package": "^2.0.2",
     "@types/tabbable": "^3.1.2",
     "eslint-config-standard-with-typescript": "^34.0.0",
     "eslint-plugin-svelte3": "^4.0.0",
-    "svelte": "^3.44.0",
     "svelte-check": "^3.0.1",
     "svelte-preprocess": "^5.0.0",
     "svelte2tsx": "^0.6.0",
     "tslib": "^2.3.1",
     "typescript": "^4.4.3"
   },
+  "peerDependencies": {
+    "svelte": "^3.44.0"
+  },
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
   "repository": {
     "type": "git",
     "url": "git@github.com:txstate-etc/svelte-components.git"
