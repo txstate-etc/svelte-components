@@ -1,6 +1,6 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "1.4.1",
+  "version": "1.4.4",
   "description": "Svelte components that are generically useful.",
   "scripts": {
     "prepublishOnly": "svelte-package",
@@ -37,10 +37,12 @@
     "svelte": "^3.44.0"
   },
   "type": "module",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "svelte": "./dist/index.js"
+      "svelte": "./dist/index.js",
+      "import": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
