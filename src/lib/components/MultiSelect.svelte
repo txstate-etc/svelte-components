@@ -19,6 +19,7 @@
   export let placeholder = ''
   export let emptyText: string|undefined = undefined
   export let usePortal: HTMLElement|true|undefined = undefined
+  export let descid: string | undefined = undefined
   export let PopupMenu = DefaultPopupMenu
 
   let menushown: boolean
@@ -28,7 +29,6 @@
   let inputvalue = ''
   let popupvalue = undefined
   let inputelement: HTMLInputElement
-  const descriptionid = randomid()
   const dispatch = createEventDispatcher()
 
   const optionsCache = new Cache(async (ipt: string) => {
@@ -124,10 +124,10 @@
         bind:this={inputelement} bind:value={inputvalue} on:blur
         on:focus={inputfocus} on:keydown={inputkeydown}
         autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list"
-        aria-describedby="{descriptionid}">
+        aria-describedby={descid}>
     </li>
   </ul>
-  <ScreenReaderOnly id={descriptionid} arialive="assertive">
+  <ScreenReaderOnly arialive="assertive">
     <span>{selected.length ? selected.length + ' selected' : 'none selected'}, select {maxSelections ? 'up to ' + maxSelections : 'multiple'}, up down to choose, left right to hilite existing choices</span>
     {#if menushown}<span>{availablemessage}, touch users explore to find autocomplete menu</span>{/if}
   </ScreenReaderOnly>
