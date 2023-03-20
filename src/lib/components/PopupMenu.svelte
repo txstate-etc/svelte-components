@@ -54,11 +54,13 @@
     await tick()
     if (!menushown) {
       buttonelement.removeAttribute('aria-controls')
+      buttonelement.removeAttribute('aria-owns')
       buttonelement.setAttribute('aria-expanded', 'false')
       if (hilited) buttonelement.removeAttribute('aria-activedescendant')
       hilited = undefined
     } else {
-      buttonelement.setAttribute('aria-controls', menuid)
+      if (buttonelement instanceof HTMLInputElement) buttonelement.setAttribute('aria-owns', menuid)
+      else buttonelement.setAttribute('aria-controls', menuid)
       buttonelement.setAttribute('aria-expanded', 'true')
       if (buttonelement !== document.activeElement) buttonelement.focus()
     }
