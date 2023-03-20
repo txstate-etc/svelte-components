@@ -10,7 +10,7 @@ export type SvelteHTMLActionType<P = any> = (
   params?: P
 ) => SvelteActionReturnType<P> | undefined
 
-export type HTMLActionEntry<P extends any = any> =
+export type HTMLActionEntry<P = any> =
   | SvelteHTMLActionType<P>
   | [SvelteHTMLActionType<P>, P]
 
@@ -19,7 +19,7 @@ export type SvelteSVGActionType<P = any> = (
   params?: P
 ) => SvelteActionReturnType<P> | undefined
 
-export type SVGActionEntry<P extends any = any> =
+export type SVGActionEntry<P = any> =
   | SvelteSVGActionType<P>
   | [SvelteSVGActionType<P>, P]
 

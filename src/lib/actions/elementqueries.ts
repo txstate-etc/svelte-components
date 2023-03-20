@@ -62,7 +62,7 @@ class ElementQueries {
     const m = document.location.hash.match(/^#([a-z][\w:.-]*)$/i)
     if (m) {
       const id = m[1]
-      requestAnimationFrame(() => document.getElementById(id) || document.querySelector(`[name="${id}"]`).scrollIntoView(true))
+      requestAnimationFrame(() => { document.getElementById(id) || document.querySelector(`[name="${id}"]`).scrollIntoView(true) })
     }
   }
 
@@ -74,7 +74,7 @@ class ElementQueries {
   #activate () {
     this.fullresync()
     window.addEventListener('resize', this.#boundRefresh)
-    this.#mutationobserver = new MutationObserver(() => this.fullresync())
+    this.#mutationobserver = new MutationObserver(() => { this.fullresync() })
     this.#mutationobserver.observe(document.body, {
       subtree: true,
       childList: true,

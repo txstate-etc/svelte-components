@@ -2,7 +2,7 @@ export function classes (...classNames: (string | undefined)[]) {
   return classNames.filter(Boolean).join(' ')
 }
 
-export function debounced (fn: Function, timeout: number) {
+export function debounced (fn: (..._: any[]) => any, timeout: number) {
   let timer: NodeJS.Timeout
   return (...args: any[]) => {
     clearTimeout(timer)

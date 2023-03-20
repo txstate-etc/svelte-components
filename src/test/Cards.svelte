@@ -37,6 +37,7 @@
 
 <CardLayout className={className} maxwidth={maxwidth} preserveorder={preserveorder}>
   {#each cards as card, i}
+    <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
     <Card><div class="card card{i + 1}" style:padding-top={card.ptop + '%'} tabindex=0><span>Card {i + 1}</span></div></Card>
   {/each}
 </CardLayout>
