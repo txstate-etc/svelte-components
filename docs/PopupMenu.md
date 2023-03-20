@@ -13,14 +13,17 @@ any element. It can also be controlled from the parent, by binding the `menushow
 * `showSelected?: boolean` (default `true`) - When an item is currently selected, should it appear in the menu (with a visual indicator), or simply be removed from the list (showSelected: `false`)?
 * `width?: string` (default `undefined`) - When defined, this width will be passed through to the menu's CSS width. Use a valid CSS dimension such as `33em` or `159px`. Generally this will be used when you need to match the menu width to something else, like the button. If the width is static like `100%` a simple CSS rule is likely more efficient.
 * `computedalign: readable<{ valign: 'top'|'bottom', halign: 'left'|'right' }>` (default store is provided) - Bind this prop to receive a store that is updated each time a menu placement decision is made. Example of when this is useful is when you are trying to round corners of your button and need to know whether the menu is above or below your button so you know which corners to round and which to leave square. Note that the values do not update when the menu is hidden, so you may need to rely on `menushown` as well.
+* `adjustparentheight?: boolean` (default `false`) - Set to `true` if you want the parent element's styling to increase its minHeight when necessary. Useful for parent elements not styled for variable size children and which you want override the the size of.
 * `usePortal?: HTMLElement|true` (default `false`) - If the menu would be clipped by an `overflow: hidden`, you can set this prop and it will be placed in the specified container, or the `document.body` if you simply say `true`. Placement will still be calculated correctly, unless there are scrolling containers between the button and the menu.
+* `loading?: boolean` (default `false`) - Useful for when your `items` need to be fetched but you want the associated element shown. Set to loading until they're ready to be displayed and the popup menu will not be shown until the `loading` bind is `true`.
+* `hilited?: number|undefined` (default `undefined`) - A bindable value for inspecting which item in `items` is currently highlighted as the item currently active in the list. This is not the same as `value` and the highlighted item may or may not be selected as for the `value` of the field.
+* `menuid?: string` (default `randomid()`) - The id of the `<ul>` element that is the displayed list of `items`.
 * `emptyText?: string` (default `¯\_(ツ)_/¯`) - When there are no items (e.g. it's a filtered search and there were no results), we still display one disabled item in the menu to let the user know what is going on. Use this prop to specify the message.
 * `menuContainerClass?: string` (default `''`) - CSS class to pass through so you can do extra styling work
 * `menuClass?: string` (default `''`) - CSS class to pass through so you can do extra styling work
 * `menuItemClass?: string` (default `''`) - CSS class to pass through so you can do extra styling work
 * `menuItemHilitedClass?: string` (default `''`) - CSS class to pass through so you can do extra styling work
 * `menuItemSelectedClass?: string` (default `''`) - CSS class to pass through so you can do extra styling work
-
 ## Events
 * `on:change` - Dispatched any time a new value is selected. Does not fire when you change the `value` property from the outside. Event detail will be the full PopupMenuItem object that was selected.
 

@@ -1,20 +1,29 @@
 # svelte-components
-A set of generically useful components for svelte.
+A set of generically useful components and related `use:` actions for svelte.
 
-## Components
+## `<Components>`
+- Card
+- CardLayout
 - [CollapsingTable](/docs/CollapsingTable.md)
 - [ConditionalWrapper](/docs/ConditionalWrapper.md)
 - [FocusLock](/docs/Modal.md#FocusLock)
+- Loading
+- Lottie
 - [Modal](/docs/Modal.md#Modal)
+- MultiSelect
 - [PopupMenu](/docs/PopupMenu.md)
 - [ScreenReaderOnly](/docs/ScreenReaderOnly.md)
 
-## Actions
-- [use:buttonify](/docs/actions.md#use:buttonify)
-- [use:glue](/docs/actions.md#use:glue)
-- [use:offset](/docs/actions.md#use:offset)
-- [use:portal](/docs/actions.md#use:portal)
-- [use:resize](/docs/actions.md#use:resize)
+## `use:` Actions
+- [buttonify](/docs/actions.md#buttonify)
+- elementqueries
+- [glue](/docs/actions.md#glue)
+- [offset](/docs/actions.md#offset)
+- passActions
+- [portal](/docs/actions.md#portal)
+- [resize](/docs/actions.md#resize)
+- sticky
+- stickyfixed
 
 ## Developing
 

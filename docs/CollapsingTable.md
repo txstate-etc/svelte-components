@@ -33,6 +33,8 @@ A `config` prop allows you to pass an array of column definitions. If passed, on
  * `menuItemClass` CSS class for `li` in the dropdown menu
  * `menuItemHilitedClass` CSS class for `li` in the dropdown menu when they are currently hilited/active
  * `defaultCellWidth`, guess for any column width in pixels, allows you to hide columns earlier/later, default 150
+ * `PopupMenu` - ???
+ * `stickyheader: boolean` (default `false`) - Set this to `true` if you want column headers to use a sticky positioning as the table is scrolled.
 
 ## Slots
 Lots of slots are provided for extra configuration.

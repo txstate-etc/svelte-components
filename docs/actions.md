@@ -1,14 +1,14 @@
-# Actions
+# `use:`Actions
 
-## use:buttonify
+## `buttonify`
 This action turns any HTML element into an accessible button that responds to keyboard events and has
-role="button" and the tabindex attribute set. You are still responsible for making sure it has
+`role="button"` and the `tabindex` attribute set. You are still responsible for making sure it has
 readable content or a good label. Does NOT change styling at all.
 ```svelte
 <div use:buttonify on:click={onClick}>You can tab to me and click me with the Enter key</div>
 ```
 
-## use:glue
+## `glue`
 This action glues the element it is placed on to the target specified, with a specified alignment
 option. It is most useful for dropdown or autocomplete menus.
 
@@ -29,7 +29,7 @@ viewport and determine which alignment gives the glued element the most space to
 </ul>
 ```
 
-## use:offset
+## `offset`
 This action allows you to observe any DOM element's position in the body. You pass in a svelte store
 and it will be updated when the element moves.
 
@@ -45,7 +45,7 @@ milliseconds.
 <div use:offset={{ store: offset }}>distance between me and body top is {$offset.top}</div>
 ```
 
-## use:portal
+## `portal`
 This action allows you to move an element to a new place in the DOM upon mount. It's useful when your component
 is sensitive to getting clipped by parents with overflow: hidden or for anything like a modal or toast message
 that needs to be positioned relative to the body, but created within a smaller component, like a web form.
@@ -64,7 +64,7 @@ instead of `undefined`, and the element will stay where it was before the change
 <div use:portal={portaltarget || null}></div>
 ```
 
-## use:resize
+## `resize`
 This action allows you to observe an element's width and height with the `ResizeObserver`. Svelte has a built-in
 `bind:clientWidth` functionality, but it works by inserting an invisible iframe into the DOM for each observation,
 which is a little ugly and potentially slow.
@@ -80,5 +80,5 @@ milliseconds.
 <script>
   const size = writable({ clientWidth: 100, clientHeight: 100, offsetWidth: 100, offsetHeight: 100 })
 </script>
-<div use:offset={{ store: size }}>My dimensions are {$size.offsetWidth}x{$size.offsetHeight}</div>
+<div use:resize={{ store: size }}>My dimensions are {$size.offsetWidth}x{$size.offsetHeight}</div>
 ```

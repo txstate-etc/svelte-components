@@ -9,26 +9,27 @@
   import { modifierKey } from '$lib/util'
   const dispatch = createEventDispatcher()
 
-  export let menushown = false
-  export let menuContainerClass = ''
-  export let menuClass = ''
-  export let menuItemClass = ''
-  export let menuItemHilitedClass = ''
-  export let menuItemSelectedClass = ''
-  export let items: PopupMenuItem[] = []
   export let buttonelement: HTMLElement
+  export let items: PopupMenuItem[] = []
+  export let menushown = false
+  export let value: string|undefined = undefined
   export let align: GlueAlignOpts = 'auto'
   export let cover = false
   export let showSelected = true
   export let width:string|undefined = undefined
   export let computedalign = new Store<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
   export let adjustparentheight = false
-  export let loading = false
   export let usePortal: HTMLElement|true|undefined = undefined
-  export let emptyText: string|undefined = undefined
-  export let value: string|undefined = undefined
+  export let loading = false
   export let hilited: number|undefined = undefined
   export let menuid = randomid()
+  export let emptyText: string|undefined = undefined
+  export let menuContainerClass = ''
+  export let menuClass = ''
+  export let menuItemClass = ''
+  export let menuItemHilitedClass = ''
+  export let menuItemSelectedClass = ''
+  
   let menuelement: HTMLElement|undefined
   const itemelements: HTMLElement[] = []
   let firstactive = 0

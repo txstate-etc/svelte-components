@@ -4,11 +4,11 @@
 </script>
 
 <script lang="ts">
-  export let returnfocusto: HTMLElement|null|undefined = undefined
-  export let initialfocus: string|undefined = undefined
+  export let escapable = true
   export let hidefocus = true
   export let hidefocuslabel = 'focus is above modal dialog, start tabbing'
-  export let escapable = true
+  export let initialfocus: string|undefined = undefined
+  export let returnfocusto: HTMLElement|null|undefined = undefined
   /**
    * If you expect any popup menus to be added to the body, we need to know that they
    * are considered to be part of the focus lock, or else the modal will be dismissed

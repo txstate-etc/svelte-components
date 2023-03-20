@@ -19,6 +19,7 @@ module.exports = {
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-unused-vars': 'off', // typescript does this better
     '@typescript-eslint/require-await': 'off',
+		'@typescript-eslint/prefer-nullish-coalescing': 'off', // not compatible with strictNullChecks disabled
     '@typescript-eslint/return-await': ['error', 'always'],
     '@typescript-eslint/strict-boolean-expressions': 'off',
     '@typescript-eslint/prefer-readonly': ['off']

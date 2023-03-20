@@ -1,11 +1,11 @@
 <script lang="ts">
+  export let opaque = false
+  export let containerClass = ''
   export let escapable = true
   export let hidefocus = true
   export let hidefocuslabel: string|undefined = undefined
-  export let returnfocusto: HTMLElement|undefined = undefined
   export let initialfocus: string|undefined = undefined
-  export let containerClass = ''
-  export let opaque = false
+  export let returnfocusto: HTMLElement|undefined = undefined
   export let usePortal: HTMLElement|undefined = undefined
   /**
    * If you expect any popup menus to be added to the body, we need to know that they
