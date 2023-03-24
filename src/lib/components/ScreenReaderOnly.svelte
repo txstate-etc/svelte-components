@@ -1,3 +1,17 @@
+<!-- @component
+  This component is for adding text that can be read by screen readers while remaining invisible to regular users.
+  ```svelte
+  <ScreenReaderOnly {id} {arialive} {ariaatomic}>
+    {`Some descriptive text to be read about the component by screen readers.`}
+  </ScreenReaderOnly>
+  ```
+  #### Properties
+  ```ts
+  id?: string|undefined = undefined // Any ID you'd like to bind to the underlying <span>.
+  arialive?: 'off'|'assertive'|'polite'|undefined = undefined
+  ariaatomic?: boolean|'false'|'true'|undefined = undefined
+  ```
+-->
 <script lang="ts">
   export let id: string|undefined = undefined
   export let arialive: 'off' | 'assertive' | 'polite' | undefined = undefined

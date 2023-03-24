@@ -1,4 +1,4 @@
-# Modal
+# [Modal](./../src/lib/components/Modal.svelte)
 The Modal component is designed to block out the screen and focus the user on the content inside the Modal.
 
 It provides only the backdrop and a scrollable container for your content. If your content should have a background color, be sure to add it yourself.

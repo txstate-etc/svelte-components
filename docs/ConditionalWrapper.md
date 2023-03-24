@@ -1,4 +1,4 @@
-# Conditional Wrapper
+# [Conditional Wrapper](./../src/lib/components/ConditionalWrapper.svelte)
 Sometimes you want to wrap a complex bit of HTML in a certain element based on a condition,
 and not wrap it at all if the condition isn't met. Without help, this situation results in a
 lot of duplicate code because you have to have an if/else block outside the whole thing, and

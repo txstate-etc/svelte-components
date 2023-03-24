@@ -1,4 +1,4 @@
-# ScreenReaderOnly
+# [ScreenReaderOnly](./../src/lib/components/ScreenReaderOnly.svelte)
 This component is for adding text that can be read to screen readers while remaining
 invisible to regular users. It accepts `arialive` and `ariaatomic` props to pass through to
 the corresponding HTML attributes. It also accepts an `id` prop in case you need to

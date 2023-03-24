@@ -1,4 +1,4 @@
-# PopupMenu
+# [PopupMenu](./../src/lib/components/PopupMenu.svelte)
 
 This component is meant to display a menu of options to the user, activated by clicking
 any element. It can also be controlled from the parent, by binding the `menushown` boolean.
