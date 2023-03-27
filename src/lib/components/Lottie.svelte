@@ -1,3 +1,7 @@
+<!-- @component
+  The purpose of `Lottie` is to provide a [Lottie](https://www.npmjs.com/package/lottie-web) player element
+  with Screen Reader compatible attributes and lables readily available through the `alt` prop.
+-->
 <script lang="ts">
   import type { AnimationItem } from 'lottie-web/build/player/lottie_light'
   import { onMount } from 'svelte'
@@ -12,6 +16,7 @@
   export let paused = false
   export let width: string | undefined = undefined
   export let height: string | undefined = undefined
+  /** `<ScreenReaderOnly>` lable to be applied. */
   export let alt = ''
 
   let container: HTMLElement

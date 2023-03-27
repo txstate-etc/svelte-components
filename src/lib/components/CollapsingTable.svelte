@@ -1,3 +1,10 @@
+<!-- @component
+[Collapsing Table](https://github.com/txstate-etc/svelte-components/blob/main/docs/CollapsingTable.md)
+
+This component is meant to help make tables responsive by eliminating columns (from the right) as the screen width reduces.
+When there are hidden columns, the last column header becomes a dropdown button allowing the selection of another column
+to be displayed instead.
+-->
 <script lang="ts">
   import { Store } from '@txstate-mws/svelte-store'
   import { derived } from 'svelte/store'

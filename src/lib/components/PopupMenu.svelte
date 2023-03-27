@@ -1,3 +1,7 @@
+<!-- @component
+  The purpose of [`PopupMenu`](https://github.com/txstate-etc/svelte-components/blob/main/docs/PopupMenu.md) is to display a menu of options to the user, activated by clicking any element
+  bound to `buttonelement`. It can also be controlled from the parent, by binding the `menushown` boolean.
+-->
 <script lang="ts">
   import { createEventDispatcher, onDestroy, tick } from 'svelte'
   import { randomid } from 'txstate-utils'
@@ -9,20 +13,49 @@
   import { modifierKey } from '$lib/util'
   const dispatch = createEventDispatcher()
 
+  /** The DOM element that will act as the "button" for this menu. The menu will be placed next to the
+  button and be controlled by the button. Keyboard access will be enabled when the button has focus.
+  This component adds all appropriate attributes (tabindex, roles, and aria) automatically. */
   export let buttonelement: HTMLElement
+  /** The list of menu items to be shown. Parent may change this at any time based on user activity. */
   export let items: PopupMenuItem[] = []
   export let menushown = false
   export let value: string|undefined = undefined
+  /** Control where the menu will appear. Default is to use the current viewport to make a decision to
+  maximize potential for menu growth. */
   export let align: GlueAlignOpts = 'auto'
+  /** When the menu is active, should it cover the button or be rendered above/below it? */
   export let cover = false
+  /** When an item is currently selected, should it appear in the menu (with a visual indicator), or
+  simply be removed from the list (`showSelected: false`). */
   export let showSelected = true
+  /** When defined, this width will be passed through to the menu's CSS width. Use a valid CSS dimension
+  such as 33em or 159px. Generally this will be used when you need to match the menu width to something
+  else, like the button. If the width is static like 100% a simple CSS rule is likely more efficient. */
   export let width:string|undefined = undefined
+  /** Bind this prop to receive a store that is updated each time a menu placement decision is made. Example
+  of when this is useful is when you are trying to round corners of your button and need to know whether the
+  menu is above or below your button so you know which corners to round and which to leave square. Note that
+  the values do not update when the menu is hidden, so you may need to rely on `menushown` as well. */
   export let computedalign = new Store<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
+  /** Set to `true` if you want the parent element's styling to increase its minHeight when necessary. Useful
+  for parent elements not styled for variable size children and which you want override the the size of. */
   export let adjustparentheight = false
+  /**  If the menu would be clipped by an `overflow: hidden`, you can set this prop and it will be placed in
+  the specified container, or the `document.body` if you simply say `true`. Placement will still be calculated
+  correctly, unless there are scrolling containers between the button and the menu. */
   export let usePortal: HTMLElement|true|undefined = undefined
+  /** Useful for when your `items` need to be fetched but you want the associated element shown. Set to loading
+  until they're ready to be displayed and the popup menu will not be shown until the `loading` bind is `true`. */
   export let loading = false
+  /** A bindable value for inspecting which item in `items` is currently highlighted as the item currently
+  active in the list. This is not the same as `value` and the highlighted item may or may not be selected as
+  for the `value` of the field. */
   export let hilited: number|undefined = undefined
+  /** The id of the <ul> element that is the displayed list of items. */
   export let menuid = randomid()
+  /** When there are no items (e.g. it's a filtered search and there were no results), we still display one
+  disabled item in the menu to let the user know what is going on. Use this prop to specify the message. */
   export let emptyText: string|undefined = undefined
   export let menuContainerClass = ''
   export let menuClass = ''

@@ -1,3 +1,17 @@
+<!-- @component
+The [`FocusLock`](https://github.com/txstate-etc/svelte-components/blob/main/docs/Modal.md#FocusLock)
+component is for creating accessible modal dialogs that do not have a darkened backdrop. It shares the
+(`escapable`, `hidefocus`, `hidefocuslabel`, `initialfocus`, `returnfocusto`, and `includeselector`)
+props and the behaviors with `Modal` because the `Modal` component uses a `FocusLock` itself. In additon
+it exports a `className` prop for passing the component a custom CSS class name to use.
+
+Any time the `FocusLock` is in the DOM, it will lock screen readers inside it. You release them by
+removing it from the DOM. Regular users are NOT trapped and may interact with other screen elements.
+When they do, the escape event will be fired, allowing you to remove the dialog.
+
+`FocusLock`s can be nested. The user will be trapped inside the deepest `FocusLock` present in the DOM.
+When it goes away, they'll be trapped inside the previous `FocusLock`, and so on.
+-->
 <script context="module" lang="ts">
   export const FocusLockStack: { pause: () => void, unpause: () => void }[] = []
   const waitAtick = typeof requestAnimationFrame !== 'undefined' ? resolve => requestAnimationFrame(resolve) : resolve => resolve(0)
@@ -9,12 +23,9 @@
   export let hidefocuslabel = 'focus is above modal dialog, start tabbing'
   export let initialfocus: string|undefined = undefined
   export let returnfocusto: HTMLElement|null|undefined = undefined
-  /**
-   * If you expect any popup menus to be added to the body, we need to know that they
-   * are considered to be part of the focus lock, or else the modal will be dismissed
-   * when the user clicks inside
-   * use commas to include multiple selectors
-   */
+  /** If you expect any popup menus to be added to the body, we need to know that they
+  are considered to be part of the focus lock, or else the modal will be dismissed
+  when the user clicks inside. Use commas to include multiple selectors. */
   export let includeselector: string | undefined = undefined
   let className = ''
   export { className as class }

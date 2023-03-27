@@ -1,3 +1,11 @@
+<!-- @component
+  The purpose of `MultiSelect` is to provide a text input associated with a popup menu that
+  displays, or completes, choice selections based on what's been typed in the text input.
+  Selected choices will be added to a list of selected items, in a pill format, that provides
+  a means for tracking and removing existing selections. The choices listed in the popup are
+  controlled by the parent component via the `getOptions` function that will be used as a
+  debounced callback on the contents of the text input.
+-->
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
   import { randomid, Cache } from 'txstate-utils'
@@ -6,20 +14,28 @@
   import { modifierKey, selectionIsLeft } from '$lib/util'
   import type { PopupMenuItem } from '$lib/types'
 
-  export let id = randomid()
   export let name: string
-  export let disabled = false
+  /**
+   * Function to pass to the component that tells it how to use the text
+   * in the text input to determine what `PopupMenuItem[]` should be displayed
+   * in the `PopupMenu`. Items already 'selected' from the popup menu will be
+   * tracked and automatically filtered from the popup if returned as one of the
+   * `PopupMenuItem[]` by `getOptions`. */
   export let getOptions: (search: string) => Promise<PopupMenuItem[]>|PopupMenuItem[]
+  export let id = randomid()
+  export let disabled = false
   export let menuContainerClass: string|undefined = undefined
   export let menuClass: string|undefined = undefined
   export let menuItemClass: string|undefined = undefined
   export let menuItemHilitedClass: string|undefined = undefined
+  /** The maximum number of selections allowed before making new selections is disabled. Default of 0 is unlimited. */
   export let maxSelections = 0
   export let selected: { value: string, label: string }[] = []
   export let placeholder = ''
   export let emptyText: string|undefined = undefined
   export let usePortal: HTMLElement|true|undefined = undefined
   export let descid: string | undefined = undefined
+  /** You can define your own PopupMenu and pass for that to be used or accept DefaultPopupMenu. */
   export let PopupMenu = DefaultPopupMenu
 
   let menushown: boolean
@@ -36,6 +52,7 @@
   }, { freshseconds: 5 })
 
   $: selectedSet = new Set(selected.map(s => s.value))
+  // Stop showing our menu if the maxSelections limit has been reached.
   $: if (maxSelections > 1 && selected.length >= maxSelections && menushown) menushown = false
   let optionsTimer: number
   async function reactToInput (..._: any) {
@@ -133,7 +150,9 @@
   </ScreenReaderOnly>
   <slot></slot>
 </fieldset>
-<svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft' {usePortal} {loading} {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement} on:change={addSelection}></svelte:component>
+<svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft'
+ {usePortal} {loading} {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement}
+ on:change={addSelection}/>
 
 <style>
   fieldset {

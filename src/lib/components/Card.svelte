@@ -1,3 +1,6 @@
+<!-- @component
+  [`Card`](https://github.com/txstate-etc/svelte-components/blob/main/src/lib/components/Card.svelte)
+-->
 <script lang="ts">
   export let className = ''
   import { getContext } from 'svelte'

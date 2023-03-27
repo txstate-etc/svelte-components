@@ -1,3 +1,8 @@
+<!-- @component
+  The purpose of `Loading` is to provide a visual, as well as Screen Reader friendly, cueue that associated content is loading
+  until the slotted content is signals it is done loading via the `loading` boolean bind at which point the slotted content
+  will be rendered.
+-->
 <script lang="ts">
   import { afterUpdate } from 'svelte'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'

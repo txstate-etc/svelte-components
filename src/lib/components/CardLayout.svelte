@@ -1,3 +1,6 @@
+<!-- @component
+  [`CardLayout`](https://github.com/txstate-etc/svelte-components/blob/main/src/lib/components/CardLayout.svelte)
+-->
 <script lang="ts">
   import { onDestroy, tick, setContext, onMount } from 'svelte'
   import { writable } from 'svelte/store'

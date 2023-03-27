@@ -1,3 +1,10 @@
+<!-- @component
+The [`Modal`](https://github.com/txstate-etc/svelte-components/blob/main/docs/Modal.md#Modal) component is designed to block out the screen and focus the user on the content inside the Modal.
+
+It provides only the backdrop and a scrollable container for your content. If your content should have a background color, be sure to add it yourself.
+
+Any time the Modal is in the DOM, it will take over the screen. You make it go away by removing it from the DOM.
+-->
 <script lang="ts">
   export let opaque = false
   export let containerClass = ''
@@ -7,12 +14,9 @@
   export let initialfocus: string|undefined = undefined
   export let returnfocusto: HTMLElement|undefined = undefined
   export let usePortal: HTMLElement|undefined = undefined
-  /**
-   * If you expect any popup menus to be added to the body, we need to know that they
-   * are considered to be part of the focus lock, or else the modal will be dismissed
-   * when the user clicks inside
-   * use commas to include multiple selectors
-   */
+  /** If you expect any popup menus to be added to the body, we need to know that they
+  are considered to be part of the focus lock, or else the modal will be dismissed
+  when the user clicks inside. Use commas to include multiple selectors. */
   export let includeselector: string | undefined = undefined
   import { createEventDispatcher, onMount } from 'svelte'
   import FocusLock, { FocusLockStack } from './FocusLock.svelte'
