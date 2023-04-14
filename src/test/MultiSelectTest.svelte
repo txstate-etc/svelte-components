@@ -72,3 +72,8 @@
 
 <label for={longid}>Select multiple items with long names and adjust page width</label><br>
 <MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2], longNamedItems[4]]} getOptions={getOptionsLong} />
+
+<label for={longid}>Multiselct with slotted element and inputBelow toggeled on</label><br>
+<MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2]]} inputBelow getOptions={getOptionsLong}>
+  <div>Some slotted element.</div>
+</MultiSelect>

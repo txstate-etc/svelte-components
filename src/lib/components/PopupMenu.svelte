@@ -227,8 +227,12 @@
 </script>
 
 {#if menushown}
-  <div use:portal={usePortal === true ? undefined : (usePortal || null)} use:glue={{ target: buttonelement, align, cover, adjustparentheight, store: computedalign }} class={menuContainerClass}>
-    <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
+  <div use:portal={usePortal === true ? undefined : (usePortal || null)}
+       use:glue={{ target: buttonelement, align, cover, adjustparentheight, store: computedalign }}
+       class={menuContainerClass}>
+    <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''}
+        class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass}
+        on:keydown={onkeydown}>
       {#each items as item, i (item.value)}
         {#if showSelected || item.value !== value}
           <!-- svelte-ignore a11y-click-events-have-key-events -->

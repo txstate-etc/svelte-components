@@ -47,7 +47,7 @@ milliseconds.
 
 ## `portal`
 This action allows you to move an element to a new place in the DOM upon mount. It's useful when your component
-is sensitive to getting clipped by parents with overflow: hidden or for anything like a modal or toast message
+is sensitive to getting clipped by parents with `overflow: hidden` or for anything like a modal or toast message
 that needs to be positioned relative to the body, but created within a smaller component, like a web form.
 
 For convenience, the default is to move it to `document.body` when you `use:portal` without any config:
