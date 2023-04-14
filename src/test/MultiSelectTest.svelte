@@ -5,6 +5,7 @@
   let secondid
   let fourthid
   let longid
+  let lotsofid
   
   function getOptionsFirst (val: string) {
     return ['apple', 'orange', 'banana'].filter(o => o.includes(val)).map(value => ({ value }))
@@ -50,6 +51,15 @@
     if (!val) return longNamedItems
     return longNamedItems.filter(c => c.label.toLocaleLowerCase().includes(val.toLocaleLowerCase()))
   }
+  
+  const lotsOfItems = [{ value: '0', label: 'Item: 0' }]
+  for (let i = 1; i < 151; i++) {
+    lotsOfItems.push({ value: `${i}`, label: `Item: ${i}` })
+  }
+  async function getOptionsLots (val: string) {
+    if (!val) return lotsOfItems
+    return lotsOfItems.filter(c => c.label.toLocaleLowerCase().includes(val.toLocaleLowerCase()))
+  }
 </script>
 
 <label for={firstid}>Fruit with only values</label><br>
@@ -73,7 +83,16 @@
 <label for={longid}>Select multiple items with long names and adjust page width</label><br>
 <MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2], longNamedItems[4]]} getOptions={getOptionsLong} />
 
-<label for={longid}>Multiselct with slotted element and inputBelow toggeled on</label><br>
-<MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2]]} inputBelow getOptions={getOptionsLong}>
+<label for={longid}>Multiselect with slotted element and inputClass modification passed to it</label><br>
+<MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2]]} inputClass='multiselect-input' getOptions={getOptionsLong}>
   <div>Some slotted element.</div>
 </MultiSelect>
+
+<label for={lotsofid}>Multiselect with lots of items to list</label><br>
+<MultiSelect bind:id={lotsofid} name="testlots" selected={[lotsOfItems[0], lotsOfItems[2]]}  getOptions={getOptionsLots} />
+
+<style>
+  :global(.multiselect-input) {
+    width: 100% 
+  }
+</style>

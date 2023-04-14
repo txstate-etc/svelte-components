@@ -28,6 +28,7 @@
   export let menuClass: string|undefined = undefined
   export let menuItemClass: string|undefined = undefined
   export let menuItemHilitedClass: string|undefined = undefined
+  export let inputClass: string|undefined = undefined
   /** The maximum number of selections allowed before making new selections is disabled. Default of 0 is unlimited. */
   export let maxSelections = 0
   export let selected: { value: string, label: string }[] = []
@@ -37,8 +38,6 @@
   export let descid: string | undefined = undefined
   /** You can define your own PopupMenu and pass for that to be used or accept DefaultPopupMenu. */
   export let PopupMenu = DefaultPopupMenu
-  /** Toggle if you want the input to always show up below the list of selected elements. */
-  export let inputBelow = false
 
   let menushown: boolean
   let loading = false
@@ -138,22 +137,13 @@
         <ScreenReaderOnly>, click to deselect</ScreenReaderOnly>
       </li>
     {/each}
-    {#if !inputBelow}
-      <li class="input">
-        <input type="text" {id} {name} {disabled} {placeholder}
-          bind:this={inputelement} bind:value={inputvalue} on:blur
-          on:focus={inputfocus} on:keydown={inputkeydown}
-          autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list"
-          aria-describedby={descid}>
-      </li>
-    {/if}
-    {#if inputBelow}
-        <input type="text" {id} {name} {disabled} {placeholder}
-          bind:this={inputelement} bind:value={inputvalue} on:blur
-          on:focus={inputfocus} on:keydown={inputkeydown}
-          autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list"
-          aria-describedby={descid}>
-    {/if}
+    <li class={`input ${inputClass ?? ''}`}>
+      <input type="text" {id} {name} {disabled} {placeholder}
+        bind:this={inputelement} bind:value={inputvalue} on:blur
+        on:focus={inputfocus} on:keydown={inputkeydown}
+        autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list"
+        aria-describedby={descid}>
+    </li>
   </ul>
   <ScreenReaderOnly arialive="assertive">
     <span>{selected.length ? selected.length + ' selected' : 'none selected'}, select {maxSelections ? 'up to ' + maxSelections : 'multiple'}, up down to choose, left right to hilite existing choices</span>
