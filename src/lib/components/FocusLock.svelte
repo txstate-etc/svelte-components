@@ -13,7 +13,7 @@ When they do, the escape event will be fired, allowing you to remove the dialog.
 When it goes away, they'll be trapped inside the previous `FocusLock`, and so on.
 -->
 <script context="module" lang="ts">
-  export const FocusLockStack: { pause: () => void, unpause: () => void }[] = []
+  export const FocusLockStack: { focusId: string, pause: () => void, unpause: () => void }[] = []
   const waitAtick = typeof requestAnimationFrame !== 'undefined' ? resolve => requestAnimationFrame(resolve) : resolve => resolve(0)
 </script>
 
@@ -29,10 +29,11 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
   export let includeselector: string | undefined = undefined
   let className = ''
   export { className as class }
+  export let focusId = randomid()
 
   import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte'
   import { tabbable } from 'tabbable'
-  import { sleep } from 'txstate-utils'
+  import { randomid, sleep } from 'txstate-utils'
   import { buttonify } from '../actions'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
@@ -44,9 +45,11 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
     const prevFocusLock = FocusLockStack.slice(-1)[0]
     if (prevFocusLock) prevFocusLock.pause()
     FocusLockStack.push({
+      focusId,
       pause: () => { state = 'paused' },
       unpause: () => { if (state === 'paused') state = 'active' }
     })
+    dispatch('focuslockupdate')
     if (typeof returnfocusto === 'undefined') {
       returnfocusto = document.querySelector(':focus') as HTMLElement
     }
@@ -74,9 +77,11 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
     if (returnfocusto && wasactive) {
       returnfocusto.focus()
     }
-    FocusLockStack.pop()
+    const idx = FocusLockStack.findIndex(f => f.focusId === focusId)
+    if (idx > -1) FocusLockStack.splice(idx, 1)
     const prevFocusLock = FocusLockStack.slice(-1)[0]
     if (prevFocusLock) prevFocusLock.unpause()
+    dispatch('focuslockupdate')
   })
   const setInitialFocus = () => {
     const firstfocus = lockelement ? tabbable(lockelement)[0] : undefined

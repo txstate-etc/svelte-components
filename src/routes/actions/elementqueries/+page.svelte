@@ -8,8 +8,8 @@
 </script>
 
 {#if showall}
-<div use:eq={{ store: largestore }} class="resizeable" style:height="100px" style:background="#eeeeee">
-  <div use:eq={{ store: medstore }} style:background="#999999">
+<div use:eq={{ store: largestore }} class="resizeable" style:height="100px" style:background="#eeeeee" data-eq="300px 200px">
+  <div use:eq={{ store: medstore }} style:background="#999999" data-eq="300px 200px">
     {#if showsmallest}<div use:eq style:background="#333333"></div>{/if}
     {$medstore.width}
   </div>
@@ -25,10 +25,10 @@
     width: 50%;
     box-sizing: border-box;
   }
-  div:global([data-eq~="300px"]) {
+  div[data-eq~="300px"] {
     border: 1px solid red;
   }
-  div:global([data-eq~="200px"]) {
+  div[data-eq~="200px"] {
     border-radius: 15px;
   }
   .resizeable {

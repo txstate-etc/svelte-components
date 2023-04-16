@@ -6,6 +6,11 @@ It provides only the backdrop and a scrollable container for your content. If yo
 Any time the Modal is in the DOM, it will take over the screen. You make it go away by removing it from the DOM.
 -->
 <script lang="ts">
+  import { createEventDispatcher, onMount } from 'svelte'
+  import { randomid } from 'txstate-utils'
+  import FocusLock, { FocusLockStack } from './FocusLock.svelte'
+  import { portal } from '$lib/actions'
+
   export let opaque = false
   export let containerClass = ''
   export let escapable = true
@@ -18,17 +23,18 @@ Any time the Modal is in the DOM, it will take over the screen. You make it go a
   are considered to be part of the focus lock, or else the modal will be dismissed
   when the user clicks inside. Use commas to include multiple selectors. */
   export let includeselector: string | undefined = undefined
-  import { createEventDispatcher, onMount } from 'svelte'
-  import FocusLock, { FocusLockStack } from './FocusLock.svelte'
-  import { portal } from '$lib/actions'
+  export let focusId = randomid()
 
   const dispatch = createEventDispatcher()
   const endmodal = () => {
     dispatch('escape')
   }
   let stackPosition: number
+  function onFocusLockUpdate () {
+    stackPosition = FocusLockStack.findIndex(f => f.focusId === focusId)
+  }
   onMount(() => {
-    stackPosition = FocusLockStack.length - 1
+    onFocusLockUpdate()
     document.body.style.marginRight = (window.innerWidth - document.body.clientWidth) + 'px'
     document.body.style.overflow = 'hidden'
     return () => {
@@ -40,7 +46,7 @@ Any time the Modal is in the DOM, it will take over the screen. You make it go a
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div use:portal={usePortal} class="modal-backdrop" style:--modal-z={stackPosition * 10 + 3000} class:opaque on:mousedown|stopPropagation|preventDefault={() => escapable && endmodal()}>
-  <FocusLock class="modal-container {containerClass}" {includeselector} {escapable} on:escape {hidefocus} {hidefocuslabel} {returnfocusto} {initialfocus}>
+  <FocusLock bind:focusId class="modal-container {containerClass}" {includeselector} {escapable} on:escape {hidefocus} {hidefocuslabel} {returnfocusto} {initialfocus} on:focuslockupdate={onFocusLockUpdate}>
     <slot></slot>
   </FocusLock>
 </div>

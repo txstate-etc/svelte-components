@@ -24,7 +24,7 @@ to the wrapper element/component, if it gets inserted.
 -->
 <script lang="ts">
   export let condition: boolean|undefined
-  export let component: Function|undefined = undefined
+  export let component: any|undefined = undefined
   export let a = false
   export let span = false
   export let element: HTMLElement|undefined = undefined
