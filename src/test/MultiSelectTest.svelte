@@ -1,5 +1,6 @@
 <script lang="ts">
   import { MultiSelect } from '$lib'
+    import { tick } from 'svelte';
   import { sleep } from 'txstate-utils'
   let firstid
   let secondid
@@ -33,8 +34,26 @@
     return thirdItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
 
+  // Noticing some issues with getOptions caching causing disabled ellipsis to stick or lag in removal from drop-down.
+  let selectedFourth = [secondItems[0]]
+  $: selectedFourthSet = new Set(selectedFourth.map(s => s.value))
+  $: carOptionsAvailable = !!thirdItems.filter(o => !selectedFourthSet.has(o.value)).length
+  $: fruitOptionsAvailable = !!secondItems.filter(o => !selectedFourthSet.has(o.value)).length
+  $: placeholderFourth = carOptionsAvailable
+    ? fruitOptionsAvailable
+      ? 'Select fruit from defaults or autocomplete for cars...'
+      : 'Autocomplete for car choices...'
+    : fruitOptionsAvailable
+      ? 'Select fruit from available default choices...'
+      : 'All options selected.'
+  $: fruitOptions = carOptionsAvailable
+    ? [...secondItems, { label: '…', value: '', disabled: true }]
+    : secondItems
+
   async function getOptionsFourth (val: string) {
-    if (!val) return secondItems
+    if (!val) {
+      return fruitOptions
+    }
     return thirdItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
 
@@ -45,7 +64,8 @@
     { value: '4', label: 'Long.Named-Item.Number - Four' },
     { value: '5', label: 'Long.Named-Item.Number - Five' },
     { value: '6', label: 'Long.Named-Item.Number - Six' },
-    { value: '7', label: 'Long.Named-Item.Number - Seven - and some additional labeling for extra length' }
+    { value: '7', label: 'Long.Named-Item.Number - Seven - and some additional labeling for extra length' },
+    { value: '8', label: '123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-' }
   ]
   async function getOptionsLong (val: string) {
     if (!val) return longNamedItems
@@ -62,6 +82,7 @@
   }
 </script>
 
+
 <label for={firstid}>Fruit with only values</label><br>
 <MultiSelect bind:id={firstid} name="test1" selected={[secondItems[0]]} getOptions={getOptionsFirst} />
 
@@ -77,8 +98,8 @@
 <label for={firstid}>Select up to two fruits</label><br>
 <MultiSelect bind:id={firstid} name="test1" maxSelections={2} selected={[secondItems[0]]} getOptions={getOptionsFirst} />
 
-<label for={fourthid}>Select a fruit or type/select a car</label><br>
-<MultiSelect bind:id={firstid} name="test4" selected={[secondItems[0]]} getOptions={getOptionsFourth} />
+<label for={fourthid}>Select a fruit or type/select a car with disabled ellipsis to cue car options available</label><br>
+<MultiSelect bind:id={fourthid} name="test4" bind:selected={selectedFourth} bind:placeholder={placeholderFourth} freshseconds={1} getOptions={getOptionsFourth} />
 
 <label for={longid}>Select multiple items with long names and adjust page width</label><br>
 <MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2], longNamedItems[4]]} getOptions={getOptionsLong} />
