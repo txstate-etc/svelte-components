@@ -57,11 +57,28 @@
   /** When there are no items (e.g. it's a filtered search and there were no results), we still display one
   disabled item in the menu to let the user know what is going on. Use this prop to specify the message. */
   export let emptyText: string|undefined = undefined
-  export let menuContainerClass = ''
-  export let menuClass = ''
-  export let menuItemClass = ''
-  export let menuItemHilitedClass = ''
-  export let menuItemSelectedClass = ''
+  // BEGIN -  Consider removing the following in preference to the `customCSS` mapping:
+  export let menuContainerClass = undefined
+  export let menuClass = undefined
+  export let menuItemClass = undefined
+  export let menuItemHilitedClass = undefined
+  export let menuItemSelectedClass = undefined
+  // END
+  /** A `Map<string, string[]>` for passing custom CSS class references.
+  The following keys can be used in place of their respective component properties with the component
+  properties taking precedence over these.
+  - menuContainerClass
+  - menuClass
+  - menuItemClass
+  - menuItemHilightedClass
+  - menuItemSelectedClass */
+  export let customCSS: Map<string, string[]>|undefined = undefined
+
+  const _menuContainerClass = (menuContainerClass || customCSS?.get('menuContainerClass')?.join(' ')) ?? ''
+  const _menuClass = (menuClass || customCSS?.get('menuClass')?.join(' ')) ?? ''
+  const _menuItemClass = (menuItemClass || customCSS?.get('menuItemClass')?.join(' ')) ?? ''
+  const _menuItemHilitedClass = (menuItemHilitedClass || customCSS?.get('menuItemHilitedClass')?.join(' ')) ?? ''
+  const _menuItemSelectedClass = (menuItemSelectedClass || customCSS?.get('menuItemSelectedClass')?.join(' ')) ?? ''
   
   let menuelement: HTMLElement|undefined
   const itemelements: HTMLElement[] = []
@@ -198,6 +215,11 @@
     }
   }
 
+  function addCustomCSS (item: PopupMenuItem) {
+    if (!item.cssKey) return ''
+    return customCSS?.get(item.cssKey)?.join(' ').trim() ?? ''
+  }
+
   onDestroy(() => cleanup(buttonelement))
 
   // if buttonelement changes we need to handle listeners and aria
@@ -229,9 +251,9 @@
 {#if menushown}
   <div use:portal={usePortal === true ? undefined : (usePortal || null)}
        use:glue={{ target: buttonelement, align, cover, adjustparentheight, store: computedalign }}
-       class={menuContainerClass}>
+       class={_menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''}
-        class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass}
+        class={_menuClass} class:hasSelected class:defaultmenu={!_menuClass && !_menuContainerClass}
         on:keydown={onkeydown}>
       {#each items as item, i (item.value)}
         {#if showSelected || item.value !== value}
@@ -239,12 +261,12 @@
           <li
             id={`${menuid}-${i}`}
             bind:this={itemelements[i]}
-            class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass || '' : ''} ${value === item.value ? menuItemSelectedClass || '' : ''}`}
+            class={`${_menuItemClass} ${i === hilited ? _menuItemHilitedClass : ''} ${value === item.value ? _menuItemSelectedClass : ''} ${addCustomCSS(item)}`}
             class:disabled={!!item.disabled}
-            class:hilited={!menuItemHilitedClass && i === hilited}
-            class:selected={showSelected && !menuItemSelectedClass && value === item.value}
+            class:hilited={!_menuItemHilitedClass && i === hilited}
+            class:selected={showSelected && !_menuItemSelectedClass && value === item.value}
             on:click={onclick(item)}
-            role="option"
+            role={item.role ?? 'option'}
             tabindex=-1
             aria-selected={value === item.value}
             aria-disabled={item.disabled}
@@ -252,7 +274,7 @@
         {/if}
       {/each}
       {#if items.length === 0}
-        <li role="option" class={`${menuItemClass} disabled`} aria-live="assertive" aria-selected={false}>
+        <li role="option" class={`${_menuItemClass} disabled`} aria-live="assertive" aria-selected={false}>
           <slot name="noresults">
             {#if !emptyText}
               <span aria-hidden="true">{'¯\\_(ツ)_/¯'}</span><ScreenReaderOnly>{emptyText || 'no results found'}</ScreenReaderOnly>

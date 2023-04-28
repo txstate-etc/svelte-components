@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { MultiSelect } from '$lib'
-    import { tick } from 'svelte';
+  import { MultiSelect, type PopupMenuItem } from '$lib'
   import { sleep } from 'txstate-utils'
   let firstid
   let secondid
-  let fourthid
+  let hybridid
   let longid
   let lotsofid
   
@@ -23,7 +22,7 @@
     return secondItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
 
-  const thirdItems = [
+  const thirdItems: PopupMenuItem[] = [
     { value: 'honda', label: 'Honda' },
     { value: 'dodge', label: 'Dodge' },
     { value: 'hyundai', label: 'Hyundai' },
@@ -34,28 +33,45 @@
     return thirdItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
 
-  // Noticing some issues with getOptions caching causing disabled ellipsis to stick or lag in removal from drop-down.
-  let selectedFourth = [secondItems[0]]
-  $: selectedFourthSet = new Set(selectedFourth.map(s => s.value))
-  $: carOptionsAvailable = !!thirdItems.filter(o => !selectedFourthSet.has(o.value)).length
-  $: fruitOptionsAvailable = !!secondItems.filter(o => !selectedFourthSet.has(o.value)).length
-  $: placeholderFourth = carOptionsAvailable
-    ? fruitOptionsAvailable
-      ? 'Select fruit from defaults or autocomplete for cars...'
-      : 'Autocomplete for car choices...'
-    : fruitOptionsAvailable
-      ? 'Select fruit from available default choices...'
-      : 'All options selected.'
-  $: fruitOptions = carOptionsAvailable
-    ? [...secondItems, { label: '…', value: '', disabled: true }]
-    : secondItems
 
-  async function getOptionsFourth (val: string) {
+  /* ------------------------------------------------------------------------------------------
+   * Demo of combining multiple lists with styling to create a quick options MultiSelect with choice groupings.
+   * ------------------------------------------------------------------------------------------ */
+  const commonHeader = { value: 'commonHeader', label: 'Commmon Options', disabled: true, cssKey: 'itemHeader', role: 'grouping' }
+  const carsHeader = { value: 'carsHeader', label: 'Vehicle Makes', disabled: true, cssKey: 'itemHeader', role: 'grouping' }
+  // const deferredCue = { label: '…', value: '', disabled: true }
+  const customCSS: Map<string, string[]> = new Map([
+    ['itemHeader', ['multiselect-group-header']],
+    ['itemChoice', ['multiselect-choice']],
+    ['inputClass', ['multiselect-input']]
+  ])
+  const commonItems = [
+    commonHeader,
+    { value: 'compact', label: 'Compact', cssKey: 'itemChoice' },
+    { value: 'truck', label: 'Truck', cssKey: 'itemChoice' },
+    { value: 'atv', label: 'ATV', cssKey: 'itemChoice' },
+    { value: 'other', label: 'Other Transportation', cssKey: 'itemChoice' }
+  ]
+  const carItems = [carsHeader, ...thirdItems.map(c => { return { ...c, cssKey: 'itemChoice' } })]
+  let selectedHybrid = []
+  $: selectedHybridSet = new Set(selectedHybrid.map(s => s.value))
+  $: carOptionsAvailable = carItems.filter(o => !selectedHybridSet.has(o.value)).length > 1
+  $: commonOptionsAvailable = commonItems.filter(o => !selectedHybridSet.has(o.value)).length > 1
+  $: placeholderHybrid = carOptionsAvailable
+    ? commonOptionsAvailable
+      ? 'Select a common choice or autocomplete for makes...'
+      : 'Autocomplete for car makes...'
+    : commonOptionsAvailable
+      ? 'Select from available common choices...'
+      : 'All options selected.'
+
+  async function getOptionsHybrid (val: string) {
     if (!val) {
-      return fruitOptions
+      return commonItems
     }
-    return thirdItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
+    return [...commonItems, ...carItems].filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
+  // ------------------------------------------------------------------------------------------
 
   const longNamedItems = [
     { value: '1', label: 'Long-Named_ItemNumber: One' },
@@ -98,8 +114,10 @@
 <label for={firstid}>Select up to two fruits</label><br>
 <MultiSelect bind:id={firstid} name="test1" maxSelections={2} selected={[secondItems[0]]} getOptions={getOptionsFirst} />
 
-<label for={fourthid}>Select a fruit or type/select a car with disabled ellipsis to cue car options available</label><br>
-<MultiSelect bind:id={fourthid} name="test4" bind:selected={selectedFourth} bind:placeholder={placeholderFourth} freshseconds={1} getOptions={getOptionsFourth} />
+<label for={hybridid}>Select a common option or type/select a car model - with group headers and styling</label><br>
+<MultiSelect bind:id={hybridid} name="testhybrid" bind:selected={selectedHybrid} bind:placeholder={placeholderHybrid}
+ getOptions={getOptionsHybrid} {customCSS}
+/>
 
 <label for={longid}>Select multiple items with long names and adjust page width</label><br>
 <MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2], longNamedItems[4]]} getOptions={getOptionsLong} />
@@ -115,5 +133,11 @@
 <style>
   :global(.multiselect-input) {
     width: 100% 
+  }
+  :global(.multiselect-group-header) {
+    transform: translateX(-2%)
+  }
+  :global(.multiselect-choice) {
+    transform: translateX(5%)
   }
 </style>

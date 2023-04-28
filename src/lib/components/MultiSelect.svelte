@@ -12,36 +12,53 @@
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import DefaultPopupMenu from './PopupMenu.svelte'
   import { modifierKey, selectionIsLeft } from '$lib/util'
-  import type { PopupMenuItem } from '$lib/types'
+  import type { PopupMenuChoice, PopupMenuTypes } from '$lib/types'
 
   export let name: string
   /**
-   * Function to pass to the component that tells it how to use the text
-   * in the text input to determine what `PopupMenuItem[]` should be displayed
-   * in the `PopupMenu`. Items already 'selected' from the popup menu will be
-   * tracked and automatically filtered from the popup if returned as one of the
-   * `PopupMenuItem[]` by `getOptions`. */
-  export let getOptions: (search: string) => Promise<PopupMenuItem[]>|PopupMenuItem[]
+   * Function to pass to the component that tells it how to use the text in the text input to determine what
+   * `PopupMenuItem[]` should be displayed in the `PopupMenu`. Items already 'selected' from the popup menu will
+   * be tracked and automatically filtered from the popup if returned as one of the `PopupMenuItem[]` by `getOptions`. */
+  export let getOptions: (search: string) => Promise<PopupMenuTypes[]>|PopupMenuTypes[]
   export let id = randomid()
   export let disabled = false
-  export let menuContainerClass: string|undefined = undefined
-  export let menuClass: string|undefined = undefined
-  export let menuItemClass: string|undefined = undefined
-  export let menuItemHilitedClass: string|undefined = undefined
-  export let inputClass: string|undefined = undefined
   /** The maximum number of selections allowed before making new selections is disabled. Default of 0 is unlimited. */
   export let maxSelections = 0
-  export let selected: { value: string, label: string }[] = []
+  /** Consuming components may need to make decisions about what to display or return as options in the popup based
+   * on what's already selected. This component property can be used to both pass an initial set of selections but
+   * it can also be bound to provide a means to inspect what's selected. */
+  export let selected: PopupMenuChoice[] = []
+  /** The text to be displayed in the input text box for contextual feedback on what the input text is expecting. */
   export let placeholder = ''
+  /** When there are no items (e.g. it's a filtered search and there were no results), we still display one
+  disabled item in the menu to let the user know what is going on. Use this prop to specify the message. */
   export let emptyText: string|undefined = undefined
   export let usePortal: HTMLElement|true|undefined = undefined
   export let descid: string | undefined = undefined
   /** You can define your own PopupMenu and pass for that to be used or accept DefaultPopupMenu. */
   export let PopupMenu = DefaultPopupMenu
+  // BEGIN -  Consider removing the following in preference to the `customCSS` mapping:
+  export let menuContainerClass: string|undefined = undefined
+  export let menuClass: string|undefined = undefined
+  export let menuItemClass: string|undefined = undefined
+  export let menuItemHilitedClass: string|undefined = undefined
+  export let inputClass: string|undefined = undefined
+  // END
+  /** A `Map<string, string[]>` for passing custom CSS class references.
+  The following keys can be used in place of their respective component
+  properties with the component properties taking precedence over these.
+  - menuContainerClass
+  - menuClass
+  - menuItemClass
+  - menuItemHilightedClass
+  - inputClass */
+  export let customCSS: Map<string, string[]>|undefined = undefined
+  const _inputClass = (inputClass || customCSS?.get('inputClass')?.join(' ')) ?? ''
+  customCSS?.delete('inputClass')
 
   let menushown: boolean
   let loading = false
-  let options: PopupMenuItem[] = []
+  let options: PopupMenuTypes[] = []
   let hilitedpill: string|undefined
   let inputvalue = ''
   let popupvalue = undefined
@@ -70,7 +87,7 @@
   }
   $: reactToInput(inputvalue, getOptions, selectedSet)
   $: availablemessage = options.filter(o => o.value).length + ' autocomplete choices available'
-  function addSelection (e: CustomEvent & { detail: PopupMenuItem }) {
+  function addSelection (e: CustomEvent & { detail: PopupMenuTypes }) {
     inputvalue = ''
     const opt = { ...e.detail, label: e.detail.label || e.detail.value }
     selected = maxSelections === 1 ? [opt] : [...selected, opt]
@@ -137,7 +154,7 @@
         <ScreenReaderOnly>, click to deselect</ScreenReaderOnly>
       </li>
     {/each}
-    <li class={`input ${inputClass ?? ''}`}>
+    <li class={`input ${_inputClass ?? ''}`}>
       <input type="text" {id} {name} {disabled} {placeholder}
         bind:this={inputelement} bind:value={inputvalue} on:blur
         on:focus={inputfocus} on:keydown={inputkeydown}
@@ -152,7 +169,9 @@
   <slot></slot>
 </fieldset>
 <svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft'
- {usePortal} {loading} {emptyText} {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} items={options} buttonelement={inputelement}
+ {usePortal} {loading} {emptyText} 
+ {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} {customCSS}
+ items={options} buttonelement={inputelement}
  on:change={addSelection}/>
 
 <style>
