@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { MultiSelect } from '$lib'
+  import { MultiSelect, type PopupMenuItem } from '$lib'
   import { sleep } from 'txstate-utils'
   let firstid
   let secondid
-  let fourthid
+  let hybridid
   let longid
   let lotsofid
 
@@ -22,7 +22,7 @@
     return secondItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
 
-  const thirdItems = [
+  const thirdItems: PopupMenuItem[] = [
     { value: 'honda', label: 'Honda' },
     { value: 'dodge', label: 'Dodge' },
     { value: 'hyundai', label: 'Hyundai' },
@@ -33,28 +33,39 @@
     return thirdItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
 
-  // Noticing some issues with getOptions caching causing disabled ellipsis to stick or lag in removal from drop-down.
-  let selectedFourth = [secondItems[0]]
-  $: selectedFourthSet = new Set(selectedFourth.map(s => s.value))
-  $: carOptionsAvailable = !!thirdItems.filter(o => !selectedFourthSet.has(o.value)).length
-  $: fruitOptionsAvailable = !!secondItems.filter(o => !selectedFourthSet.has(o.value)).length
-  $: placeholderFourth = carOptionsAvailable
-    ? fruitOptionsAvailable
-      ? 'Select fruit from defaults or autocomplete for cars...'
-      : 'Autocomplete for car choices...'
-    : fruitOptionsAvailable
-      ? 'Select fruit from available default choices...'
-      : 'All options selected.'
-  $: fruitOptions = carOptionsAvailable
-    ? [...secondItems, { label: '…', value: '', disabled: true }]
-    : secondItems
 
-  async function getOptionsFourth (val: string) {
+  /* ------------------------------------------------------------------------------------------
+   * Demo of combining multiple lists with styling to create a quick options MultiSelect with choice groupings.
+   * ------------------------------------------------------------------------------------------ */
+  const commonHeader = { divider: true, label: 'Commmon Options' }
+  const carsHeader = { divider: true, label: 'Vehicle Makes' }
+  const commonItems = [
+    commonHeader,
+    { value: 'compact', label: 'Compact' },
+    { value: 'truck', label: 'Truck' },
+    { value: 'atv', label: 'ATV' },
+    { value: 'other', label: 'Other Transportation' }
+  ]
+  const carItems = [carsHeader, ...thirdItems]
+  let selectedHybrid = []
+  $: selectedHybridSet = new Set(selectedHybrid.map(s => s.value))
+  $: carOptionsAvailable = carItems.filter(o => 'value' in o && !selectedHybridSet.has(o.value)).length > 1
+  $: commonOptionsAvailable = commonItems.filter(o => 'value' in o && !selectedHybridSet.has(o.value)).length > 1
+  $: placeholderHybrid = carOptionsAvailable
+    ? commonOptionsAvailable
+      ? 'Select a common choice or autocomplete for makes...'
+      : 'Autocomplete for car makes...'
+    : commonOptionsAvailable
+      ? 'Select from available common choices...'
+      : 'All options selected.'
+
+  async function getOptionsHybrid (val: string) {
     if (!val) {
-      return fruitOptions
+      return commonItems
     }
-    return thirdItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
+    return [...commonItems, ...carItems].filter(o => 'divider' in o || o.value.includes(val.toLocaleLowerCase()))
   }
+  // ------------------------------------------------------------------------------------------
 
   const longNamedItems = [
     { value: '1', label: 'Long-Named_ItemNumber: One' },
@@ -97,8 +108,10 @@
 <label for={firstid}>Select up to two fruits</label><br>
 <MultiSelect bind:id={firstid} name="test1" maxSelections={2} selected={[secondItems[0]]} getOptions={getOptionsFirst} />
 
-<label for={fourthid}>Select a fruit or type/select a car with disabled ellipsis to cue car options available</label><br>
-<MultiSelect bind:id={fourthid} name="test4" bind:selected={selectedFourth} bind:placeholder={placeholderFourth} getOptions={getOptionsFourth} />
+<label for={hybridid}>Select a common option or type/select a car model - with group headers and styling</label><br>
+<MultiSelect bind:id={hybridid} name="testhybrid" bind:selected={selectedHybrid} bind:placeholder={placeholderHybrid}
+ getOptions={getOptionsHybrid} menuDividerClass='multiselect-dividers'
+/>
 
 <label for={longid}>Select multiple items with long names and adjust page width</label><br>
 <MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2], longNamedItems[4]]} getOptions={getOptionsLong} />
@@ -114,5 +127,8 @@
 <style>
   :global(.multiselect-input) {
     width: 100%
+  }
+  :global(.multiselect-dividers) {
+    background-color: darkslategrey;
   }
 </style>
