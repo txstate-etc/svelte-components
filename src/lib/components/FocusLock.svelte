@@ -13,7 +13,7 @@ When they do, the escape event will be fired, allowing you to remove the dialog.
 When it goes away, they'll be trapped inside the previous `FocusLock`, and so on.
 -->
 <script context="module" lang="ts">
-  export const FocusLockStack: { focusId: string, pause: () => void, unpause: () => void }[] = []
+  export const FocusLockStack: { focusId: string, pause: () => void, unpause: () => void, update: () => void }[] = []
   const waitAtick = typeof requestAnimationFrame !== 'undefined' ? resolve => requestAnimationFrame(resolve) : resolve => resolve(0)
 </script>
 
@@ -47,9 +47,10 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
     FocusLockStack.push({
       focusId,
       pause: () => { state = 'paused' },
-      unpause: () => { if (state === 'paused') state = 'active' }
+      unpause: () => { if (state === 'paused') state = 'active' },
+      update: () => dispatch('focuslockupdate')
     })
-    dispatch('focuslockupdate')
+    for (const entry of FocusLockStack) entry.update()
     if (typeof returnfocusto === 'undefined') {
       returnfocusto = document.querySelector(':focus') as HTMLElement
     }
@@ -81,7 +82,7 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
     if (idx > -1) FocusLockStack.splice(idx, 1)
     const prevFocusLock = FocusLockStack.slice(-1)[0]
     if (prevFocusLock) prevFocusLock.unpause()
-    dispatch('focuslockupdate')
+    for (const entry of FocusLockStack) entry.update()
   })
   const setInitialFocus = () => {
     const firstfocus = lockelement ? tabbable(lockelement)[0] : undefined
