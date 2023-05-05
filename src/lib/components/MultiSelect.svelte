@@ -12,7 +12,7 @@
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import DefaultPopupMenu from './PopupMenu.svelte'
   import { modifierKey, selectionIsLeft } from '$lib/util'
-  import type { PopupMenuChoice, PopupMenuTypes } from '$lib/types'
+  import type { PopupMenuItem, PopupMenuTypes } from '$lib/types'
 
   export let name: string
   /**
@@ -27,7 +27,7 @@
   /** Consuming components may need to make decisions about what to display or return as options in the popup based
    * on what's already selected. This component property can be used to both pass an initial set of selections but
    * it can also be bound to provide a means to inspect what's selected. */
-  export let selected: PopupMenuChoice[] = []
+  export let selected: PopupMenuItem[] = []
   /** The text to be displayed in the input text box for contextual feedback on what the input text is expecting. */
   export let placeholder = ''
   /** When there are no items (e.g. it's a filtered search and there were no results), we still display one
@@ -80,13 +80,13 @@
       const saveval = inputvalue
       const rawOptions = await optionsCache.get(saveval)
       if (inputvalue !== saveval) return // ignore any results that are out of date
-      options = rawOptions.filter(o => !selectedSet.has(o.value))
+      options = rawOptions.filter(o => !('value' in o) || !selectedSet.has(o.value))
       if (typeof document !== 'undefined' && inputelement === document.activeElement && (options.length || inputvalue?.length)) menushown = true
       loading = false
     }, 250)
   }
   $: reactToInput(inputvalue, getOptions, selectedSet)
-  $: availablemessage = options.filter(o => o.value).length + ' autocomplete choices available'
+  $: availablemessage = options.filter(o => 'value' in o && o.value).length + ' autocomplete choices available'
   function addSelection (e: CustomEvent & { detail: PopupMenuTypes }) {
     inputvalue = ''
     const opt = { ...e.detail, label: e.detail.label || e.detail.value }
@@ -169,7 +169,7 @@
   <slot></slot>
 </fieldset>
 <svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft'
- {usePortal} {loading} {emptyText} 
+ {usePortal} {loading} {emptyText}
  {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} {customCSS}
  items={options} buttonelement={inputelement}
  on:change={addSelection}/>

@@ -1,12 +1,14 @@
 /**  The basic information assocaited with individual choices that are presented in a PopupMenu. */
-export interface PopupMenuChoice {
+export interface PopupMenuDivider {
+  divider: boolean
+  groupName?: string
+}
+
+export interface PopupMenuItem {
   /** The value returned by the PopupMenu when the associated item is selected. */
   value: string
   /** An optional display string to show in the menu for the associated `value`. */
   label?: string
-}
-
-export interface PopupMenuItem extends PopupMenuChoice {
   /** Toggles the choice as one that's visible but is disabled and unclickable until conditions
    * are met that would cause it to become enabled. */
   disabled?: boolean
@@ -20,16 +22,5 @@ export interface PopupMenuItem extends PopupMenuChoice {
   role?: string
 }
 
-/** For possible extension/enhancement to PopupMenu that handles grouping of choices beyond CSS. */
-export interface PopupMenuGroup {
-  /** The identifying name of the item grouping. */
-  name: string
-  /** An optional label for the items grouping. Shown as an unselectable divider `<li>` above
-   * the associated items. */
-  label?: string
-  /** This list of items associated with this grouping. */
-  items: PopupMenuItem[]
-}
-
-export type PopupMenuTypes = (PopupMenuChoice | PopupMenuItem)
+export type PopupMenuTypes = (PopupMenuDivider | PopupMenuItem)
 // export type PopupMenuTypes = (PopupMenuChoice | PopupMenuGroup)

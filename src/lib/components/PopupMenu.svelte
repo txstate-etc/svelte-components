@@ -4,11 +4,11 @@
 -->
 <script lang="ts">
   import { createEventDispatcher, onDestroy, tick } from 'svelte'
-  import { randomid } from 'txstate-utils'
+  import { isNotBlank, randomid } from 'txstate-utils'
   import { Store } from '@txstate-mws/svelte-store'
   import { glue, portal } from '$lib/actions'
   import type { GlueAlignOpts, GlueAlignStore } from '$lib/actions'
-  import type { PopupMenuItem } from '$lib/types'
+  import type { PopupMenuItem, PopupMenuTypes } from '$lib/types'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import { modifierKey } from '$lib/util'
   const dispatch = createEventDispatcher()
@@ -18,7 +18,7 @@
   This component adds all appropriate attributes (tabindex, roles, and aria) automatically. */
   export let buttonelement: HTMLElement
   /** The list of menu items to be shown. Parent may change this at any time based on user activity. */
-  export let items: PopupMenuItem[] = []
+  export let items: PopupMenuTypes[] = []
   export let menushown = false
   export let value: string|undefined = undefined
   /** Control where the menu will appear. Default is to use the current viewport to make a decision to
@@ -79,7 +79,7 @@
   const _menuItemClass = (menuItemClass || customCSS?.get('menuItemClass')?.join(' ')) ?? ''
   const _menuItemHilitedClass = (menuItemHilitedClass || customCSS?.get('menuItemHilitedClass')?.join(' ')) ?? ''
   const _menuItemSelectedClass = (menuItemSelectedClass || customCSS?.get('menuItemSelectedClass')?.join(' ')) ?? ''
-  
+
   let menuelement: HTMLElement|undefined
   const itemelements: HTMLElement[] = []
   let firstactive = 0
@@ -90,9 +90,9 @@
   }
 
   async function reactToItems (..._: any[]) {
-    firstactive = items.findIndex(itm => !itm.disabled && !hiddenItem(itm))
-    lastactive = items.length - [...items].reverse().findIndex(itm => !itm.disabled && !hiddenItem(itm)) - 1
-    if (hilited && items[hilited]?.disabled) hilited = firstactive
+    firstactive = items.findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm))
+    lastactive = items.length - [...items].reverse().findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm)) - 1
+    if (hilited && (items[hilited] as PopupMenuItem)?.disabled) hilited = firstactive
   }
   $: reactToItems(items, value)
 
@@ -119,10 +119,15 @@
 
   function move (idx: number) {
     if (!menushown) return
-    if (items[idx]?.disabled) return
+    while (idx <= lastactive && 'divider' in items[idx]) idx++
+    if ((items[idx] as PopupMenuItem)?.disabled) return
     hilited = Math.max(firstactive, Math.min(lastactive, idx))
     itemelements[hilited].scrollIntoView({ block: 'center' })
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
+  }
+
+  function isSelectable (itm: PopupMenuTypes): itm is PopupMenuItem {
+    return 'value' in itm && !itm.disabled && !hiddenItem(itm)
   }
 
   function onkeydown (e: KeyboardEvent) {
@@ -131,7 +136,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? firstactive - 1) + 1
-        while (items[i]?.disabled || hiddenItem(items[i])) i++
+        while (!isSelectable(items[i])) i++
         move(i)
       } else {
         menushown = true
@@ -141,7 +146,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? lastactive + 1) - 1
-        while (items[i]?.disabled || hiddenItem(items[i])) i--
+        while (!isSelectable(items[i])) i--
         move(i)
       } else {
         menushown = true
@@ -152,7 +157,7 @@
       if (menushown) {
         menushown = false
         if (typeof hilited !== 'undefined') {
-          value = items[hilited]?.value
+          value = (items[hilited] as PopupMenuItem)?.value
           dispatch('change', items[hilited])
         }
       } else {
@@ -166,7 +171,7 @@
         if (typeof hilited !== 'undefined') {
           e.preventDefault()
           menushown = false
-          value = items[hilited]?.value
+          value = (items[hilited] as PopupMenuItem)?.value
           dispatch('change', items[hilited])
         } else {
           if (buttonelement.tagName !== 'INPUT') {
@@ -245,7 +250,7 @@
     dispatch('change', item)
   }
 
-  $: hasSelected = showSelected && items.some(itm => itm.value === value)
+  $: hasSelected = showSelected && items.some(itm => 'value' in itm && itm.value === value)
 </script>
 
 {#if menushown}
@@ -255,8 +260,8 @@
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''}
         class={_menuClass} class:hasSelected class:defaultmenu={!_menuClass && !_menuContainerClass}
         on:keydown={onkeydown}>
-      {#each items as item, i (item.value)}
-        {#if showSelected || item.value !== value}
+      {#each items as item, i ('value' in item ? item.value : `popupmenu_divider_${i}`)}
+        {#if 'value' in item && (showSelected || item.value !== value)}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <li
             id={`${menuid}-${i}`}
@@ -271,6 +276,8 @@
             aria-selected={value === item.value}
             aria-disabled={item.disabled}
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
+        {:else if 'divider' in item && item.divider}
+          <li class="divider" class:group={isNotBlank(item.groupName)}>{item.groupName}</li>
         {/if}
       {/each}
       {#if items.length === 0}
@@ -332,6 +339,14 @@
   }
   li.selected {
     position: relative;
+  }
+  li.divider {
+    height: 0px;
+    border-top: 2px solid slategray;
+  }
+  li.divider.group {
+    height: auto;
+    border-bottom: 2px solid slategray;
   }
   ul.hasSelected li {
     padding-left: 1.4em;

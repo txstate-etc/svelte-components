@@ -6,7 +6,7 @@
   let hybridid
   let longid
   let lotsofid
-  
+
   function getOptionsFirst (val: string) {
     return ['apple', 'orange', 'banana'].filter(o => o.includes(val)).map(value => ({ value }))
   }
@@ -37,8 +37,8 @@
   /* ------------------------------------------------------------------------------------------
    * Demo of combining multiple lists with styling to create a quick options MultiSelect with choice groupings.
    * ------------------------------------------------------------------------------------------ */
-  const commonHeader = { value: 'commonHeader', label: 'Commmon Options', disabled: true, cssKey: 'itemHeader', role: 'grouping' }
-  const carsHeader = { value: 'carsHeader', label: 'Vehicle Makes', disabled: true, cssKey: 'itemHeader', role: 'grouping' }
+  const commonHeader = { divider: true, groupName: 'Commmon Options' }
+  const carsHeader = { divider: true, groupName: 'Vehicle Makes' }
   // const deferredCue = { label: '…', value: '', disabled: true }
   const customCSS: Map<string, string[]> = new Map([
     ['itemHeader', ['multiselect-group-header']],
@@ -55,8 +55,8 @@
   const carItems = [carsHeader, ...thirdItems.map(c => { return { ...c, cssKey: 'itemChoice' } })]
   let selectedHybrid = []
   $: selectedHybridSet = new Set(selectedHybrid.map(s => s.value))
-  $: carOptionsAvailable = carItems.filter(o => !selectedHybridSet.has(o.value)).length > 1
-  $: commonOptionsAvailable = commonItems.filter(o => !selectedHybridSet.has(o.value)).length > 1
+  $: carOptionsAvailable = carItems.filter(o => 'value' in o && !selectedHybridSet.has(o.value)).length > 1
+  $: commonOptionsAvailable = commonItems.filter(o => 'value' in o && !selectedHybridSet.has(o.value)).length > 1
   $: placeholderHybrid = carOptionsAvailable
     ? commonOptionsAvailable
       ? 'Select a common choice or autocomplete for makes...'
@@ -69,7 +69,7 @@
     if (!val) {
       return commonItems
     }
-    return [...commonItems, ...carItems].filter(o => o.value.includes(val.toLocaleLowerCase()))
+    return [...commonItems, ...carItems].filter(o => 'divider' in o || o.value.includes(val.toLocaleLowerCase()))
   }
   // ------------------------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@
     if (!val) return longNamedItems
     return longNamedItems.filter(c => c.label.toLocaleLowerCase().includes(val.toLocaleLowerCase()))
   }
-  
+
   const lotsOfItems = [{ value: '0', label: 'Item: 0' }]
   for (let i = 1; i < 151; i++) {
     lotsOfItems.push({ value: `${i}`, label: `Item: ${i}` })
@@ -132,7 +132,7 @@
 
 <style>
   :global(.multiselect-input) {
-    width: 100% 
+    width: 100%
   }
   :global(.multiselect-group-header) {
     transform: translateX(-2%)
