@@ -43,7 +43,7 @@
   export let adjustparentheight = false
   /**  If the menu would be clipped by an `overflow: hidden`, you can set this prop and it will be placed in
   the specified container, or the `document.body` if you simply say `true`. Placement will still be calculated
-  correctly, unless there are scrolling containers between the button and the menu. */
+  correctly since it uses positon fixed for placement. */
   export let usePortal: HTMLElement|true|undefined = undefined
   /** Useful for when your `items` need to be fetched but you want the associated element shown. Set to loading
   until they're ready to be displayed and the popup menu will not be shown until the `loading` bind is `true`. */
@@ -62,7 +62,7 @@
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
   export let menuItemSelectedClass = ''
-  
+
   let menuelement: HTMLElement|undefined
   const itemelements: HTMLElement[] = []
   let firstactive = 0
@@ -268,7 +268,6 @@
 
 <style>
   div {
-    position: absolute !important;
     z-index: var(--popup-z, calc(var(--modal-z, 3000) + 1));
   }
   ul {

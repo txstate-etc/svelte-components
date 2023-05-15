@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { hashify } from 'txstate-utils'
+  import { keyby } from 'txstate-utils'
   import PopupMenu from '$lib/components/PopupMenu.svelte'
 
   export let showSelected = false
@@ -15,7 +15,7 @@
 
   let button: HTMLElement
   let value: string
-  $: itemsByValue = hashify(items, 'value')
+  $: itemsByValue = keyby(items, 'value')
   $: selected = itemsByValue[value]
 </script>
 
@@ -33,6 +33,6 @@
   .container {
     position: relative;
     overflow: hidden;
-    height: 150px;
+    height: 15000px;
   }
 </style>
