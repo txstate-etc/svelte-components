@@ -1,13 +1,12 @@
 <script lang="ts">
   import { MultiSelect } from '$lib'
-    import { tick } from 'svelte';
   import { sleep } from 'txstate-utils'
   let firstid
   let secondid
   let fourthid
   let longid
   let lotsofid
-  
+
   function getOptionsFirst (val: string) {
     return ['apple', 'orange', 'banana'].filter(o => o.includes(val)).map(value => ({ value }))
   }
@@ -71,7 +70,7 @@
     if (!val) return longNamedItems
     return longNamedItems.filter(c => c.label.toLocaleLowerCase().includes(val.toLocaleLowerCase()))
   }
-  
+
   const lotsOfItems = [{ value: '0', label: 'Item: 0' }]
   for (let i = 1; i < 151; i++) {
     lotsOfItems.push({ value: `${i}`, label: `Item: ${i}` })
@@ -99,7 +98,7 @@
 <MultiSelect bind:id={firstid} name="test1" maxSelections={2} selected={[secondItems[0]]} getOptions={getOptionsFirst} />
 
 <label for={fourthid}>Select a fruit or type/select a car with disabled ellipsis to cue car options available</label><br>
-<MultiSelect bind:id={fourthid} name="test4" bind:selected={selectedFourth} bind:placeholder={placeholderFourth} freshseconds={1} getOptions={getOptionsFourth} />
+<MultiSelect bind:id={fourthid} name="test4" bind:selected={selectedFourth} bind:placeholder={placeholderFourth} getOptions={getOptionsFourth} />
 
 <label for={longid}>Select multiple items with long names and adjust page width</label><br>
 <MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2], longNamedItems[4]]} getOptions={getOptionsLong} />
@@ -114,6 +113,6 @@
 
 <style>
   :global(.multiselect-input) {
-    width: 100% 
+    width: 100%
   }
 </style>

@@ -4,7 +4,7 @@
 <script lang="ts">
   export let className = ''
   import { getContext } from 'svelte'
-  import { resize, passActions, type HTMLActionEntry, type SvelteHTMLActionType } from '$lib/actions'
+  import { resize, passActions, type HTMLActionEntry } from '$lib/actions'
   import { CARDLAYOUT } from '$lib/types'
   import type { CardLayoutContext, Block } from '$lib/types'
 

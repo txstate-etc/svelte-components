@@ -29,7 +29,7 @@
     cards = [...cards, { ptop: randheight() }]
   }
   function add20 () {
-    const newcards = []
+    const newcards: typeof cards = []
     for (let i = 0; i < 20; i++) newcards.push({ ptop: randheight() })
     cards = [...cards, ...newcards]
   }

@@ -13,7 +13,7 @@
   export let className = ''
   export let use: HTMLActionEntry[] = []
   const ssr = typeof navigator === 'undefined' || navigator.userAgent.includes('jsdom')
-  const blocks = []
+  const blocks: Block[] = []
   const gutterstore = writable(gutter)
   let defaultOrder = 0
   setContext(CARDLAYOUT, {
@@ -61,7 +61,7 @@
     const guttereach = gutter * (columns - 1) / columns
     const cycling = detectcycle(realw)
     if (columns !== savecolumns) {
-      for (const block of blocks) block.width.set(`calc(${100.0 / columns}% - ${guttereach}px`)
+      for (const block of blocks) block.width!.set(`calc(${100.0 / columns}% - ${guttereach}px`)
       await tick()
     }
     // collect all the card heights at this new column width
@@ -70,8 +70,8 @@
       if (preserveorder) {
         optimal = [blocks]
         if (columns > 1) {
-          const totalheight = blocks.reduce((totalheight, block) => totalheight + block.height + gutter, 0)
-          const tallestblock = Math.max(...blocks.map(b => b.height))
+          const totalheight = blocks.reduce((totalheight, block) => totalheight + block.height! + gutter, 0)
+          const tallestblock = Math.max(...blocks.map(b => b.height!))
           const minheight = Math.max(totalheight / columns, tallestblock)
           let shortestoverall = totalheight
           // 2d packing problem is NP-hard so this is an O(n) heuristic
@@ -83,9 +83,9 @@
             let colidx = 0
             let tallestcol = 0
             let tallestcolidx = 0
-            const arrangement = []
+            const arrangement: Block[][] = []
             for (const block of blocks) {
-              if (colheight + block.height > colmaxheight && colidx < columns - 1) {
+              if (colheight + block.height! > colmaxheight && colidx < columns - 1) {
                 if (colheight > tallestcol) {
                   tallestcol = colheight
                   tallestcolidx = colidx
@@ -95,7 +95,7 @@
               }
               if (!arrangement[colidx]) arrangement[colidx] = []
               arrangement[colidx].push(block)
-              colheight += block.height + gutter
+              colheight += block.height! + gutter
             }
             if (colheight > tallestcol) {
               tallestcol = colheight
@@ -117,7 +117,7 @@
           // find the column with the smallest current height
           const colidx = heights.reduce((acc, curr, curridx) => curr < heights[acc] ? curridx : acc, 0)
           // record the height we are adding to the chosen column
-          heights[colidx] += block.height + gutter
+          heights[colidx] += block.height! + gutter
           // move the current card to the chosen column
           if (!optimal[colidx]) optimal[colidx] = []
           optimal[colidx].push(block)
@@ -129,8 +129,8 @@
       for (let i = 0; i < optimal.length; i++) {
         for (let j = 0; j < optimal[i].length; j++) {
           const block = optimal[i][j]
-          block.order.set(order++)
-          block.linebreak.set(j === optimal[i].length - 1 && i < optimal.length - 1)
+          block.order!.set(order++)
+          block.linebreak!.set(j === optimal[i].length - 1 && i < optimal.length - 1)
         }
       }
       savecolumns = columns
@@ -142,7 +142,7 @@
     for (let i = 0; i < optimal.length; i++) {
       let top = 0
       for (const block of optimal[i]) {
-        top += block.height + gutter
+        top += block.height! + gutter
       }
       fullheight = Math.max(fullheight, top)
     }
@@ -167,7 +167,7 @@
     triggerrecalc(layoutelement.clientWidth)
   }
   function onResize (e: UIEvent & { currentTarget: any, detail: ElementSize }) {
-    triggerrecalc(e.detail.clientWidth)
+    triggerrecalc(e.detail.clientWidth ?? 0)
   }
   onMount(() => triggerrecalc(layoutelement.clientWidth))
 </script>

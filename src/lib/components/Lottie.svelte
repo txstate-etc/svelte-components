@@ -37,8 +37,8 @@
       name
     })
     animation.addEventListener('DOMLoaded', () => {
-      animation.setSpeed(speed)
-      animation.setDirection(direction)
+      animation!.setSpeed(speed)
+      animation!.setDirection(direction)
     })
   })
 </script>

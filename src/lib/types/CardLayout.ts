@@ -10,7 +10,7 @@ export const CARDLAYOUT = {}
 }
 ``` */
 export interface Block {
-  element: HTMLElement
+  element: HTMLElement | undefined
   order?: SettableSubject<number>
   linebreak?: SettableSubject<boolean>
   width?: SettableSubject<string>

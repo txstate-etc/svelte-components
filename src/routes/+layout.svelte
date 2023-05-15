@@ -78,7 +78,7 @@
 
   function updateLinks (links: Link[], ..._: any) {
     if (!links) return []
-    return links.map(l => ({ ...l, selected: isSelected(l), parent: isParentOfSelected(l), sublinks: updateLinks(l.sublinks) }))
+    return links.map(l => ({ ...l, selected: isSelected(l), parent: isParentOfSelected(l), sublinks: l.sublinks ? updateLinks(l.sublinks) : undefined }))
   }
   $: links = updateLinks(links, $page)
 

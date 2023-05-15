@@ -11,8 +11,8 @@ class ElementQueries {
 
   #processwidths () {
     for (let i = 0; i < this.#watchlist.length; i++) {
-      const widths = []
-      const attrs = []
+      const widths: number[] = []
+      const attrs: (string | null)[] = []
       for (let j = 0; j < this.#watchlist[i].length; j++) {
         widths.push(this.#watchlist[i][j].offsetWidth)
         attrs.push(this.#watchlist[i][j].getAttribute('data-eq'))
@@ -26,7 +26,7 @@ class ElementQueries {
         for (let k = 700; k >= w; k -= 50) { attrstr += `${k}px `; finalw = k }
         if (attrstr !== attrs[j]) el.setAttribute('data-eq', attrstr)
         if (this.#stores.has(el)) {
-          this.#stores.get(el).update(v => v.width === finalw ? v : { ...v, width: finalw })
+          this.#stores.get(el)!.update(v => v.width === finalw ? v : { ...v, width: finalw })
         }
       }
     }
@@ -62,7 +62,7 @@ class ElementQueries {
     const m = document.location.hash.match(/^#([a-z][\w:.-]*)$/i)
     if (m) {
       const id = m[1]
-      requestAnimationFrame(() => { document.getElementById(id) || document.querySelector(`[name="${id}"]`).scrollIntoView(true) })
+      requestAnimationFrame(() => { (document.getElementById(id) || document.querySelector(`[name="${id}"]`))?.scrollIntoView(true) })
     }
   }
 
