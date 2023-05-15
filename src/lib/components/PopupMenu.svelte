@@ -57,19 +57,12 @@
   /** When there are no items (e.g. it's a filtered search and there were no results), we still display one
   disabled item in the menu to let the user know what is going on. Use this prop to specify the message. */
   export let emptyText: string|undefined = undefined
-  export let menuContainerClass = undefined
-  export let menuClass = undefined
-  export let menuItemClass = undefined
-  export let menuItemHilitedClass = undefined
-  export let menuItemSelectedClass = undefined
-  export let menuDividerClass = undefined
-
-  $: _menuContainerClass = menuContainerClass ?? ''
-  $: _menuClass = menuClass ?? ''
-  $: _menuItemClass = menuItemClass ?? ''
-  $: _menuItemHilitedClass = menuItemHilitedClass ?? ''
-  $: _menuItemSelectedClass = menuItemSelectedClass ?? ''
-  $: _menuDividerClass = menuDividerClass ?? ''
+  export let menuContainerClass = ''
+  export let menuClass = ''
+  export let menuItemClass = ''
+  export let menuItemHilitedClass = ''
+  export let menuItemSelectedClass = ''
+  export let menuDividerClass = ''
 
   let menuelement: HTMLElement|undefined
   const itemelements: HTMLElement[] = []
@@ -242,9 +235,9 @@
 {#if menushown}
   <div use:portal={usePortal === true ? undefined : (usePortal || null)}
        use:glue={{ target: buttonelement, align, cover, adjustparentheight, store: computedalign }}
-       class={_menuContainerClass}>
+       class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''}
-        class={_menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass}
+        class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass}
         on:keydown={onkeydown}>
       {#each items as item, i ('value' in item ? item.value : `popupmenu_divider_${i}`)}
         {#if 'value' in item && (showSelected || item.value !== value)}
@@ -252,7 +245,7 @@
           <li
             id={`${menuid}-${i}`}
             bind:this={itemelements[i]}
-            class={`${_menuItemClass} ${i === hilited ? _menuItemHilitedClass : ''} ${value === item.value ? _menuItemSelectedClass : ''}`}
+            class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass : ''} ${value === item.value ? menuItemSelectedClass : ''}`}
             class:disabled={!!item.disabled}
             class:hilited={!menuItemHilitedClass && i === hilited}
             class:selected={showSelected && !menuItemSelectedClass && value === item.value}
@@ -263,11 +256,11 @@
             aria-disabled={item.disabled}
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
         {:else if 'divider' in item && item.divider}
-          <li class={`divider ${_menuDividerClass}`} class:group={isNotBlank(item.label)} aria-disabled={true}>{item.label}</li>
+          <li class={`divider ${menuDividerClass}`} on:mousedown|stopPropagation|preventDefault class:group={isNotBlank(item.label)}>{item.label}</li>
         {/if}
       {/each}
       {#if items.length === 0}
-        <li role="option" class={`${_menuItemClass} disabled`} aria-live="assertive" aria-selected={false}>
+        <li role="option" class={`${menuItemClass} disabled`} aria-live="assertive" aria-selected={false}>
           <slot name="noresults">
             {#if !emptyText}
               <span aria-hidden="true">{'¯\\_(ツ)_/¯'}</span><ScreenReaderOnly>{emptyText || 'no results found'}</ScreenReaderOnly>
@@ -328,6 +321,7 @@
   li.divider {
     height: 0px;
     border-top: 2px solid slategray;
+    cursor: default;
   }
   li.divider.group {
     height: auto;

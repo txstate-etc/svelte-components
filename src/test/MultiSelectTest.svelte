@@ -47,7 +47,7 @@
     { value: 'other', label: 'Other Transportation' }
   ]
   const carItems = [carsHeader, ...thirdItems]
-  let selectedHybrid = []
+  let selectedHybrid: PopupMenuItem[] = []
   $: selectedHybridSet = new Set(selectedHybrid.map(s => s.value))
   $: carOptionsAvailable = carItems.filter(o => 'value' in o && !selectedHybridSet.has(o.value)).length > 1
   $: commonOptionsAvailable = commonItems.filter(o => 'value' in o && !selectedHybridSet.has(o.value)).length > 1
@@ -129,6 +129,6 @@
     width: 100%
   }
   :global(.multiselect-dividers) {
-    background-color: darkslategrey;
+    background-color: #EEEEEE;
   }
 </style>
