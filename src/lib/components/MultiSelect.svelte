@@ -13,6 +13,7 @@
   import DefaultPopupMenu from './PopupMenu.svelte'
   import { modifierKey, selectionIsLeft } from '$lib/util'
   import type { PopupMenuItem, PopupMenuTypes } from '$lib/types'
+  import { SafeStore } from '@txstate-mws/svelte-store'
 
   export let name: string
   /**
@@ -57,7 +58,9 @@
     return await getOptions(ipt)
   }, { freshseconds: 5 })
 
-  $: selectedSet = new Set(selected.map(s => s.value))
+  const selectedStore = new SafeStore(selected)
+  $: $selectedStore = selected
+  $: selectedSet = new Set($selectedStore.map(s => s.value))
   // Stop showing our menu if the maxSelections limit has been reached.
   $: if (maxSelections > 1 && selected.length >= maxSelections && menushown) menushown = false
   let optionsTimer: number
