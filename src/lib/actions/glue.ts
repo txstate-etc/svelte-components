@@ -91,7 +91,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     store?.update(v => ({ ...v, valign, halign }))
   }
   const { destroy: watchDestroy } = watchForMutations(reposition)
-  window.addEventListener('scroll', reposition)
+  document.addEventListener('scroll', reposition, { capture: true })
   return {
     update ({ target: utarget, align: ualign = 'auto', cover: ucover = false, store: ustore }: GlueArgs) {
       align = ualign
@@ -108,7 +108,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     },
     destroy () {
       watchDestroy()
-      window.removeEventListener('scroll', reposition)
+      document.removeEventListener('scroll', reposition)
       if (adjustparentheight) {
         if (formerMinHeight) parent.style.minHeight = formerMinHeight
         parent.style.removeProperty('min-height')
