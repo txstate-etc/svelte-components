@@ -10,7 +10,7 @@
   import type { GlueAlignOpts, GlueAlignStore } from '$lib/actions'
   import type { PopupMenuItem, PopupMenuTypes } from '$lib/types'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
-  import { modifierKey } from '$lib/util'
+  import { getScrollParents, modifierKey } from '$lib/util'
   const dispatch = createEventDispatcher()
 
   /** The DOM element that will act as the "button" for this menu. The menu will be placed next to the
@@ -192,6 +192,8 @@
   }
 
   function cleanup (element: HTMLElement) {
+    for (const observer of observers) observer.disconnect()
+    observers = []
     if (element) {
       element.removeEventListener('click', onbuttonclick)
       element.removeEventListener('keydown', onkeydown)
@@ -208,6 +210,7 @@
 
   // if buttonelement changes we need to handle listeners and aria
   let lastbuttonelement: HTMLElement
+  let observers: IntersectionObserver[] = []
   function reactToButtonElement (buttonelement: HTMLElement) {
     cleanup(lastbuttonelement)
     lastbuttonelement = buttonelement
@@ -216,6 +219,16 @@
       buttonelement.addEventListener('click', onbuttonclick)
       buttonelement.addEventListener('keydown', onkeydown)
       buttonelement.addEventListener('blur', onblur)
+      const parents = getScrollParents(buttonelement)
+      for (const parent of [...parents, undefined]) {
+        const observer = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (entry.intersectionRatio < 1) menushown = false
+          }
+        }, { root: parent, threshold: 1 })
+        observer.observe(buttonelement)
+        observers.push(observer)
+      }
     }
   }
   $: reactToButtonElement(buttonelement)

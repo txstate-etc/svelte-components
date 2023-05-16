@@ -17,3 +17,17 @@ export function modifierKey (e) {
 export function selectionIsLeft (ele: HTMLInputElement | HTMLTextAreaElement) {
   return ele.selectionStart === 0 && ele.selectionEnd === 0
 }
+
+export function getScrollParents (element: HTMLElement) {
+  let style = getComputedStyle(element)
+  const excludeStaticParent = style.position === 'absolute'
+  if (style.position === 'fixed') return [document.body]
+  for (let parent: HTMLElement | null = element; (parent = parent.parentElement);) {
+    style = getComputedStyle(parent)
+    if (excludeStaticParent && style.position === 'static') {
+      continue
+    }
+    if (/(auto|scroll|hidden)/.test(style.overflow + style.overflowY + style.overflowX)) return [parent, ...getScrollParents(parent)]
+  }
+  return [document.body]
+}
