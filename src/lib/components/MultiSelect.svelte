@@ -7,7 +7,7 @@
   debounced callback on the contents of the text input.
 -->
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher, onMount } from 'svelte'
   import { randomid, Cache } from 'txstate-utils'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import DefaultPopupMenu from './PopupMenu.svelte'
@@ -132,6 +132,12 @@
     } else inputelement.removeAttribute('aria-activedescendant')
   }
   $: reactToHilite(hilitedpill, id)
+
+  let gap = 0
+  onMount(() => {
+    const ul = inputelement.closest('.multiselect-selected') as HTMLElement | null
+    if (ul != null) gap = ((ul.offsetHeight - ul.clientHeight) / 2) + parseInt(window.getComputedStyle(ul).paddingBottom)
+  })
 </script>
 
 <fieldset>
@@ -161,7 +167,7 @@
   <slot></slot>
 </fieldset>
 <svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft'
- {usePortal} {loading} {emptyText}
+ {usePortal} {loading} {emptyText} {gap}
  {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} {menuDividerClass}
  items={options} buttonelement={inputelement}
  on:change={addSelection}/>

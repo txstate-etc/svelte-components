@@ -7,6 +7,7 @@ export interface GlueArgs<T extends GlueAlignStore = GlueAlignStore> {
   target: HTMLElement
   align?: GlueAlignOpts
   cover?: boolean
+  gap?: number
   adjustparentheight?: boolean
   store?: SettableSubject<T>
 }
@@ -16,7 +17,7 @@ export interface GlueAlignStore {
   halign: 'left' | 'right'
 }
 
-export function glue (el: HTMLElement, { target, align = 'auto', cover = false, adjustparentheight = false, store }: GlueArgs) {
+export function glue (el: HTMLElement, { target, align = 'auto', cover = false, gap = 0, adjustparentheight = false, store }: GlueArgs) {
   let halign: GlueAlignStore['halign']
   let valign: GlueAlignStore['valign']
   const parent: HTMLElement = el.offsetParent as HTMLElement
@@ -49,7 +50,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     const targetHeight = rect.height
     if (autoalign === 'bottomleft') {
       requestAnimationFrame(() => {
-        el.style.top = `${rect.top + (cover ? 0 : targetHeight)}px`
+        el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
         el.style.left = `${rect.left}px`
         el.style.bottom = ''
         el.style.right = ''
@@ -59,7 +60,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       halign = 'left'
     } else if (autoalign === 'bottomright') {
       requestAnimationFrame(() => {
-        el.style.top = `${rect.top + (cover ? 0 : targetHeight)}px`
+        el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
         el.style.left = ''
         el.style.bottom = ''
         el.style.right = `${rect.right}px`
@@ -71,7 +72,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       requestAnimationFrame(() => {
         el.style.top = ''
         el.style.left = `${rect.left}px`
-        el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight)}px`
+        el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`
         el.style.right = ''
         adjustParentHeight()
       })
@@ -81,7 +82,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       requestAnimationFrame(() => {
         el.style.top = ''
         el.style.left = ''
-        el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight)}px`
+        el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`
         el.style.right = `${rect.right}px`
         adjustParentHeight()
       })
@@ -93,9 +94,10 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
   const { destroy: watchDestroy } = watchForMutations(reposition)
   document.addEventListener('scroll', reposition, { capture: true })
   return {
-    update ({ target: utarget, align: ualign = 'auto', cover: ucover = false, store: ustore }: GlueArgs) {
+    update ({ target: utarget, align: ualign = 'auto', cover: ucover = false, gap: ugap = 0, store: ustore }: GlueArgs) {
       align = ualign
       cover = ucover
+      gap = ugap
       if (ustore && ustore !== store) {
         ustore.update(v => ({ ...v, valign, halign }))
         store = ustore

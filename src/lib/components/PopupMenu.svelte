@@ -38,6 +38,8 @@
   menu is above or below your button so you know which corners to round and which to leave square. Note that
   the values do not update when the menu is hidden, so you may need to rely on `menushown` as well. */
   export let computedalign = new Store<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
+  /** Create some spacing between the specified button element and the menu, in pixels */
+  export let gap = 0
   /** Set to `true` if you want the parent element's styling to increase its minHeight when necessary. Useful
   for parent elements not styled for variable size children and which you want override the the size of. */
   export let adjustparentheight = false
@@ -247,7 +249,7 @@
 
 {#if menushown}
   <div use:portal={usePortal === true ? undefined : (usePortal || null)}
-       use:glue={{ target: buttonelement, align, cover, adjustparentheight, store: computedalign }}
+       use:glue={{ target: buttonelement, align, cover, gap, adjustparentheight, store: computedalign }}
        class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''}
         class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass}
