@@ -22,6 +22,12 @@
   export let getOptions: (search: string) => Promise<PopupMenuTypes[]>|PopupMenuTypes[]
   export let id = randomid()
   export let disabled = false
+  export let menuContainerClass = ''
+  export let menuClass = ''
+  export let menuItemClass = ''
+  export let menuItemHilitedClass = ''
+  export let inputClass = ''
+  export let menuDividerClass = ''
   /** The maximum number of selections allowed before making new selections is disabled. Default of 0 is unlimited. */
   export let maxSelections = 0
   /** Consuming components may need to make decisions about what to display or return as options in the popup based
@@ -37,13 +43,6 @@
   export let descid: string | undefined = undefined
   /** You can define your own PopupMenu and pass for that to be used or accept DefaultPopupMenu. */
   export let PopupMenu = DefaultPopupMenu
-  export let menuContainerClass: string|undefined = undefined
-  export let menuClass: string|undefined = undefined
-  export let menuItemClass: string|undefined = undefined
-  export let menuItemHilitedClass: string|undefined = undefined
-  export let inputClass: string|undefined = undefined
-  export let menuDividerClass: string|undefined = undefined
-  $: _inputClass = inputClass ?? ''
 
   let menushown: boolean
   let loading = false
@@ -140,10 +139,11 @@
         on:click|preventDefault|stopPropagation={() => !disabled && removeSelection(option, i, 1)} on:mousedown={e => disabled && e.preventDefault()}
         aria-selected="true">
         {option.label || option.value}
+        <i aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><path fill="currentColor" d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128L50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/></svg></i>
         <ScreenReaderOnly>, click to deselect</ScreenReaderOnly>
       </li>
     {/each}
-    <li class={`input ${_inputClass ?? ''}`}>
+    <li class={`input ${inputClass}`}>
       <input type="text" {id} {name} {disabled} {placeholder}
         bind:this={inputelement} bind:value={inputvalue} on:blur
         on:focus={inputfocus} on:keydown={inputkeydown}
@@ -199,6 +199,7 @@
     height: 100%;
   }
   .multiselect-pill {
+    position: relative;
     cursor: pointer;
     flex-grow: 0;
     margin-right: 0.3em;
@@ -207,7 +208,21 @@
     border: var(--multiselect-pill-border, 1px solid gray);
     background-color: var(--multiselect-pill-bg, transparent);
     color: var(--multiselect-pill-text, black);
-    padding: var(--multiselect-pill-padding, 0.3em 0.5em);
+    padding: var(--multiselect-pill-padding-top, 0.3em) var(--multiselect-pill-padding-left, 0.5em);
+    padding-right: calc(var(--multiselect-pill-padding-left, 0.5em) + 1.1em);
+  }
+  .multiselect-pill i {
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: calc(var(--multiselect-pill-padding-left, 0.5em) - 0.1em);
+    transform: translateY(-50%);
+    width: 1em;
+    height: 1em;
+  }
+  .multiselect-pill svg {
+    width: 100%;
+    height: 100%;
   }
   .multiselect-selected.disabled {
     opacity: 0.5;
