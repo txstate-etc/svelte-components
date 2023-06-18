@@ -1,11 +1,12 @@
 import { Store } from '@txstate-mws/svelte-store'
 import type { WritableSubject } from '@txstate-mws/svelte-store'
-import { debounced, watchForPositionChange } from '../util/index.js'
+import { debounced, watchForPositionChangeInContainer } from '../util/index.js'
 import type { ElementOffsets } from '../util/index.js'
 
 interface OffsetConfig<T extends ElementOffsets = ElementOffsets> {
   debounce?: boolean | number
   store?: WritableSubject<T>
+  container?: HTMLElement | 'nearest'
 }
 
 export class OffsetStore extends Store<ElementOffsets> {
@@ -23,18 +24,19 @@ export function offset (el: HTMLElement, config?: OffsetConfig) {
     el.dispatchEvent(new CustomEvent('offset', { detail: current }))
   }
   let resolvedchange = config?.debounce ? debounced(lookforoffsetchange, config.debounce) : lookforoffsetchange
-
-  const { destroy, update } = watchForPositionChange(el, resolvedchange)
+  const offsetContainer = !config?.container ? document.body : (config.container === 'nearest' ? el.offsetParent as HTMLElement ?? document.body : config.container)
+  const { destroy, update } = watchForPositionChangeInContainer(el, offsetContainer, resolvedchange)
 
   return {
     update (newConfig?: OffsetConfig) {
+      const offsetContainer = !config?.container ? document.body : (config.container === 'nearest' ? el.offsetParent as HTMLElement ?? document.body : config.container)
       if (newConfig?.debounce === true) newConfig.debounce = 100
       if (newConfig?.store !== config?.store) {
         newConfig?.store?.update(v => ({ ...v, ...lastOffset }))
       }
       if (newConfig?.debounce !== config?.debounce) {
         resolvedchange = newConfig?.debounce ? debounced(lookforoffsetchange, newConfig.debounce as any) : lookforoffsetchange
-        update(el, resolvedchange)
+        update(el, offsetContainer, resolvedchange)
       }
       config = newConfig
     },
