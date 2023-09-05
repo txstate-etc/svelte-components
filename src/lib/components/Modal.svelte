@@ -58,6 +58,7 @@ Any time the Modal is in the DOM, it will take over the screen. You make it go a
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     background-color: var(--modal-bg, rgba(0, 0, 0, 0.7));
     z-index: var(--modal-z);
     display: flex;
@@ -70,6 +71,7 @@ Any time the Modal is in the DOM, it will take over the screen. You make it go a
   .modal-backdrop :global(.modal-container) {
     max-width: 100vw;
     max-height: 100vh;
+    max-height: 100dvh;
     overflow: auto;
   }
 </style>
