@@ -155,7 +155,7 @@
     if (width === savewidth && !hardrequired) return
     cancelAnimationFrame(timer)
     timer = requestAnimationFrame(() => {
-      recalculate(width)
+      void recalculate(width)
       savewidth = width
     })
   }
@@ -169,7 +169,7 @@
   function onResize (e: UIEvent & { currentTarget: any, detail: ElementSize }) {
     triggerrecalc(e.detail.clientWidth ?? 0)
   }
-  onMount(() => triggerrecalc(layoutelement.clientWidth))
+  onMount(() => { triggerrecalc(layoutelement.clientWidth) })
 </script>
 
 <ul class="cardlayout {className}" class:ssr style:height={ssr ? undefined : `${fullheight + gutter}px`} bind:this={layoutelement} use:resize on:resize={onResize} use:passActions={use}>

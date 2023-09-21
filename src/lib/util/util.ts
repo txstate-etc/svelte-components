@@ -3,7 +3,7 @@ export function classes (...classNames: (string | undefined)[]) {
 }
 
 export function debounced (fn: (..._: any[]) => any, timeout: number) {
-  let timer: NodeJS.Timeout
+  let timer: number
   return (...args: any[]) => {
     clearTimeout(timer)
     timer = setTimeout(() => fn(...args), timeout)

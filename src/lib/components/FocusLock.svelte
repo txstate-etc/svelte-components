@@ -18,11 +18,17 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
 </script>
 
 <script lang="ts">
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte'
+  import { tabbable } from 'tabbable'
+  import { randomid, sleep } from 'txstate-utils'
+  import { buttonify } from '../actions'
+  import ScreenReaderOnly from './ScreenReaderOnly.svelte'
+
   export let escapable = true
   export let hidefocus = true
   export let hidefocuslabel = 'focus is above modal dialog, start tabbing'
-  export let initialfocus: string|undefined = undefined
-  export let returnfocusto: HTMLElement|null|undefined = undefined
+  export let initialfocus: string | undefined = undefined
+  export let returnfocusto: HTMLElement | null | undefined = undefined
   /** If you expect any popup menus to be added to the body, we need to know that they
   are considered to be part of the focus lock, or else the modal will be dismissed
   when the user clicks inside. Use commas to include multiple selectors. */
@@ -31,11 +37,6 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
   export { className as class }
   export let focusId = randomid()
 
-  import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte'
-  import { tabbable } from 'tabbable'
-  import { randomid, sleep } from 'txstate-utils'
-  import { buttonify } from '../actions'
-  import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   const dispatch = createEventDispatcher()
   let lockelement: HTMLElement
   let abovelockelement: HTMLElement
@@ -86,13 +87,13 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
   })
   const setInitialFocus = () => {
     const firstfocus = lockelement ? tabbable(lockelement)[0] : undefined
-    if (firstfocus && firstfocus.focus) {
+    if (firstfocus?.focus) {
       firstfocus.focus()
     }
   }
   const setLastFocus = () => {
     const lastfocus = lockelement ? tabbable(lockelement).slice(-1)[0] : undefined
-    if (lastfocus && lastfocus.focus) {
+    if (lastfocus?.focus) {
       lastfocus.focus()
     }
   }
@@ -116,9 +117,11 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
   }
 </script>
 <svelte:window on:mousedown={windowclick} />
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <div class={className} role="alertdialog" aria-modal="true" on:click|stopPropagation on:mousedown|stopPropagation on:keydown|stopPropagation={keydown} on:focusin={focusin}>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div bind:this={abovelockelement} tabindex="0"></div>
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div bind:this={lockelement} on:keydown={keydown}>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     {#if hidefocus}<div class="hiddenfocus" use:buttonify on:blur={() => { hidefocus = false }} on:click={() => escapable && dispatch('escape')}><ScreenReaderOnly>{hidefocuslabel}{#if escapable}, click to escape or use escape key at any time{/if}</ScreenReaderOnly></div>{/if}

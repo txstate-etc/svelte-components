@@ -26,7 +26,7 @@
     "@sveltejs/package": "^2.0.2",
     "@types/tabbable": "^3.1.2",
     "eslint-config-standard-with-typescript": "^39.0.0",
-    "eslint-plugin-svelte3": "^4.0.0",
+    "eslint-plugin-svelte": "^2.0.0",
     "svelte-check": "^3.0.1",
     "svelte-preprocess": "^5.0.0",
     "svelte2tsx": "^0.6.0",

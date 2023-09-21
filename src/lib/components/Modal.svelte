@@ -15,10 +15,10 @@ Any time the Modal is in the DOM, it will take over the screen. You make it go a
   export let containerClass = ''
   export let escapable = true
   export let hidefocus = true
-  export let hidefocuslabel: string|undefined = undefined
-  export let initialfocus: string|undefined = undefined
-  export let returnfocusto: HTMLElement|undefined = undefined
-  export let usePortal: HTMLElement|undefined = undefined
+  export let hidefocuslabel: string | undefined = undefined
+  export let initialfocus: string | undefined = undefined
+  export let returnfocusto: HTMLElement | undefined = undefined
+  export let usePortal: HTMLElement | undefined = undefined
   /** If you expect any popup menus to be added to the body, we need to know that they
   are considered to be part of the focus lock, or else the modal will be dismissed
   when the user clicks inside. Use commas to include multiple selectors. */
@@ -45,7 +45,8 @@ Any time the Modal is in the DOM, it will take over the screen. You make it go a
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div use:portal={usePortal} class="modal-backdrop" style:--modal-z={stackPosition * 10 + 3000} class:opaque on:mousedown|stopPropagation|preventDefault={() => escapable && endmodal()}>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div use:portal={usePortal} class="modal-backdrop" style:--modal-z={stackPosition * 10 + 3000} class:opaque on:mousedown|stopPropagation|preventDefault={() => { escapable && endmodal() }}>
   <FocusLock bind:focusId class="modal-container {containerClass}" {includeselector} {escapable} on:escape {hidefocus} {hidefocuslabel} {returnfocusto} {initialfocus} on:focuslockupdate={onFocusLockUpdate}>
     <slot></slot>
   </FocusLock>

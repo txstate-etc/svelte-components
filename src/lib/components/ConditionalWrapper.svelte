@@ -23,11 +23,11 @@ Any props you provide (except the ConditionalWrapper props like `condition`) wil
 to the wrapper element/component, if it gets inserted.
 -->
 <script lang="ts">
-  export let condition: boolean|undefined
-  export let component: any|undefined = undefined
+  export let condition: boolean | undefined
+  export let component: any | undefined = undefined
   export let a = false
   export let span = false
-  export let element: HTMLElement|undefined = undefined
+  export let element: HTMLElement | undefined = undefined
   $: passthrough = (({ condition, component, a, span, element, ...passthrough }) => passthrough)($$props)
 </script>
 

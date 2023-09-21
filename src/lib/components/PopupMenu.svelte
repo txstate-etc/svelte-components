@@ -20,7 +20,7 @@
   /** The list of menu items to be shown. Parent may change this at any time based on user activity. */
   export let items: PopupMenuTypes[] = []
   export let menushown = false
-  export let value: string|undefined = undefined
+  export let value: string | undefined = undefined
   /** Control where the menu will appear. Default is to use the current viewport to make a decision to
   maximize potential for menu growth. */
   export let align: GlueAlignOpts = 'auto'
@@ -32,7 +32,7 @@
   /** When defined, this width will be passed through to the menu's CSS width. Use a valid CSS dimension
   such as 33em or 159px. Generally this will be used when you need to match the menu width to something
   else, like the button. If the width is static like 100% a simple CSS rule is likely more efficient. */
-  export let width:string|undefined = undefined
+  export let width: string | undefined = undefined
   /** Bind this prop to receive a store that is updated each time a menu placement decision is made. Example
   of when this is useful is when you are trying to round corners of your button and need to know whether the
   menu is above or below your button so you know which corners to round and which to leave square. Note that
@@ -46,19 +46,19 @@
   /**  If the menu would be clipped by an `overflow: hidden`, you can set this prop and it will be placed in
   the specified container, or the `document.body` if you simply say `true`. Placement will still be calculated
   correctly since it uses positon fixed for placement. */
-  export let usePortal: HTMLElement|true|undefined = undefined
+  export let usePortal: HTMLElement | true | undefined = undefined
   /** Useful for when your `items` need to be fetched but you want the associated element shown. Set to loading
   until they're ready to be displayed and the popup menu will not be shown until the `loading` bind is `true`. */
   export let loading = false
   /** A bindable value for inspecting which item in `items` is currently highlighted as the item currently
   active in the list. This is not the same as `value` and the highlighted item may or may not be selected as
   for the `value` of the field. */
-  export let hilited: number|undefined = undefined
+  export let hilited: number | undefined = undefined
   /** The id of the <ul> element that is the displayed list of items. */
   export let menuid = randomid()
   /** When there are no items (e.g. it's a filtered search and there were no results), we still display one
   disabled item in the menu to let the user know what is going on. Use this prop to specify the message. */
-  export let emptyText: string|undefined = undefined
+  export let emptyText: string | undefined = undefined
   export let menuContainerClass = ''
   export let menuClass = ''
   export let menuItemClass = ''
@@ -66,7 +66,7 @@
   export let menuItemSelectedClass = ''
   export let menuDividerClass = ''
 
-  let menuelement: HTMLElement|undefined
+  let menuelement: HTMLElement | undefined
   const itemelements: HTMLElement[] = []
   let firstactive = 0
   let lastactive = items.length - 1
@@ -80,7 +80,7 @@
     lastactive = items.length - [...items].reverse().findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm)) - 1
     if (hilited && (items[hilited] as PopupMenuItem)?.disabled) hilited = firstactive
   }
-  $: reactToItems(items, value)
+  $: void reactToItems(items, value)
 
   async function reactToMenuShown (_: boolean) {
     if (!buttonelement) {
@@ -101,7 +101,7 @@
       if (buttonelement !== document.activeElement) buttonelement.focus()
     }
   }
-  $: reactToMenuShown(menushown)
+  $: void reactToMenuShown(menushown)
 
   function move (idx: number) {
     if (!menushown) return
@@ -126,7 +126,7 @@
         move(i)
       } else {
         menushown = true
-        tick().then(() => move(firstactive))
+        tick().then(() => { move(firstactive) }).catch(console.error)
       }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
@@ -136,7 +136,7 @@
         move(i)
       } else {
         menushown = true
-        tick().then(() => move(lastactive))
+        tick().then(() => { move(lastactive) }).catch(console.error)
       }
     } else if (e.key === 'Enter') {
       e.preventDefault()
@@ -148,7 +148,7 @@
         }
       } else {
         menushown = true
-        tick().then(() => move(firstactive))
+        tick().then(() => { move(firstactive) }).catch(console.error)
       }
     } else if (e.key === ' ') {
       // buttonelement might be a text input if this popup is searchable,
@@ -169,7 +169,7 @@
         if (buttonelement.tagName !== 'INPUT') {
           e.preventDefault()
           menushown = true
-          tick().then(() => move(firstactive))
+          tick().then(() => { move(firstactive) }).catch(console.error)
         }
       }
     } else if (menushown && e.key === 'Escape') {
@@ -186,7 +186,7 @@
     if (!loading) menushown = !menushown
   }
 
-  async function onblur (e: FocusEvent) {
+  function onblur (e: FocusEvent) {
     // tabindex=-1 on our menu elements means e.relatedTarget will be set
     if (!(e.relatedTarget instanceof HTMLElement && menuelement?.contains(e.relatedTarget))) {
       blurTimer = requestAnimationFrame(() => { if (buttonelement !== document.activeElement) menushown = false })
@@ -208,7 +208,7 @@
     }
   }
 
-  onDestroy(() => cleanup(buttonelement))
+  onDestroy(() => { cleanup(buttonelement) })
 
   // if buttonelement changes we need to handle listeners and aria
   let lastbuttonelement: HTMLElement
@@ -271,6 +271,7 @@
             aria-disabled={item.disabled}
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
         {:else if 'divider' in item && item.divider}
+          <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
           <li class={`divider ${menuDividerClass}`} on:mousedown|stopPropagation|preventDefault class:group={isNotBlank(item.label)}>{item.label}</li>
         {/if}
       {/each}

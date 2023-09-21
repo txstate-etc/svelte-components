@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
   /** An id to bind with the `<span>` used to implement this component. */
-  export let id: string|undefined = undefined
+  export let id: string | undefined = undefined
   export let arialive: 'off' | 'assertive' | 'polite' | undefined = undefined
   export let ariaatomic: boolean | 'false' | 'true' | undefined = undefined
 </script>

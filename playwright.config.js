@@ -23,7 +23,7 @@ export const config = {
   forbidOnly: !!process.env.CI,
 
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
 
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
@@ -42,6 +42,7 @@ export const config = {
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    video: 'on-first-retry'
   },
 
   /* Configure projects for major browsers */

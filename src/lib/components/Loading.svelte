@@ -7,8 +7,8 @@
   import { afterUpdate } from 'svelte'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import { resize, ResizeStore } from '$lib/actions'
-  export let loading: boolean|undefined
-  export let height: string|undefined = undefined
+  export let loading: boolean | undefined
+  export let height: string | undefined = undefined
   const store = new ResizeStore()
 
   let containerelement: HTMLElement

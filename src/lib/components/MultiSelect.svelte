@@ -20,7 +20,7 @@
    * Function to pass to the component that tells it how to use the text in the text input to determine what
    * `PopupMenuItem[]` should be displayed in the `PopupMenu`. Items already 'selected' from the popup menu will
    * be tracked and automatically filtered from the popup if returned as one of the `PopupMenuItem[]` by `getOptions`. */
-  export let getOptions: (search: string) => Promise<PopupMenuTypes[]>|PopupMenuTypes[]
+  export let getOptions: (search: string) => Promise<PopupMenuTypes[]> | PopupMenuTypes[]
   export let id = randomid()
   export let disabled = false
   export let menuContainerClass = ''
@@ -39,8 +39,8 @@
   export let placeholder = ''
   /** When there are no items (e.g. it's a filtered search and there were no results), we still display one
   disabled item in the menu to let the user know what is going on. Use this prop to specify the message. */
-  export let emptyText: string|undefined = undefined
-  export let usePortal: HTMLElement|true|undefined = undefined
+  export let emptyText: string | undefined = undefined
+  export let usePortal: HTMLElement | true | undefined = undefined
   export let descid: string | undefined = undefined
   /** You can define your own PopupMenu and pass for that to be used or accept DefaultPopupMenu. */
   export let PopupMenu = DefaultPopupMenu
@@ -48,7 +48,7 @@
   let menushown: boolean
   let loading = false
   let options: PopupMenuTypes[] = []
-  let hilitedpill: string|undefined
+  let hilitedpill: string | undefined
   let inputvalue = ''
   let popupvalue = undefined
   let inputelement: HTMLInputElement
@@ -76,7 +76,7 @@
       loading = false
     }, 250)
   }
-  $: reactToInput(inputvalue, getOptions, selectedSet)
+  $: void reactToInput(inputvalue, getOptions, selectedSet)
   $: availablemessage = options.filter(o => 'value' in o && o.value).length + ' autocomplete choices available'
   function addSelection (e: CustomEvent & { detail: PopupMenuTypes }) {
     inputvalue = ''
@@ -118,8 +118,8 @@
       e.preventDefault()
     }
   }
-  async function inputfocus () {
-    reactToInput()
+  function inputfocus () {
+    void reactToInput()
   }
 
   let popuphilited
@@ -135,7 +135,7 @@
 
   let gap = 0
   onMount(() => {
-    const ul = inputelement.closest('.multiselect-selected') as HTMLElement | null
+    const ul = inputelement.closest<HTMLElement>('.multiselect-selected')
     if (ul != null) gap = ((ul.offsetHeight - ul.clientHeight) / 2) + parseInt(window.getComputedStyle(ul).paddingBottom)
   })
 </script>
@@ -145,7 +145,7 @@
     {#each selected as option, i}
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <li id={id + option.value} role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
-        on:click|preventDefault|stopPropagation={() => !disabled && removeSelection(option, i, 1)} on:mousedown={e => disabled && e.preventDefault()}
+        on:click|preventDefault|stopPropagation={() => { !disabled && removeSelection(option, i, 1) }} on:mousedown={e => { disabled && e.preventDefault() }}
         aria-selected="true">
         {option.label || option.value}
         <i aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><path fill="currentColor" d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128L50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/></svg></i>

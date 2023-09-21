@@ -23,7 +23,7 @@ to be displayed instead.
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
   export let items: any[]
-  export let config: CollapsingTableColumn[]|undefined = undefined
+  export let config: CollapsingTableColumn[] | undefined = undefined
   export let defaultCellWidth = 150
   export let PopupMenu = DefaultPopupMenu
   export let slots: Record<string, boolean> = $$slots

@@ -1,13 +1,10 @@
 module.exports = {
 	root: true,
 	parser: '@typescript-eslint/parser',
-	extends: 'standard-with-typescript',
-	plugins: ['svelte3', '@typescript-eslint'],
+	extends: ['plugin:svelte/base', 'standard-with-typescript'],
+	plugins: ['@typescript-eslint'],
 	ignorePatterns: ['*.cjs', 'package/**/*', '*.config.js', '*.d.ts'],
-	overrides: [{ files: ['*.svelte'], processor: 'svelte3/svelte3' }],
-	settings: {
-		'svelte3/typescript': () => require('typescript')
-	},
+	overrides: [{ files: ['*.svelte'], parser: 'svelte-eslint-parser', parserOptions: { parser: '@typescript-eslint/parser' } }],
   rules: {
     'import/first': 'off',
 		'no-multiple-empty-lines': 'off',

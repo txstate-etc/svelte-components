@@ -102,7 +102,7 @@
           <li class="pure-menu-item pure-menu-parent" class:pure-menu-selected={link.selected} class:pure-menu-subselected={link.parent}>
             <a href="{link.href}" class="pure-menu-link">{link.label}</a>
           </li>
-          {#if link.sublinks && link.sublinks.length && (link.selected || link.parent)}
+          {#if link.sublinks?.length && (link.selected || link.parent)}
             <ul class="pure-menu-list">
               {#each link.sublinks as sublink}
                 <li class="pure-menu-item" class:pure-menu-selected={sublink.selected}>

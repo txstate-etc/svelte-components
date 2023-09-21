@@ -94,7 +94,7 @@
 
 
 <label for={firstid}>Fruit with only values</label><br>
-<MultiSelect bind:id={firstid} name="test1" selected={[secondItems[0]]} getOptions={getOptionsFirst} />
+<MultiSelect bind:id={firstid} name="test1" selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
 
 <label for={secondid}>Fruit with value and label</label><br>
 <MultiSelect bind:id={secondid} name="test2" selected={[secondItems[1], secondItems[2]]} placeholder='Choose some fruit' getOptions={getOptionsSecond} />
@@ -103,10 +103,10 @@
 <MultiSelect bind:id={secondid} name="test3" disabled selected={[thirdItems[0], thirdItems[3]]} placeholder='Choose some cars' getOptions={getOptionsThird} />
 
 <label for={firstid}>Select a single fruit</label><br>
-<MultiSelect bind:id={firstid} name="test1" maxSelections={1} selected={[secondItems[0]]} getOptions={getOptionsFirst} />
+<MultiSelect bind:id={firstid} name="test4" maxSelections={1} selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
 
 <label for={firstid}>Select up to two fruits</label><br>
-<MultiSelect bind:id={firstid} name="test1" maxSelections={2} selected={[secondItems[0]]} getOptions={getOptionsFirst} />
+<MultiSelect bind:id={firstid} name="test5" maxSelections={2} selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
 
 <label for={hybridid}>Select a common option or type/select a car model - with group headers and styling</label><br>
 <MultiSelect bind:id={hybridid} name="testhybrid" bind:selected={selectedHybrid} bind:placeholder={placeholderHybrid}
@@ -117,12 +117,12 @@
 <MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2], longNamedItems[4]]} getOptions={getOptionsLong} />
 
 <label for={longid}>Multiselect with slotted element and inputClass modification passed to it</label><br>
-<MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2]]} inputClass='multiselect-input' getOptions={getOptionsLong}>
+<MultiSelect bind:id={longid} name="testslotted" selected={[longNamedItems[0], longNamedItems[2]]} inputClass='multiselect-input' getOptions={getOptionsLong}>
   <div>Some slotted element.</div>
 </MultiSelect>
 
 <label for={lotsofid}>Multiselect with lots of items to list</label><br>
-<MultiSelect bind:id={lotsofid} name="testlots" selected={[lotsOfItems[0], lotsOfItems[2]]}  getOptions={getOptionsLots} />
+<MultiSelect bind:id={lotsofid} name="testlots" selected={[lotsOfItems[0], lotsOfItems[2]]} getOptions={getOptionsLots} />
 
 <style>
   :global(.multiselect-input) {
