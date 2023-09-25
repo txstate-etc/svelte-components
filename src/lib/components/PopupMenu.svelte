@@ -66,7 +66,9 @@
   export let menuItemSelectedClass = ''
   export let menuDividerClass = ''
 
-  let menuelement: HTMLElement | undefined
+  export let usemenurole: boolean = false
+
+  let menuelement: HTMLElement|undefined
   const itemelements: HTMLElement[] = []
   let firstactive = 0
   let lastactive = items.length - 1
@@ -137,6 +139,16 @@
       } else {
         menushown = true
         tick().then(() => { move(lastactive) }).catch(console.error)
+      }
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      if (menushown) {
+        move(firstactive)
+      }
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      if (menushown) {
+        move(lastactive)
       }
     } else if (e.key === 'Enter') {
       e.preventDefault()
@@ -217,7 +229,8 @@
     cleanup(lastbuttonelement)
     lastbuttonelement = buttonelement
     if (buttonelement) {
-      buttonelement.setAttribute('aria-haspopup', 'listbox')
+      buttonelement.setAttribute('aria-haspopup', (usemenurole ? 'true' : 'listbox'))
+      buttonelement.setAttribute('aria-expanded', menushown ? 'true' : 'false')
       buttonelement.addEventListener('click', onbuttonclick)
       buttonelement.addEventListener('keydown', onkeydown)
       buttonelement.addEventListener('blur', onblur)
@@ -251,7 +264,7 @@
   <div use:portal={usePortal === true ? undefined : (usePortal || null)}
        use:glue={{ target: buttonelement, align, cover, gap, adjustparentheight, store: computedalign }}
        class={menuContainerClass}>
-    <ul bind:this={menuelement} id={menuid} role='listbox' style={width ? `width: ${width}` : ''}
+    <ul bind:this={menuelement} id={menuid} role={usemenurole ? 'menu' : 'listbox'} style={width ? `width: ${width}` : ''}
         class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass}
         on:keydown={onkeydown}>
       {#each items as item, i ('value' in item ? item.value : `popupmenu_divider_${i}`)}
@@ -265,9 +278,9 @@
             class:hilited={!menuItemHilitedClass && i === hilited}
             class:selected={showSelected && !menuItemSelectedClass && value === item.value}
             on:click={onclick(item)}
-            role='option'
+            role={usemenurole ? 'menuitem' : 'option'}
             tabindex=-1
-            aria-selected={value === item.value}
+            aria-selected={usemenurole ? undefined : (value === item.value)}
             aria-disabled={item.disabled}
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
         {:else if 'divider' in item && item.divider}
@@ -276,7 +289,7 @@
         {/if}
       {/each}
       {#if items.length === 0}
-        <li role="option" class={`${menuItemClass} disabled`} aria-live="assertive" aria-selected={false}>
+        <li role={usemenurole ? 'menuitem' : 'option'} class={`${menuItemClass} disabled`} aria-live="assertive" aria-selected={usemenurole ? undefined : false}>
           <slot name="noresults">
             {#if !emptyText}
               <span aria-hidden="true">{'¯\\_(ツ)_/¯'}</span><ScreenReaderOnly>{emptyText || 'no results found'}</ScreenReaderOnly>

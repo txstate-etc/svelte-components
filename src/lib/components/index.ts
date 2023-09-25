@@ -1,3 +1,4 @@
+export { default as ButtonMenu } from './ButtonMenu.svelte'
 export { default as CardLayout } from './CardLayout.svelte'
 export { default as Card } from './Card.svelte'
 export { default as CollapsingTable } from './CollapsingTable.svelte'
