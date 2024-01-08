@@ -73,7 +73,7 @@
   const itemelements: HTMLElement[] = []
   let firstactive = 0
   let lastactive = items.length - 1
-  $: hasMeaningfulItems = showSelected ? items.filter(itm => 'value' in itm) : items.filter(itm => 'value' in itm && itm.value !== value)
+  $: hasMeaningfulItems = showSelected ? !!items.filter(itm => 'value' in itm).length : !!items.filter(itm => 'value' in itm && itm.value !== value).length
 
   function hiddenItem (item: PopupMenuItem) {
     return !!item && !showSelected && item.value === value
