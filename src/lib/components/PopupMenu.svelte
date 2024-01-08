@@ -241,6 +241,7 @@
       buttonelement.addEventListener('click', onbuttonclick)
       buttonelement.addEventListener('keydown', onkeydown)
       buttonelement.addEventListener('blur', onblur)
+      buttonelement.addEventListener('input', oninput)
       const parents = getScrollParents(buttonelement)
       for (const parent of [...parents, undefined]) {
         const observer = new IntersectionObserver((entries) => {
