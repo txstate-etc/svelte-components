@@ -83,7 +83,6 @@
     firstactive = items.findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm))
     lastactive = items.length - [...items].reverse().findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm)) - 1
     if (hilited && (items[hilited] as PopupMenuItem)?.disabled) hilited = firstactive
-    if (document.activeElement === buttonelement && hasMeaningfulItems && !loading) menushown = true
   }
   $: void reactToItems(items, value)
 
@@ -208,6 +207,10 @@
     }
   }
 
+  function oninput (e: InputEvent) {
+    if (document.activeElement === buttonelement) menushown = true
+  }
+
   function cleanup (element: HTMLElement) {
     for (const observer of observers) observer.disconnect()
     observers = []
@@ -215,6 +218,7 @@
       element.removeEventListener('click', onbuttonclick)
       element.removeEventListener('keydown', onkeydown)
       element.removeEventListener('blur', onblur)
+      element.removeEventListener('input', oninput)
       element.removeAttribute('aria-disabled')
       element.removeAttribute('aria-haspopup')
       element.removeAttribute('aria-expanded')
