@@ -66,7 +66,7 @@
   export let menuItemSelectedClass = ''
   export let menuDividerClass = ''
   export let hideSelectedIndicator = false
-
+  export let hideEmptyText = false
   export let usemenurole: boolean = false
 
   let menuelement: HTMLElement | undefined
@@ -121,7 +121,7 @@
   }
 
   function onkeydown (e: KeyboardEvent) {
-    if (modifierKey(e) || loading) return
+    if (modifierKey(e)) return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       if (menushown) {
@@ -197,7 +197,7 @@
   function onbuttonclick (e: MouseEvent) {
     e.preventDefault()
     cancelAnimationFrame(blurTimer)
-    if (!loading) menushown = !menushown
+    menushown = !menushown
   }
 
   function onblur (e: FocusEvent) {
@@ -267,7 +267,7 @@
   $: hasSelected = showSelected && !hideSelectedIndicator && items.some(itm => 'value' in itm && itm.value === value)
 </script>
 
-{#if menushown}
+{#if menushown && !loading && (hasMeaningfulItems || !hideEmptyText)}
   <div use:portal={usePortal === true ? undefined : (usePortal || null)}
        use:glue={{ target: buttonelement, align, cover, gap, adjustparentheight, store: computedalign }}
        class={menuContainerClass}>

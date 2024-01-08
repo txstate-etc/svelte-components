@@ -1,6 +1,6 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "1.5.10",
+  "version": "1.5.11",
   "description": "Svelte components that are generically useful.",
   "scripts": {
     "prepublishOnly": "svelte-package",
