@@ -65,13 +65,15 @@
   export let menuItemHilitedClass = ''
   export let menuItemSelectedClass = ''
   export let menuDividerClass = ''
+  export let hideSelectedIndicator = false
 
   export let usemenurole: boolean = false
 
-  let menuelement: HTMLElement|undefined
+  let menuelement: HTMLElement | undefined
   const itemelements: HTMLElement[] = []
   let firstactive = 0
   let lastactive = items.length - 1
+  $: hasMeaningfulItems = showSelected ? items.filter(itm => 'value' in itm) : items.filter(itm => 'value' in itm && itm.value !== value)
 
   function hiddenItem (item: PopupMenuItem) {
     return !!item && !showSelected && item.value === value
@@ -81,6 +83,7 @@
     firstactive = items.findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm))
     lastactive = items.length - [...items].reverse().findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm)) - 1
     if (hilited && (items[hilited] as PopupMenuItem)?.disabled) hilited = firstactive
+    if (document.activeElement === buttonelement && hasMeaningfulItems && !loading) menushown = true
   }
   $: void reactToItems(items, value)
 
@@ -119,7 +122,7 @@
   }
 
   function onkeydown (e: KeyboardEvent) {
-    if (modifierKey(e)) return
+    if (modifierKey(e) || loading) return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       if (menushown) {
@@ -257,7 +260,7 @@
     dispatch('change', item)
   }
 
-  $: hasSelected = showSelected && items.some(itm => 'value' in itm && itm.value === value)
+  $: hasSelected = showSelected && !hideSelectedIndicator && items.some(itm => 'value' in itm && itm.value === value)
 </script>
 
 {#if menushown}
@@ -276,7 +279,7 @@
             class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass : ''} ${value === item.value ? menuItemSelectedClass : ''}`}
             class:disabled={!!item.disabled}
             class:hilited={!menuItemHilitedClass && i === hilited}
-            class:selected={showSelected && !menuItemSelectedClass && value === item.value}
+            class:selected={showSelected && !hideSelectedIndicator && value === item.value}
             on:click={onclick(item)}
             role={usemenurole ? 'menuitem' : 'option'}
             tabindex=-1
@@ -288,7 +291,7 @@
           <li class={`divider ${menuDividerClass}`} on:mousedown|stopPropagation|preventDefault class:group={isNotBlank(item.label)}>{item.label}</li>
         {/if}
       {/each}
-      {#if items.length === 0}
+      {#if !hasMeaningfulItems}
         <li role={usemenurole ? 'menuitem' : 'option'} class={`${menuItemClass} disabled`} aria-live="assertive" aria-selected={usemenurole ? undefined : false}>
           <slot name="noresults">
             {#if !emptyText}
