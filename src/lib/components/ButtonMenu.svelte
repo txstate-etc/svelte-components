@@ -8,19 +8,19 @@
   export let buttonelement: HTMLButtonElement
   export let items: PopupMenuTypes[] = []
   export let menushown = false
-  export let value: string|undefined = undefined
+  export let value: string | undefined = undefined
   export let align: GlueAlignOpts = 'auto'
   export let cover = false
   export let showSelected = true
-  export let width:string|undefined = undefined
+  export let width: string | undefined = undefined
   export let computedalign = new Store<GlueAlignStore>({ valign: 'bottom', halign: 'left' })
   export let gap = 0
   export let adjustparentheight = false
-  export let usePortal: HTMLElement|true|undefined = undefined
+  export let usePortal: HTMLElement | true | undefined = undefined
   export let loading = false
-  export let hilited: number|undefined = undefined
+  export let hilited: number | undefined = undefined
   export let menuid = randomid()
-  export let emptyText: string|undefined = undefined
+  export let emptyText: string | undefined = undefined
   export let menuContainerClass = ''
   export let menuClass = ''
   export let menuItemClass = ''

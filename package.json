@@ -1,6 +1,6 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "1.5.12",
+  "version": "1.5.13",
   "description": "Svelte components that are generically useful.",
   "scripts": {
     "prepublishOnly": "svelte-package",
@@ -21,15 +21,15 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.18.1",
-    "@sveltejs/adapter-auto": "^2.0.0",
-    "@sveltejs/kit": "^1.0.1",
+    "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/kit": "^2.0.0",
     "@sveltejs/package": "^2.0.2",
     "@types/tabbable": "^3.1.2",
-    "eslint-config-standard-with-typescript": "^39.0.0",
+    "eslint-config-standard-with-typescript": "^43.0.0",
     "eslint-plugin-svelte": "^2.0.0",
     "svelte-check": "^3.0.1",
     "svelte-preprocess": "^5.0.0",
-    "svelte2tsx": "^0.6.0",
+    "svelte2tsx": "^0.7.0",
     "tslib": "^2.3.1",
     "typescript": "^5.0.4"
   },

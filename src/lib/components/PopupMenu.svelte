@@ -13,6 +13,10 @@
   import { getScrollParents, modifierKey } from '$lib/util'
   const dispatch = createEventDispatcher()
 
+  interface $$Events {
+    change: CustomEvent<PopupMenuItem>
+  }
+
   /** The DOM element that will act as the "button" for this menu. The menu will be placed next to the
   button and be controlled by the button. Keyboard access will be enabled when the button has focus.
   This component adds all appropriate attributes (tabindex, roles, and aria) automatically. */
@@ -293,7 +297,7 @@
           ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
         {:else if 'divider' in item && item.divider}
           <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-          <li class={`divider ${menuDividerClass}`} on:mousedown|stopPropagation|preventDefault class:group={isNotBlank(item.label)}>{item.label}</li>
+          <li class={`divider ${menuDividerClass}`} on:mousedown|stopPropagation|preventDefault={() => {}} class:group={isNotBlank(item.label)}>{item.label}</li>
         {/if}
       {/each}
       {#if !hasMeaningfulItems}
