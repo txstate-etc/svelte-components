@@ -8,7 +8,7 @@
 -->
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte'
-  import { randomid, Cache } from 'txstate-utils'
+  import { randomid, Cache, isNotBlank } from 'txstate-utils'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import DefaultPopupMenu from './PopupMenu.svelte'
   import { modifierKey, selectionIsLeft } from '$lib/util'
@@ -49,9 +49,11 @@
   let loading = false
   let options: PopupMenuTypes[] = []
   let hilitedpill: string | undefined
-  let inputvalue = ''
   let popupvalue = undefined
   let inputelement: HTMLInputElement
+  let menuid: string
+  let announcement = ''
+  const instructionid = randomid()
   const dispatch = createEventDispatcher()
 
   const optionsCache = new Cache(async (ipt: string) => {
@@ -68,21 +70,21 @@
     loading = true
     clearTimeout(optionsTimer)
     setTimeout(async () => {
-      const saveval = inputvalue
+      const saveval = inputelement?.value
       const rawOptions = await optionsCache.get(saveval)
-      if (inputvalue !== saveval) return // ignore any results that are out of date
+      if (inputelement?.value !== saveval) return // ignore any results that are out of date
       options = rawOptions.filter(o => !('value' in o) || !selectedSet.has(o.value))
-      if (typeof document !== 'undefined' && inputelement === document.activeElement && (options.length || inputvalue?.length)) menushown = true
+      if (typeof document !== 'undefined' && inputelement === document.activeElement && (options.length || inputelement?.value.length) && !menushown) menushown = true
       loading = false
     }, 250)
   }
-  $: void reactToInput(inputvalue, getOptions, selectedSet)
-  $: availablemessage = options.filter(o => 'value' in o && o.value).length + ' autocomplete choices available'
+  $: void reactToInput(getOptions, selectedSet)
   function addSelection (e: CustomEvent & { detail: PopupMenuTypes }) {
-    inputvalue = ''
+    inputelement.value = ''
     const opt = { ...e.detail, label: e.detail.label || e.detail.value }
     selected = maxSelections === 1 ? [opt] : [...selected, opt]
     popupvalue = undefined
+    announcement = `${maxSelections === 1 ? 'selected' : 'added'} ${opt.value}`
     dispatch('change', selected)
   }
   function removeSelection (opt: typeof selected[number], idx: number, nextfocus = 1) {
@@ -90,10 +92,12 @@
       hilitedpill = selected[idx + nextfocus]?.value
     }
     selected = selected.filter(s => s.value !== opt.value)
+    if (document.activeElement !== inputelement) inputelement.focus()
+    announcement = `removed ${opt.value}`
     dispatch('change', selected)
   }
 
-  function inputkeydown (e) {
+  function inputkeydown (e: KeyboardEvent) {
     if (modifierKey(e)) return
     if (e.key === 'ArrowLeft' && selectionIsLeft(inputelement)) {
       const idx = hilitedpill ? selected.findIndex(s => s.value === hilitedpill) : selected.length
@@ -110,16 +114,22 @@
         const idx = selected.findIndex(s => s.value === hilitedpill)
         removeSelection(selected[idx], idx, e.key === 'Delete' ? 1 : -1)
         e.preventDefault()
-      } else if (e.key === 'Backspace' && selectionIsLeft(inputelement)) {
-        removeSelection(selected[selected.length - 1], selected.length - 1, -1)
-        e.preventDefault()
       }
     } else if (e.key !== 'Tab' && maxSelections > 1 && selected.length >= maxSelections) {
       e.preventDefault()
+    } else if (e.key === 'ArrowDown') {
+      hilitedpill = undefined
     }
   }
+  let active = false
   function inputfocus () {
     void reactToInput()
+    active = true
+    dispatch('focus')
+  }
+  function inputblur () {
+    active = false
+    dispatch('blur')
   }
 
   let popuphilited
@@ -133,6 +143,8 @@
   }
   $: reactToHilite(hilitedpill, id)
 
+  $: ariainstructions = `${selected.length === 0 ? 'nothing' : selected.length} selected, ${maxSelections ? 'select up to ' + maxSelections + ',' : 'select multiple,'} up down to browse choices, ${selected.length ? 'left right to browse selected,' : ''} touch users must explore screen to find menu`
+
   let gap = 0
   onMount(() => {
     const ul = inputelement.closest<HTMLElement>('.multiselect-selected')
@@ -140,72 +152,64 @@
   })
 </script>
 
-<fieldset>
-  <ul class="multiselect-selected" class:disabled role="listbox">
-    {#each selected as option, i}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <li id={id + option.value} role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
-        on:click|preventDefault|stopPropagation={() => { !disabled && removeSelection(option, i, 1) }} on:mousedown={e => { disabled && e.preventDefault() }}
-        aria-selected="true">
-        {option.label || option.value}
-        <i aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><path fill="currentColor" d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128L50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/></svg></i>
-        <ScreenReaderOnly>, click to deselect</ScreenReaderOnly>
-      </li>
-    {/each}
-    <li class={`input ${inputClass}`}>
-      <input type="text" {id} {name} {disabled} {placeholder}
-        bind:this={inputelement} bind:value={inputvalue} on:blur
-        on:focus={inputfocus} on:keydown={inputkeydown}
-        autocomplete="off" autocorrect="off" spellcheck="false" aria-autocomplete="list"
-        aria-describedby={descid}>
-    </li>
-  </ul>
-  <ScreenReaderOnly arialive="assertive">
-    <span>{selected.length ? selected.length + ' selected' : 'none selected'}, select {maxSelections ? 'up to ' + maxSelections : 'multiple'}, up down to choose, left right to hilite existing choices</span>
-    {#if menushown}<span>{availablemessage}, touch users explore to find autocomplete menu</span>{/if}
-  </ScreenReaderOnly>
+<div class="multiselect" class:disabled role="combobox" aria-controls={menushown ? menuid : undefined} aria-expanded={menushown}>
+  {#if selected.length}
+    <div class="multiselect-selected" role="listbox" aria-label="selected options">
+      {#each selected as option, i (option.value)}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div id={id + option.value} role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
+          on:click|preventDefault|stopPropagation={() => { !disabled && removeSelection(option, i, 1) }} on:mousedown={e => { disabled && e.preventDefault() }}
+          aria-selected="true" aria-posinset={i + 1} aria-setsize={selected.length}>
+          {option.label || option.value}
+          <i aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><path fill="currentColor" d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128L50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/></svg></i>
+          <ScreenReaderOnly>, click to deselect</ScreenReaderOnly>
+        </div>
+      {/each}
+    </div>
+  {/if}
+  <!-- svelte-ignore a11y-role-has-required-aria-props -->
+  <input type="text" class={inputClass} {id} {name} {disabled} {placeholder}
+    bind:this={inputelement} on:input={reactToInput} on:blur={inputblur}
+    on:focus={inputfocus} on:keydown={inputkeydown}
+    autocomplete="off" autocorrect="off" spellcheck="false"
+    aria-describedby="{[descid, instructionid].filter(isNotBlank).join(' ')}">
   <slot></slot>
-</fieldset>
-<svelte:component this={PopupMenu} bind:menushown bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft'
+  <ScreenReaderOnly id={instructionid}>{ariainstructions}</ScreenReaderOnly>
+  <ScreenReaderOnly arialive="polite">{announcement}</ScreenReaderOnly>
+</div>
+
+<svelte:component this={PopupMenu} bind:menushown bind:menuid bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft'
  {usePortal} {loading} {emptyText} {gap}
  {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} {menuDividerClass}
  items={options} buttonelement={inputelement}
  on:change={addSelection}/>
 
 <style>
-  fieldset {
-    border: 0;
-    padding: 0;
-    margin: 0;
-  }
-  fieldset * {
+  .multiselect, .multiselect * {
     box-sizing: border-box;
   }
-  .multiselect-selected {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  .multiselect {
     display: flex;
     flex-wrap: wrap;
-    align-items: stretch;
     padding: var(--multiselect-padding, 0.3em);
     border: var(--multiselect-border, 1px solid #666666);
     border-radius: var(--multiselect-radius, 0.3em);
   }
-  .multiselect-selected:focus-within {
+  .multiselect:focus-within {
     outline-width: var(--multiselect-focus-width, 2px);
     outline-style: solid;
     outline-color: var(--multiselect-focus-color, Highlight);
   }
-  li.input {
-    flex-grow: 1;
+  .multiselect-selected {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
   }
   input {
+    flex-grow: 1;
     outline: 0;
     border: 0;
     min-width: 0;
-    width: 100%;
-    height: 100%;
   }
   .multiselect-pill {
     position: relative;
@@ -236,7 +240,7 @@
   .multiselect-selected.disabled {
     opacity: 0.5;
   }
-  .multiselect-selected.disabled .multiselect-pill {
+  .multiselect.disabled .multiselect-pill {
     cursor: default;
   }
   .multiselect-pill.hilited {

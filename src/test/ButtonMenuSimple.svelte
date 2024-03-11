@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { keyby } from 'txstate-utils'
   import ButtonMenu from '$lib/components/ButtonMenu.svelte'
 
-  export let showSelected = false
   export let items = [
     { value: '0', label: 'Sunday', disabled: true },
     { value: '1', label: 'Monday' },
@@ -14,9 +12,6 @@
   ]
 
   let button: HTMLButtonElement
-  let value: string
-  $: itemsByValue = keyby(items, 'value')
-  $: selected = itemsByValue[value]
 </script>
 
 <div class="topspacer"></div>

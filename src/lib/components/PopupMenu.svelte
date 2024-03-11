@@ -113,8 +113,8 @@
 
   function move (idx: number) {
     if (!menushown) return
-    while (idx <= lastactive && 'divider' in items[idx]) idx++
-    if ((items[idx] as PopupMenuItem)?.disabled) return
+    while (idx <= lastactive && items[idx] != null && 'divider' in items[idx]) idx++
+    if (items[idx] == null || (items[idx] as PopupMenuItem)?.disabled) return
     hilited = Math.max(firstactive, Math.min(lastactive, idx))
     itemelements[hilited].scrollIntoView({ block: 'center' })
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
@@ -130,7 +130,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? firstactive - 1) + 1
-        while (!isSelectable(items[i])) i++
+        while (items[i] && !isSelectable(items[i])) i++
         move(i)
       } else {
         menushown = true
@@ -140,7 +140,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? lastactive + 1) - 1
-        while (!isSelectable(items[i])) i--
+        while (items[i] && !isSelectable(items[i])) i--
         move(i)
       } else {
         menushown = true
@@ -197,7 +197,7 @@
     }
   }
 
-  let blurTimer: any
+  let blurTimer: number
   function onbuttonclick (e: MouseEvent) {
     e.preventDefault()
     cancelAnimationFrame(blurTimer)

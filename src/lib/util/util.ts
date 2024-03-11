@@ -6,6 +6,7 @@ export function debounced (fn: (..._: any[]) => any, timeout: number) {
   let timer: number
   return (...args: any[]) => {
     clearTimeout(timer)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     timer = setTimeout(() => fn(...args), timeout)
   }
 }

@@ -3,8 +3,12 @@
   import { sleep } from 'txstate-utils'
   let firstid
   let secondid
+  let thirdid
+  let fourthid
+  let fifthid
   let hybridid
   let longid
+  let longslotid
   let lotsofid
 
   function getOptionsFirst (val: string) {
@@ -99,14 +103,14 @@
 <label for={secondid}>Fruit with value and label</label><br>
 <MultiSelect bind:id={secondid} name="test2" selected={[secondItems[1], secondItems[2]]} placeholder='Choose some fruit' getOptions={getOptionsSecond} />
 
-<label for={secondid}>Disabled cars with value and label</label><br>
-<MultiSelect bind:id={secondid} name="test3" disabled selected={[thirdItems[0], thirdItems[3]]} placeholder='Choose some cars' getOptions={getOptionsThird} />
+<label for={thirdid}>Disabled cars with value and label</label><br>
+<MultiSelect bind:id={thirdid} name="test3" disabled selected={[thirdItems[0], thirdItems[3]]} placeholder='Choose some cars' getOptions={getOptionsThird} />
 
-<label for={firstid}>Select a single fruit</label><br>
-<MultiSelect bind:id={firstid} name="test4" maxSelections={1} selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
+<label for={fourthid}>Select a single fruit</label><br>
+<MultiSelect bind:id={fourthid} name="test4" maxSelections={1} selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
 
-<label for={firstid}>Select up to two fruits</label><br>
-<MultiSelect bind:id={firstid} name="test5" maxSelections={2} selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
+<label for={fifthid}>Select up to two fruits</label><br>
+<MultiSelect bind:id={fifthid} name="test5" maxSelections={2} selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
 
 <label for={hybridid}>Select a common option or type/select a car model - with group headers and styling</label><br>
 <MultiSelect bind:id={hybridid} name="testhybrid" bind:selected={selectedHybrid} bind:placeholder={placeholderHybrid}
@@ -116,8 +120,8 @@
 <label for={longid}>Select multiple items with long names and adjust page width</label><br>
 <MultiSelect bind:id={longid} name="testlong" selected={[longNamedItems[0], longNamedItems[2], longNamedItems[4]]} getOptions={getOptionsLong} />
 
-<label for={longid}>Multiselect with slotted element and inputClass modification passed to it</label><br>
-<MultiSelect bind:id={longid} name="testslotted" selected={[longNamedItems[0], longNamedItems[2]]} inputClass='multiselect-input' getOptions={getOptionsLong}>
+<label for={longslotid}>Multiselect with slotted element and inputClass modification passed to it</label><br>
+<MultiSelect bind:id={longslotid} name="testslotted" selected={[longNamedItems[0], longNamedItems[2]]} inputClass='multiselect-input' getOptions={getOptionsLong}>
   <div>Some slotted element.</div>
 </MultiSelect>
 
