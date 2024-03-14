@@ -14,7 +14,7 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
 -->
 <script context="module" lang="ts">
   export const FocusLockStack: { focusId: string, pause: () => void, unpause: () => void, update: () => void }[] = []
-  const waitAtick = typeof requestAnimationFrame !== 'undefined' ? resolve => requestAnimationFrame(resolve) : resolve => resolve(0)
+  const waitAtick = typeof requestAnimationFrame !== 'undefined' ? (resolve: () => void) => requestAnimationFrame(resolve) : resolve => resolve(0)
 </script>
 
 <script lang="ts">
@@ -28,7 +28,7 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
   export let hidefocus = true
   export let hidefocuslabel = 'focus is above modal dialog, start tabbing'
   export let initialfocus: string | undefined = undefined
-  export let returnfocusto: HTMLElement | null | undefined = undefined
+  export let returnfocusto: HTMLElement | undefined = undefined
   /** If you expect any popup menus to be added to the body, we need to know that they
   are considered to be part of the focus lock, or else the modal will be dismissed
   when the user clicks inside. Use commas to include multiple selectors. */
@@ -53,7 +53,7 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
     })
     for (const entry of FocusLockStack) entry.update()
     if (typeof returnfocusto === 'undefined') {
-      returnfocusto = document.querySelector(':focus') as HTMLElement
+      returnfocusto = document.activeElement as HTMLElement | undefined
     }
     await sleep(1) // sapper resets focus on page load, so we'll wait a millisecond in case our modal is on screen at load
     if (!lockelement) return // in case we already unmounted

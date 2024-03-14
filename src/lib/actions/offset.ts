@@ -35,7 +35,7 @@ export function offset (el: HTMLElement, config?: OffsetConfig) {
         newConfig?.store?.update(v => ({ ...v, ...lastOffset }))
       }
       if (newConfig?.debounce !== config?.debounce) {
-        resolvedchange = newConfig?.debounce ? debounced(lookforoffsetchange, newConfig.debounce as any) : lookforoffsetchange
+        resolvedchange = newConfig?.debounce ? debounced(lookforoffsetchange, newConfig.debounce) : lookforoffsetchange
         update(el, offsetContainer, resolvedchange)
       }
       config = newConfig

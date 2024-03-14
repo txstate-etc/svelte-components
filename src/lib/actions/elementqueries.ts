@@ -5,7 +5,7 @@ class ElementQueries {
   #busy = false
   #hasInit = false
   #mutationobserver?: MutationObserver
-  #boundRefresh = this.refresh.bind(this)
+  #boundRefresh: () => void = this.refresh.bind(this)
   #subscribers = 0
   #stores = new Map<HTMLElement, WritableSubject<{ width: number }>>()
 
@@ -52,7 +52,7 @@ class ElementQueries {
   refresh () {
     if (!this.#busy && this.#watchlist.length > 0) {
       this.#busy = true
-      requestAnimationFrame(this.#processwidths.bind(this))
+      requestAnimationFrame(this.#processwidths.bind(this) as () => void)
     }
   }
 

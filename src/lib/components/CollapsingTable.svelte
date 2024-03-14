@@ -33,7 +33,7 @@ to be displayed instead.
   let selected: PopupMenuItem | undefined
   let identifyingkeys: string[] = []
   $: firstrow = items?.[0] ?? {}
-  $: columns = config ?? Object.keys(firstrow).map(key => ({ key }))
+  $: columns = config ?? Object.keys(firstrow as object).map(key => ({ key }))
   function reactToColumns (columns: CollapsingTableColumn[]) {
     if (!columns.some(c => c.neverhide)) {
       columns[0].neverhide = true

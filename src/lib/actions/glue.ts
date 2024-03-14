@@ -91,6 +91,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     }
     store?.update(v => ({ ...v, valign, halign }))
   }
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const { destroy: watchDestroy } = watchForMutations(reposition)
   document.addEventListener('scroll', reposition, { capture: true })
   return {

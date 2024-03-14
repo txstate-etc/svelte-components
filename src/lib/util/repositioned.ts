@@ -25,7 +25,7 @@ export function watchForMutations (cb: () => void) {
   cb()
 
   return {
-    destroy () {
+    destroy: () => {
       observers.delete(id)
       if (observers.size === 0) {
         window.removeEventListener('resize', watch)
@@ -49,7 +49,7 @@ export function watchForPositionChange (el: (HTMLElement | undefined)[] | HTMLEl
   const { destroy } = watchForMutations(watch)
 
   return {
-    update (newEl: (HTMLElement | undefined)[] | HTMLElement | undefined, newCb: ((offset: Required<ElementOffsets>) => void) | ((offsets: Required<ElementOffsets>[]) => void)) {
+    update: (newEl: (HTMLElement | undefined)[] | HTMLElement | undefined, newCb: ((offset: Required<ElementOffsets>) => void) | ((offsets: Required<ElementOffsets>[]) => void)) => {
       const changed = newEl !== el || newCb !== cb
       if (changed) {
         el = newEl
@@ -77,7 +77,7 @@ export function watchForPositionChangeInContainer (el: HTMLElement | undefined, 
   const { destroy } = watchForMutations(watch)
 
   return {
-    update (newEl: HTMLElement | undefined, newContainer: HTMLElement | undefined, newCb: (offset: Required<ElementOffsets>) => void) {
+    update: (newEl: HTMLElement | undefined, newContainer: HTMLElement | undefined, newCb: (offset: Required<ElementOffsets>) => void) => {
       const changed = newEl !== el || newContainer !== container || newCb !== cb
       if (changed) {
         el = newEl
