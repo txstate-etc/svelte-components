@@ -84,7 +84,7 @@
     const opt = { ...e.detail, label: e.detail.label || e.detail.value }
     selected = maxSelections === 1 ? [opt] : [...selected, opt]
     popupvalue = undefined
-    announcement = `${maxSelections === 1 ? 'selected' : 'added'} ${opt.value}`
+    announcement = `${maxSelections === 1 ? 'selected' : 'added'} ${opt.label}`
     dispatch('change', selected)
   }
   function removeSelection (opt: typeof selected[number], idx: number, nextfocus = 1) {
@@ -93,7 +93,7 @@
     }
     selected = selected.filter(s => s.value !== opt.value)
     if (document.activeElement !== inputelement) inputelement.focus()
-    announcement = `removed ${opt.value}`
+    announcement = `removed ${opt.label ?? opt.value}`
     dispatch('change', selected)
   }
 

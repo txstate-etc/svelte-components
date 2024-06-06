@@ -276,7 +276,7 @@
   <div use:portal={usePortal === true ? undefined : (usePortal || null)}
        use:glue={{ target: buttonelement, align, cover, gap, adjustparentheight, store: computedalign }}
        class={menuContainerClass}>
-    <ul bind:this={menuelement} id={menuid} role={usemenurole ? 'menu' : 'listbox'} style={width ? `width: ${width}` : ''}
+    <ul bind:this={menuelement} id={menuid} role={usemenurole ? 'menu' : 'listbox'} tabindex="-1" style={width ? `width: ${width}` : ''}
         class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass}
         on:keydown={onkeydown}>
       {#each items as item, i ('value' in item ? item.value : `popupmenu_divider_${i}`)}
