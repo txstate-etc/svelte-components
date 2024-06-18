@@ -43,6 +43,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       const tmpRect = fixedParent.getBoundingClientRect()
       fixedRect = { left: tmpRect.left, right: window.innerWidth - tmpRect.right, top: tmpRect.top, bottom: window.innerHeight - tmpRect.bottom }
     }
+    if (!target) return
     const tmpRect = target.getBoundingClientRect()
     const rect = { left: tmpRect.left - fixedRect.left, right: window.innerWidth - tmpRect.right - fixedRect.right, top: tmpRect.top - fixedRect.top, bottom: window.innerHeight - tmpRect.bottom - fixedRect.bottom, width: tmpRect.width, height: tmpRect.height }
     if (equal(rect, lastrect)) return
@@ -112,7 +113,10 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       if (target !== utarget) {
         target = utarget
         if (!target) el.style.removeProperty('position')
-        else el.style.position = 'fixed'
+        else {
+          el.style.position = 'fixed'
+          reposition()
+        }
       }
     },
     destroy () {
