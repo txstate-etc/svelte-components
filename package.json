@@ -1,6 +1,6 @@
 {
   "name": "@txstate-mws/svelte-components",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Svelte components that are generically useful.",
   "scripts": {
     "prepublishOnly": "svelte-package",
@@ -34,7 +34,7 @@
     "typescript": "^5.0.4"
   },
   "peerDependencies": {
-    "svelte": "^3.53.1 || ^4.0.0"
+    "svelte": "^3.53.1 || ^4.0.0 || ^5.0.0"
   },
   "type": "module",
   "main": "./dist/index.js",
