@@ -59,8 +59,8 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       requestAnimationFrame(() => {
         el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
         el.style.left = `${rect.left}px`
-        el.style.bottom = ''
-        el.style.right = ''
+        el.style.removeProperty('bottom')
+        el.style.removeProperty('right')
         adjustParentHeight()
       })
       valign = 'bottom'
@@ -68,8 +68,8 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     } else if (autoalign === 'bottomright') {
       requestAnimationFrame(() => {
         el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
-        el.style.left = ''
-        el.style.bottom = ''
+        el.style.removeProperty('left')
+        el.style.removeProperty('bottom')
         el.style.right = `${rect.right}px`
         adjustParentHeight()
       })
@@ -77,18 +77,18 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       halign = 'right'
     } else if (autoalign === 'topleft') {
       requestAnimationFrame(() => {
-        el.style.top = ''
+        el.style.removeProperty('top')
         el.style.left = `${rect.left}px`
         el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`
-        el.style.right = ''
+        el.style.removeProperty('right')
         adjustParentHeight()
       })
       valign = 'top'
       halign = 'left'
     } else if (autoalign === 'topright') {
       requestAnimationFrame(() => {
-        el.style.top = ''
-        el.style.left = ''
+        el.style.removeProperty('top')
+        el.style.removeProperty('left')
         el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`
         el.style.right = `${rect.right}px`
         adjustParentHeight()
@@ -139,8 +139,8 @@ function isFixedContainer (el: HTMLElement) {
   if (['transform', 'perspective', 'filter'].includes(css.getPropertyValue('will-change'))) return true // A will-change value of transform, filter, or perspective
   if (css.getPropertyValue('filter') !== 'none') return true // A filter value other than none
   if (['layout', 'paint', 'strict', 'content'].includes(css.getPropertyValue('contain'))) return true // A contain value of layout, paint, strict or content (e.g. contain: paint;)
-  if (css.getPropertyValue('container-type') !== 'normal') return true // A container-type value other than normal
-  if (css.getPropertyValue('backdrop-filter') !== 'none') return true // A backdrop-filter other than none (e.g. backdrop-filter: blur(10px);)
+  if ('container-type' in css && css.getPropertyValue('container-type') !== 'normal') return true // A container-type value other than normal
+  if ('backdrop-filter' in css && css.getPropertyValue('backdrop-filter') !== 'none') return true // A backdrop-filter other than none (e.g. backdrop-filter: blur(10px);)
   return false
 }
 function fixedContainingBlock (el: HTMLElement) {
