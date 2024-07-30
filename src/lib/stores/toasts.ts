@@ -22,8 +22,6 @@ export interface ToastStorage extends Required<Toast> {
 }
 
 export class ToastStore extends Store<ToastStorage[]> {
-  timers: Record<string, number> = {}
-
   add (msg: string, type?: Toast['type'], ttlMs?: number) {
     const resolvedType = type ?? 'error'
     const id = randomid()
@@ -36,7 +34,7 @@ export class ToastStore extends Store<ToastStorage[]> {
       ttlMs: ttlMs ?? (['error', 'warning'].includes(resolvedType) ? 8000 : 5000)
     }
     this.update(v => [...v.filter(t => t.message !== stored.message), stored])
-    this.timers[id] = setTimeout(() => { this.clean() }, stored.ttlMs)
+    setTimeout(() => { this.clean() }, stored.ttlMs)
   }
 
   close (id: string) {
@@ -49,12 +47,12 @@ export class ToastStore extends Store<ToastStorage[]> {
 
   resume (id: string) {
     this.update(v => v.map(t => t.id !== id ? t : { ...t, suspended: false }))
-    this.clean()
+    setTimeout(() => { this.clean() }, 100)
   }
 
   clean () {
     const now = new Date().getTime()
-    this.update(v => v.filter(t => t.suspended || (now - t.stamp.getTime() < t.ttlMs)))
+    this.update(v => v.some(t => t.suspended) ? v : v.filter(t => now - t.stamp.getTime() <= t.ttlMs))
   }
 }
 
