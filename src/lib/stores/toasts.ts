@@ -2,6 +2,7 @@ import { Store } from '@txstate-mws/svelte-store'
 import { randomid } from 'txstate-utils'
 
 export interface Toast {
+  title?: string
   message: string
   /** default is error */
   type?: 'error' | 'warning' | 'info' | 'success'
@@ -12,7 +13,11 @@ export interface Toast {
    */
   ttlMs?: number
 }
-export interface ToastStorage extends Required<Toast> {
+export interface ToastStorage {
+  title?: string
+  message: string
+  type: 'error' | 'warning' | 'info' | 'success'
+  ttlMs: number
   /** each toast gets a random id so it can be dismissed by user interaction */
   id: string
   /** when the toast was created, so we know when it expires */
@@ -22,18 +27,29 @@ export interface ToastStorage extends Required<Toast> {
 }
 
 export class ToastStore extends Store<ToastStorage[]> {
-  add (msg: string, type?: Toast['type'], ttlMs?: number) {
-    const resolvedType = type ?? 'error'
+  add (toast: Toast)
+  add (msg: string, type?: Toast['type'], ttlMs?: number)
+  add (msgOrToast: string | Toast, type?: Toast['type'], ttlMs?: number) {
+    const toast = typeof msgOrToast === 'string'
+      ? {
+          message: msgOrToast,
+          type,
+          ttlMs
+        }
+      : msgOrToast
+
+    const resolvedType = toast.type ?? 'error'
     const id = randomid()
     const stored = {
       id,
       stamp: new Date(),
-      message: msg,
+      title: toast.title,
+      message: toast.message,
       type: resolvedType,
       suspended: false,
-      ttlMs: ttlMs ?? (['error', 'warning'].includes(resolvedType) ? 8000 : 5000)
+      ttlMs: toast.ttlMs ?? (['error', 'warning'].includes(resolvedType) ? 8000 : 5000)
     }
-    this.update(v => [...v.filter(t => t.message !== stored.message), stored])
+    this.update(v => [...v.filter(t => t.message !== stored.message || t.title !== stored.title), stored])
     setTimeout(() => { this.clean() }, stored.ttlMs)
   }
 
