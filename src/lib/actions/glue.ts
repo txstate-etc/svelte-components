@@ -41,11 +41,11 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     let fixedRect = { left: 0, top: 0, right: 0, bottom: 0 }
     if (fixedParent) {
       const tmpRect = fixedParent.getBoundingClientRect()
-      fixedRect = { left: tmpRect.left, right: window.innerWidth - tmpRect.right, top: tmpRect.top, bottom: window.innerHeight - tmpRect.bottom }
+      fixedRect = { left: tmpRect.left, right: document.documentElement.clientWidth - tmpRect.right, top: tmpRect.top, bottom: window.innerHeight - tmpRect.bottom }
     }
     if (!target) return
     const tmpRect = target.getBoundingClientRect()
-    const rect = { left: tmpRect.left - fixedRect.left, right: window.innerWidth - tmpRect.right - fixedRect.right, top: tmpRect.top - fixedRect.top, bottom: window.innerHeight - tmpRect.bottom - fixedRect.bottom, width: tmpRect.width, height: tmpRect.height }
+    const rect = { left: tmpRect.left - fixedRect.left, right: document.documentElement.clientWidth - tmpRect.right - fixedRect.right, top: tmpRect.top - fixedRect.top, bottom: window.innerHeight - tmpRect.bottom - fixedRect.bottom, width: tmpRect.width, height: tmpRect.height }
     if (equal(rect, lastrect)) return
 
     let autoalign = align
