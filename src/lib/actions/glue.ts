@@ -36,16 +36,17 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
   }
 
   let lastrect: DOMRect | undefined
+  let timer: number | undefined
   function reposition () {
     const fixedParent = fixedContainingBlock(el)
     let fixedRect = { left: 0, top: 0, right: 0, bottom: 0 }
     if (fixedParent) {
       const tmpRect = fixedParent.getBoundingClientRect()
-      fixedRect = { left: tmpRect.left, right: document.documentElement.clientWidth - tmpRect.right, top: tmpRect.top, bottom: window.innerHeight - tmpRect.bottom }
+      fixedRect = { left: tmpRect.left, right: document.documentElement.clientWidth - tmpRect.right, top: tmpRect.top, bottom: document.documentElement.clientHeight - tmpRect.bottom }
     }
     if (!target) return
     const tmpRect = target.getBoundingClientRect()
-    const rect = { left: tmpRect.left - fixedRect.left, right: document.documentElement.clientWidth - tmpRect.right - fixedRect.right, top: tmpRect.top - fixedRect.top, bottom: window.innerHeight - tmpRect.bottom - fixedRect.bottom, width: tmpRect.width, height: tmpRect.height }
+    const rect = { left: tmpRect.left - fixedRect.left, right: document.documentElement.clientWidth - tmpRect.right - fixedRect.right, top: tmpRect.top - fixedRect.top, bottom: document.documentElement.clientHeight - tmpRect.bottom - fixedRect.bottom, width: tmpRect.width, height: tmpRect.height }
     if (equal(rect, lastrect)) return
 
     let autoalign = align
@@ -56,7 +57,8 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     }
     const targetHeight = rect.height
     if (autoalign === 'bottomleft') {
-      requestAnimationFrame(() => {
+      cancelAnimationFrame(timer!)
+      timer = requestAnimationFrame(() => {
         el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
         el.style.left = `${rect.left}px`
         el.style.removeProperty('bottom')
@@ -66,7 +68,8 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       valign = 'bottom'
       halign = 'left'
     } else if (autoalign === 'bottomright') {
-      requestAnimationFrame(() => {
+      cancelAnimationFrame(timer!)
+      timer = requestAnimationFrame(() => {
         el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
         el.style.removeProperty('left')
         el.style.removeProperty('bottom')
@@ -76,7 +79,8 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       valign = 'bottom'
       halign = 'right'
     } else if (autoalign === 'topleft') {
-      requestAnimationFrame(() => {
+      cancelAnimationFrame(timer!)
+      timer = requestAnimationFrame(() => {
         el.style.removeProperty('top')
         el.style.left = `${rect.left}px`
         el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`
@@ -86,7 +90,8 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       valign = 'top'
       halign = 'left'
     } else if (autoalign === 'topright') {
-      requestAnimationFrame(() => {
+      cancelAnimationFrame(timer!)
+      timer = requestAnimationFrame(() => {
         el.style.removeProperty('top')
         el.style.removeProperty('left')
         el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`

@@ -42,6 +42,7 @@
         { label: 'body placement', href: '/popupmenu/body' },
         { label: 'button is parent', href: '/popupmenu/parent' },
         { label: 'scrollable', href: '/popupmenu/scrollable' },
+        { label: 'insidescrolldiv', href: '/popupmenu/insidescrolldiv' },
         { label: 'no items', href: '/popupmenu/empty' },
         { label: 'ButtonMenu', href: '/popupmenu/buttonmenu' },
         { label: 'transform test', href: '/popupmenu/transform' }

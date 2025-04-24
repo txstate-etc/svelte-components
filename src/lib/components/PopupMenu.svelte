@@ -250,9 +250,9 @@
       for (const parent of [...parents, undefined]) {
         const observer = new IntersectionObserver((entries) => {
           for (const entry of entries) {
-            if (entry.intersectionRatio < 1) menushown = false
+            if (entry.intersectionRatio < 0.1) menushown = false
           }
-        }, { root: parent, threshold: 1 })
+        }, { root: parent, threshold: 0.1 })
         observer.observe(buttonelement)
         observers.push(observer)
       }
