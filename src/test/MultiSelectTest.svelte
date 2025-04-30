@@ -10,6 +10,7 @@
   let longid
   let longslotid
   let lotsofid
+  let groupeditemsid
 
   function getOptionsFirst (val: string) {
     return ['apple', 'orange', 'banana'].filter(o => o.includes(val)).map(value => ({ value }))
@@ -27,10 +28,10 @@
   }
 
   const thirdItems: PopupMenuItem[] = [
-    { value: 'honda', label: 'Honda' },
-    { value: 'dodge', label: 'Dodge' },
-    { value: 'hyundai', label: 'Hyundai' },
-    { value: 'kia', label: 'Kia' }
+    { value: 'honda', label: 'Honda', group: 'Vehicle Makes' },
+    { value: 'dodge', label: 'Dodge', group: 'Vehicle Makes' },
+    { value: 'hyundai', label: 'Hyundai', group: 'Vehicle Makes' },
+    { value: 'kia', label: 'Kia', group: 'Vehicle Makes' }
   ]
   async function getOptionsThird (val: string) {
     if (!val) return thirdItems
@@ -41,16 +42,13 @@
   /* ------------------------------------------------------------------------------------------
    * Demo of combining multiple lists with styling to create a quick options MultiSelect with choice groupings.
    * ------------------------------------------------------------------------------------------ */
-  const commonHeader = { divider: true, label: 'Commmon Options' }
-  const carsHeader = { divider: true, label: 'Vehicle Makes' }
   const commonItems = [
-    commonHeader,
-    { value: 'compact', label: 'Compact' },
-    { value: 'truck', label: 'Truck' },
-    { value: 'atv', label: 'ATV' },
-    { value: 'other', label: 'Other Transportation' }
+    { value: 'compact', label: 'Compact', group: 'Common Options' },
+    { value: 'truck', label: 'Truck', group: 'Common Options' },
+    { value: 'atv', label: 'ATV', group: 'Common Options' },
+    { value: 'other', label: 'Other Transportation', group: 'Common Options' }
   ]
-  const carItems = [carsHeader, ...thirdItems]
+  const carItems = thirdItems
   let selectedHybrid: PopupMenuItem[] = []
   $: selectedHybridSet = new Set(selectedHybrid.map(s => s.value))
   $: carOptionsAvailable = carItems.filter(o => 'value' in o && !selectedHybridSet.has(o.value)).length > 1
@@ -94,6 +92,23 @@
     if (!val) return lotsOfItems
     return lotsOfItems.filter(c => c.label.toLocaleLowerCase().includes(val.toLocaleLowerCase()))
   }
+
+  const rocks: PopupMenuItem[] = [
+    { value: 'granite', label: 'Granite', group: 'Igneous' },
+    { value: 'gabbro', label: 'Gabbro', group: 'Igneous' },
+    { value: 'pumice', label: 'Pumice', group: 'Igneous' },
+    { value: 'obsidian', label: 'Obsidian', group: 'Igneous' },
+    { value: 'limestone', label: 'Limestone', group: 'Sedimentary' },
+    { value: 'shale', label: 'Shale', group: 'Sedimentary' },
+    { value: 'sandstone', label: 'Sandstone', group: 'Sedimentary' },
+    { value: 'marble', label: 'Marble', group: 'Metamorphic' },
+    { value: 'gneiss', label: 'Gneiss', group: 'Metamorphic' }
+  ]
+
+  async function getCategorizedOptions (val: string) {
+    if (!val) return rocks
+    return rocks.filter(o => o.value.includes(val.toLocaleLowerCase()))
+  }
 </script>
 
 
@@ -128,7 +143,13 @@
 <label for={lotsofid}>Multiselect with lots of items to list</label><br>
 <MultiSelect bind:id={lotsofid} name="testlots" selected={[lotsOfItems[0], lotsOfItems[2]]} getOptions={getOptionsLots} />
 
+<label for={groupeditemsid}>Multiselect with Categorized Items</label><br>
+<MultiSelect bind:id={groupeditemsid} name="testcategories" getOptions={getCategorizedOptions} />
+
 <style>
+  :global(.multiselect) {
+    margin-bottom: 1em;
+  }
   :global(.multiselect-input) {
     width: 100%
   }

@@ -7,9 +7,13 @@ export interface PopupMenuItem {
   /** Toggles the choice as one that's visible but is disabled and unclickable until conditions
    * are met that would cause it to become enabled. */
   disabled?: boolean
+  /** Allows PopupMenuItems to be grouped by categories in the menu */
+  group?: string
 }
 
-/** A PopupMenu list native type for displaying */
+/** A PopupMenu list native type for displaying
+ * @note Not currently in use
+ */
 export interface PopupMenuDivider {
   /** Toggle for whether this instance of this type is shown. */
   divider: boolean
@@ -25,7 +29,7 @@ export interface PopupMenuDivider {
  * @note Not currently in use. */
 export interface PopupMenuGroup {
   /** The label for the group. */
-  lable: string
+  label: string
   /** The listing of options that would be listed under the parent `<ul>`. */
   options: PopupMenuTypes[]
 }

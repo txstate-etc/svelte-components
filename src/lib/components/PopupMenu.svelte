@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
   import { createEventDispatcher, onDestroy, tick } from 'svelte'
-  import { isNotBlank, randomid } from 'txstate-utils'
+  import { groupby, isNull, randomid } from 'txstate-utils'
   import { Store } from '@txstate-mws/svelte-store'
   import { glue, portal } from '$lib/actions'
   import type { GlueAlignOpts, GlueAlignStore } from '$lib/actions'
@@ -22,7 +22,7 @@
   This component adds all appropriate attributes (tabindex, roles, and aria) automatically. */
   export let buttonelement: HTMLElement
   /** The list of menu items to be shown. Parent may change this at any time based on user activity. */
-  export let items: PopupMenuTypes[] = []
+  export let items: PopupMenuItem[] = []
   export let menushown = false
   export let value: string | undefined = undefined
   /** Control where the menu will appear. Default is to use the current viewport to make a decision to
@@ -68,25 +68,44 @@
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
   export let menuItemSelectedClass = ''
-  export let menuDividerClass = ''
+  export let menuCategoryClass = ''
   export let hideSelectedIndicator = false
   export let hideEmptyText = false
+  /** If true, the role for the popup menu will be 'menu' instead of the default 'listbox' value */
   export let usemenurole: boolean = false
 
   let menuelement: HTMLElement | undefined
   const itemelements: HTMLElement[] = []
   let firstactive = 0
   let lastactive = items.length - 1
-  $: hasMeaningfulItems = showSelected ? !!items.filter(itm => 'value' in itm).length : !!items.filter(itm => 'value' in itm && itm.value !== value).length
+  $: hasMeaningfulItems = showSelected ? !!items.length : !!items.filter(itm => itm.value !== value).length
 
   function hiddenItem (item: PopupMenuItem) {
     return !!item && !showSelected && item.value === value
   }
 
+  $: grouped = groupby(items, item => item.group ?? 'default-group')
+  let itemsOrderedByGroup: PopupMenuItem[] = []
+
+  function getItemIndex (item: PopupMenuItem) {
+    return itemsOrderedByGroup.findIndex(itm => {
+      // need to handle default group options
+      if (itm.value === item.value) {
+        if (item.group === 'default-group') {
+          return isNull(itm.group)
+        } else {
+          return item.group === itm.group
+        }
+      }
+      return false
+    })
+  }
+
   async function reactToItems (..._: any[]) {
-    firstactive = items.findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm))
-    lastactive = items.length - [...items].reverse().findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm)) - 1
-    if (hilited && (items[hilited] as PopupMenuItem)?.disabled) hilited = firstactive
+    itemsOrderedByGroup = Object.values(grouped).flat()
+    firstactive = itemsOrderedByGroup.findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm))
+    lastactive = itemsOrderedByGroup.length - [...itemsOrderedByGroup].reverse().findIndex(itm => 'value' in itm && !itm.disabled && !hiddenItem(itm)) - 1
+    if (hilited && (itemsOrderedByGroup[hilited])?.disabled) hilited = firstactive
   }
   $: void reactToItems(items, value)
 
@@ -113,8 +132,7 @@
 
   function move (idx: number) {
     if (!menushown) return
-    while (idx <= lastactive && items[idx] != null && 'divider' in items[idx]) idx++
-    if (items[idx] == null || (items[idx] as PopupMenuItem)?.disabled) return
+    if (itemsOrderedByGroup[idx] == null || (itemsOrderedByGroup[idx])?.disabled) return
     hilited = Math.max(firstactive, Math.min(lastactive, idx))
     itemelements[hilited].scrollIntoView({ block: 'center' })
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
@@ -130,7 +148,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? firstactive - 1) + 1
-        while (items[i] && !isSelectable(items[i])) i++
+        while (itemsOrderedByGroup[i] && !isSelectable(itemsOrderedByGroup[i])) i++
         move(i)
       } else {
         menushown = true
@@ -140,7 +158,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? lastactive + 1) - 1
-        while (items[i] && !isSelectable(items[i])) i--
+        while (itemsOrderedByGroup[i] && !isSelectable(itemsOrderedByGroup[i])) i--
         move(i)
       } else {
         menushown = true
@@ -161,8 +179,8 @@
       if (menushown) {
         menushown = false
         if (typeof hilited !== 'undefined') {
-          value = (items[hilited] as PopupMenuItem)?.value
-          dispatch('change', items[hilited])
+          value = (itemsOrderedByGroup[hilited])?.value
+          dispatch('change', itemsOrderedByGroup[hilited])
         }
       } else {
         menushown = true
@@ -175,8 +193,8 @@
         if (typeof hilited !== 'undefined') {
           e.preventDefault()
           menushown = false
-          value = (items[hilited] as PopupMenuItem)?.value
-          dispatch('change', items[hilited])
+          value = (itemsOrderedByGroup[hilited])?.value
+          dispatch('change', itemsOrderedByGroup[hilited])
         } else {
           if (buttonelement.tagName !== 'INPUT') {
             e.preventDefault()
@@ -242,6 +260,9 @@
     if (buttonelement) {
       buttonelement.setAttribute('aria-haspopup', (usemenurole ? 'true' : 'listbox'))
       buttonelement.setAttribute('aria-expanded', menushown ? 'true' : 'false')
+      if (!usemenurole) {
+        buttonelement.setAttribute('role', 'combobox')
+      }
       buttonelement.addEventListener('click', onbuttonclick)
       buttonelement.addEventListener('keydown', onkeydown)
       buttonelement.addEventListener('blur', onblur)
@@ -273,41 +294,62 @@
 </script>
 
 {#if menushown && !loading && (hasMeaningfulItems || !hideEmptyText)}
-  <div use:portal={usePortal === true ? undefined : (usePortal || null)}
-       use:glue={{ target: buttonelement, align, cover, gap, adjustparentheight, store: computedalign }}
-       class={menuContainerClass}>
-    <ul bind:this={menuelement} id={menuid} role={usemenurole ? 'menu' : 'listbox'} tabindex="-1" style={width ? `width: ${width}` : ''}
-        class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass}
-        on:keydown={onkeydown}>
-      {#each items as item, i ('value' in item ? item.value : `popupmenu_divider_${i}`)}
-        {#if 'value' in item && (showSelected || item.value !== value)}
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <li
-            id={`${menuid}-${i}`}
-            bind:this={itemelements[i]}
-            class={`${menuItemClass} ${i === hilited ? menuItemHilitedClass : ''} ${value === item.value ? menuItemSelectedClass : ''}`}
-            class:disabled={!!item.disabled}
-            class:hilited={!menuItemHilitedClass && i === hilited}
-            class:selected={showSelected && !hideSelectedIndicator && value === item.value}
-            on:click={onclick(item)}
-            role={usemenurole ? 'menuitem' : 'option'}
-            tabindex=-1
-            aria-selected={usemenurole ? undefined : (value === item.value)}
-            aria-disabled={item.disabled}
-          ><slot {item} label={item.label || item.value} hilited={i === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
-        {:else if 'divider' in item && item.divider}
-          <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-          <li class={`divider ${menuDividerClass}`} on:mousedown|stopPropagation|preventDefault={() => {}} class:group={isNotBlank(item.label)}>{item.label}</li>
+  <div use:portal={usePortal === true ? undefined : (usePortal || null)} use:glue={{ target: buttonelement, align, cover, gap, adjustparentheight, store: computedalign }} class={menuContainerClass}>
+    <ul bind:this={menuelement} id={menuid} role={usemenurole ? 'menu' : 'listbox'} tabindex="-1" style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
+      {#each Object.entries(grouped) as [group, groupitems]}
+        {#if group === 'default-group'}
+          {#each groupitems as item, i (item.value)}
+            {@const itemIndex = getItemIndex(item)}
+            {#if (showSelected || item.value !== value)}
+              <li
+                id={`${menuid}-${itemIndex}`}
+                bind:this={itemelements[itemIndex]}
+                class={`${menuItemClass} ${itemIndex === hilited ? menuItemHilitedClass : ''} ${value === item.value ? menuItemSelectedClass : ''}`}
+                class:disabled={!!item.disabled}
+                class:hilited={!menuItemHilitedClass && itemIndex === hilited}
+                class:selected={showSelected && !hideSelectedIndicator && value === item.value}
+                on:click={onclick(item)}
+                role={usemenurole ? 'menuitem' : 'option'}
+                tabindex=-1
+                aria-selected={usemenurole ? undefined : (value === item.value)}
+                aria-disabled={item.disabled}
+                ><slot {item} label={item.label || item.value} hilited={itemIndex === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
+            {/if}
+          {/each}
+        {:else}
+          <li role="group" aria-labelledby="{menuid}-{group}" class="group">
+            <span id="{menuid}-{group}" class="category {menuCategoryClass}">{group}</span>
+            <ul role="presentation">
+              {#each groupitems as item, i (item.value)}
+                {@const itemIndex = getItemIndex(item)}
+                {#if (showSelected || item.value !== value)}
+                  <li
+                  id={`${menuid}-${itemIndex}`}
+                  bind:this={itemelements[itemIndex]}
+                  class={`${menuItemClass} ${itemIndex === hilited ? menuItemHilitedClass : ''} ${value === item.value ? menuItemSelectedClass : ''}`}
+                  class:disabled={!!item.disabled}
+                  class:hilited={!menuItemHilitedClass && itemIndex === hilited}
+                  class:selected={showSelected && !hideSelectedIndicator && value === item.value}
+                  on:click={onclick(item)}
+                  role={usemenurole ? 'menuitem' : 'option'}
+                  tabindex=-1
+                  aria-selected={usemenurole ? undefined : (value === item.value)}
+                  aria-disabled={item.disabled}
+                  ><slot {item} label={item.label || item.value} hilited={itemIndex === hilited} selected={value === item.value}>{item.label || item.value}</slot></li>
+                {/if}
+              {/each}
+            </ul>
+          </li>
         {/if}
       {/each}
       {#if !hasMeaningfulItems}
         <li role={usemenurole ? 'menuitem' : 'option'} class={`${menuItemClass} disabled`} aria-live="assertive" aria-selected={usemenurole ? undefined : false}>
           <slot name="noresults">
-            {#if !emptyText}
-              <span aria-hidden="true">{'¯\\_(ツ)_/¯'}</span><ScreenReaderOnly>{emptyText || 'no results found'}</ScreenReaderOnly>
-            {:else}
-              {emptyText}
-            {/if}
+          {#if !emptyText}
+            <span aria-hidden="true">{'¯\\_(ツ)_/¯'}</span><ScreenReaderOnly>{emptyText || 'no results found'}</ScreenReaderOnly>
+          {:else}
+            {emptyText}
+          {/if}
           </slot>
         </li>
       {/if}
@@ -383,5 +425,12 @@
     border-bottom: 0.2em solid;
     border-right: 0.2em solid;
     box-sizing: border-box;
+  }
+  span.category {
+    display: block;
+    font-weight: bold;
+  }
+  .group ul {
+    padding-inline-start: 20px;
   }
 </style>

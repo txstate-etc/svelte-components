@@ -45,7 +45,8 @@
         { label: 'insidescrolldiv', href: '/popupmenu/insidescrolldiv' },
         { label: 'no items', href: '/popupmenu/empty' },
         { label: 'ButtonMenu', href: '/popupmenu/buttonmenu' },
-        { label: 'transform test', href: '/popupmenu/transform' }
+        { label: 'transform test', href: '/popupmenu/transform' },
+        { label: 'grouped items test', href: '/popupmenu/categories' }
       ]
     },
     {
