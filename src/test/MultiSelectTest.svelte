@@ -107,7 +107,7 @@
 
   async function getCategorizedOptions (val: string) {
     if (!val) return rocks
-    return rocks.filter(o => o.value.includes(val.toLocaleLowerCase()))
+    return rocks.filter(o => o.value.includes(val.toLocaleLowerCase()) || o.group?.toLocaleLowerCase().includes(val.toLocaleLowerCase()))
   }
 </script>
 
@@ -129,7 +129,7 @@
 
 <label for={hybridid}>Select a common option or type/select a car model - with group headers and styling</label><br>
 <MultiSelect bind:id={hybridid} name="testhybrid" bind:selected={selectedHybrid} bind:placeholder={placeholderHybrid}
- getOptions={getOptionsHybrid} menuDividerClass='multiselect-dividers'
+ getOptions={getOptionsHybrid} menuCategoryClass='multiselect-dividers'
 />
 
 <label for={longid}>Select multiple items with long names and adjust page width</label><br>
@@ -144,7 +144,7 @@
 <MultiSelect bind:id={lotsofid} name="testlots" selected={[lotsOfItems[0], lotsOfItems[2]]} getOptions={getOptionsLots} />
 
 <label for={groupeditemsid}>Multiselect with Categorized Items</label><br>
-<MultiSelect bind:id={groupeditemsid} name="testcategories" getOptions={getCategorizedOptions} />
+<MultiSelect bind:id={groupeditemsid} name="testcategories" getOptions={getCategorizedOptions} includeDeleteAll confirmDelete="Are you sure you want to remove all selected rocks?" />
 
 <style>
   :global(.multiselect) {

@@ -12,7 +12,7 @@
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import DefaultPopupMenu from './PopupMenu.svelte'
   import { modifierKey, selectionIsLeft } from '$lib/util'
-  import type { PopupMenuItem, PopupMenuTypes } from '$lib/types'
+  import type { PopupMenuItem } from '$lib/types'
   import { SafeStore } from '@txstate-mws/svelte-store'
 
   export let name: string
@@ -20,7 +20,7 @@
    * Function to pass to the component that tells it how to use the text in the text input to determine what
    * `PopupMenuItem[]` should be displayed in the `PopupMenu`. Items already 'selected' from the popup menu will
    * be tracked and automatically filtered from the popup if returned as one of the `PopupMenuItem[]` by `getOptions`. */
-  export let getOptions: (search: string) => Promise<PopupMenuTypes[]> | PopupMenuTypes[]
+  export let getOptions: (search: string) => Promise<PopupMenuItem[]> | PopupMenuItem[]
   export let id = randomid()
   export let disabled = false
   export let menuContainerClass = ''
@@ -28,7 +28,7 @@
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
   export let inputClass = ''
-  export let menuDividerClass = ''
+  export let menuCategoryClass = ''
   /** The maximum number of selections allowed before making new selections is disabled. Default of 0 is unlimited. */
   export let maxSelections = 0
   /** Consuming components may need to make decisions about what to display or return as options in the popup based
@@ -44,10 +44,14 @@
   export let descid: string | undefined = undefined
   /** You can define your own PopupMenu and pass for that to be used or accept DefaultPopupMenu. */
   export let PopupMenu = DefaultPopupMenu
+  /** Add a Delete All button to clear all selected items */
+  export let includeDeleteAll = false
+  /** Show a confirmation message before clearing all selections */
+  export let confirmDelete: string | undefined = undefined
 
   let menushown: boolean
   let loading = false
-  let options: PopupMenuTypes[] = []
+  let options: PopupMenuItem[] = []
   let hilitedpill: string | undefined
   let popupvalue = undefined
   let inputelement: HTMLInputElement
@@ -79,7 +83,7 @@
     }, 250)
   }
   $: void reactToInput(getOptions, selectedSet)
-  function addSelection (e: CustomEvent & { detail: PopupMenuTypes }) {
+  function addSelection (e: CustomEvent & { detail: PopupMenuItem }) {
     inputelement.value = ''
     const opt = { ...e.detail, label: e.detail.label || e.detail.value }
     selected = maxSelections === 1 ? [opt] : [...selected, opt]
@@ -132,6 +136,21 @@
     dispatch('blur')
   }
 
+  function removeAllSelections () {
+    selected = []
+    dispatch('change', selected)
+  }
+
+  function confirmRemoveAllSelections () {
+    if (confirmDelete) {
+      if (confirm(confirmDelete)) {
+        removeAllSelections()
+      }
+    } else {
+      removeAllSelections()
+    }
+  }
+
   let popuphilited
   $: if (popuphilited != null) hilitedpill = undefined
   function reactToHilite (..._: any) {
@@ -153,6 +172,13 @@
 </script>
 
 <div class="multiselect" class:disabled role="combobox" aria-controls={menushown ? menuid : undefined} aria-expanded={menushown}>
+  {#if includeDeleteAll && selected.length}
+    <div class="delete-all-container">
+      <button on:click|preventDefault|stopPropagation={confirmRemoveAllSelections}>
+        <slot name="deleteall">Delete All <ScreenReaderOnly>{selected.length} items</ScreenReaderOnly></slot>
+      </button>
+    </div>
+  {/if}
   {#if selected.length}
     <div class="multiselect-selected" role="listbox" aria-label="selected options">
       {#each selected as option, i (option.value)}
@@ -180,7 +206,7 @@
 
 <svelte:component this={PopupMenu} bind:menushown bind:menuid bind:hilited={popuphilited} bind:value={popupvalue} align='bottomleft'
  {usePortal} {loading} {emptyText} {gap}
- {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} {menuDividerClass}
+ {menuContainerClass} {menuClass} {menuItemClass} {menuItemHilitedClass} {menuCategoryClass}
  items={options} buttonelement={inputelement}
  on:change={addSelection}/>
 
@@ -248,5 +274,10 @@
     background-color: var(--multiselect-pill-selected, gray);
     border: var(--multiselect-pill-selected-border, 1px solid transparent);
     color: var(--multiselect-pill-selected-text, white);
+  }
+  .delete-all-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
   }
 </style>
