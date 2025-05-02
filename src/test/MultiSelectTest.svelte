@@ -109,6 +109,11 @@
     if (!val) return rocks
     return rocks.filter(o => o.value.includes(val.toLocaleLowerCase()) || o.group?.toLocaleLowerCase().includes(val.toLocaleLowerCase()))
   }
+
+  function categorizedOptionLabel (item: PopupMenuItem) {
+    const tag = item.label ?? item.value
+    return item.group ? `${item.group}: ${tag}` : tag
+  }
 </script>
 
 
@@ -144,7 +149,7 @@
 <MultiSelect bind:id={lotsofid} name="testlots" selected={[lotsOfItems[0], lotsOfItems[2]]} getOptions={getOptionsLots} />
 
 <label for={groupeditemsid}>Multiselect with Categorized Items</label><br>
-<MultiSelect bind:id={groupeditemsid} name="testcategories" getOptions={getCategorizedOptions} includeDeleteAll confirmDelete="Are you sure you want to remove all selected rocks?" />
+<MultiSelect bind:id={groupeditemsid} name="testcategories" getOptions={getCategorizedOptions} includeDeleteAll confirmDelete="Are you sure you want to remove all selected rocks?" selectedItemLabel={categorizedOptionLabel}/>
 
 <style>
   :global(.multiselect) {
@@ -155,5 +160,8 @@
   }
   :global(.multiselect-dividers) {
     background-color: #EEEEEE;
+  }
+  :global(.content) {
+    padding-bottom: 400px;
   }
 </style>

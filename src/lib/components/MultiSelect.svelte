@@ -48,6 +48,9 @@
   export let includeDeleteAll = false
   /** Show a confirmation message before clearing all selections */
   export let confirmDelete: string | undefined = undefined
+  /** A function that can be used to customize the labels on the selected item pills. Default is a function
+   * that takes a PopupMenuItem and returns its label, if available, or its value when no label is provided. */
+  export let selectedItemLabel: (item: PopupMenuItem) => string = (item) => item.label || item.value
 
   let menushown: boolean
   let loading = false
@@ -186,7 +189,7 @@
         <div id={id + option.value} role="option" tabindex="-1" class="multiselect-pill" class:hilited={hilitedpill === option.value}
           on:click|preventDefault|stopPropagation={() => { !disabled && removeSelection(option, i, 1) }} on:mousedown={e => { disabled && e.preventDefault() }}
           aria-selected="true" aria-posinset={i + 1} aria-setsize={selected.length}>
-          {option.label || option.value}
+          {selectedItemLabel(option)}
           <i aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><path fill="currentColor" d="M205.66 194.34a8 8 0 0 1-11.32 11.32L128 139.31l-66.34 66.35a8 8 0 0 1-11.32-11.32L116.69 128L50.34 61.66a8 8 0 0 1 11.32-11.32L128 116.69l66.34-66.35a8 8 0 0 1 11.32 11.32L139.31 128Z"/></svg></i>
           <ScreenReaderOnly>, click to deselect</ScreenReaderOnly>
         </div>
