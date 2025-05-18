@@ -72,7 +72,7 @@
   $: selectedSet = new Set($selectedStore.map(s => s.value))
   // Stop showing our menu if the maxSelections limit has been reached.
   $: if (maxSelections > 1 && selected.length >= maxSelections && menushown) menushown = false
-  let optionsTimer: number
+  let optionsTimer: number | undefined
   async function reactToInput (..._: any) {
     loading = true
     clearTimeout(optionsTimer)
