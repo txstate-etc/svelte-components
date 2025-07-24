@@ -136,6 +136,7 @@
   }
   function inputblur () {
     active = false
+    hilitedpill = undefined
     dispatch('blur')
   }
 
