@@ -2,19 +2,21 @@
   The purpose of [`PopupMenu`](https://github.com/txstate-etc/svelte-components/blob/main/docs/PopupMenu.md) is to display a menu of options to the user, activated by clicking any element
   bound to `buttonelement`. It can also be controlled from the parent, by binding the `menushown` boolean.
 -->
-<script lang="ts">
+<script lang="ts" generics="MenuItem extends PopupMenuItem = PopupMenuItem">
   import { createEventDispatcher, onDestroy, tick } from 'svelte'
   import { groupby, isNull, randomid } from 'txstate-utils'
   import { Store } from '@txstate-mws/svelte-store'
   import { glue, portal } from '$lib/actions'
   import type { GlueAlignOpts, GlueAlignStore } from '$lib/actions'
-  import type { PopupMenuItem, PopupMenuTypes } from '$lib/types'
+  import type { PopupMenuItem, PopupMenuDivider } from '$lib/types'
   import ScreenReaderOnly from './ScreenReaderOnly.svelte'
   import { getScrollParents, modifierKey } from '$lib/util'
   const dispatch = createEventDispatcher()
 
+  type MenuTypes = MenuItem | PopupMenuDivider
+
   interface $$Events {
-    change: CustomEvent<PopupMenuItem>
+    change: CustomEvent<MenuItem>
   }
 
   /** The DOM element that will act as the "button" for this menu. The menu will be placed next to the
@@ -22,7 +24,7 @@
   This component adds all appropriate attributes (tabindex, roles, and aria) automatically. */
   export let buttonelement: HTMLElement
   /** The list of menu items to be shown. Parent may change this at any time based on user activity. */
-  export let items: PopupMenuItem[] = []
+  export let items: MenuItem[] = []
   export let menushown = false
   export let value: string | undefined = undefined
   /** Control where the menu will appear. Default is to use the current viewport to make a decision to
@@ -80,14 +82,14 @@
   let lastactive = items.length - 1
   $: hasMeaningfulItems = showSelected ? !!items.length : !!items.filter(itm => itm.value !== value).length
 
-  function hiddenItem (item: PopupMenuItem) {
+  function hiddenItem (item: MenuItem) {
     return !!item && !showSelected && item.value === value
   }
 
   $: grouped = groupby(items, item => item.group ?? 'default-group')
-  let itemsOrderedByGroup: PopupMenuItem[] = []
+  let itemsOrderedByGroup: MenuItem[] = []
 
-  function getItemIndex (item: PopupMenuItem) {
+  function getItemIndex (item: MenuItem) {
     return itemsOrderedByGroup.findIndex(itm => {
       // need to handle default group options
       if (itm.value === item.value) {
@@ -138,7 +140,7 @@
     buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
   }
 
-  function isSelectable (itm: PopupMenuTypes): itm is PopupMenuItem {
+  function isSelectable (itm: MenuTypes): itm is MenuItem {
     return 'value' in itm && !itm.disabled && !hiddenItem(itm)
   }
 
@@ -281,7 +283,7 @@
   }
   $: reactToButtonElement(buttonelement)
 
-  const onclick = (item: PopupMenuItem) => (e: MouseEvent) => {
+  const onclick = (item: MenuItem) => (e: MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
     if (item.disabled) return
