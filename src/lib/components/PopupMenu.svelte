@@ -22,7 +22,7 @@
   /** The DOM element that will act as the "button" for this menu. The menu will be placed next to the
   button and be controlled by the button. Keyboard access will be enabled when the button has focus.
   This component adds all appropriate attributes (tabindex, roles, and aria) automatically. */
-  export let buttonelement: HTMLElement
+  export let buttonelement: HTMLElement | undefined
   /** The list of menu items to be shown. Parent may change this at any time based on user activity. */
   export let items: MenuItem[] = []
   export let menushown = false
@@ -74,7 +74,7 @@
   export let hideSelectedIndicator = false
   export let hideEmptyText = false
   /** If true, the role for the popup menu will be 'menu' instead of the default 'listbox' value */
-  export let usemenurole: boolean = false
+  export let usemenurole = false
 
   let menuelement: HTMLElement | undefined
   const itemelements: HTMLElement[] = []
@@ -137,7 +137,7 @@
     if (itemsOrderedByGroup[idx] == null || (itemsOrderedByGroup[idx])?.disabled) return
     hilited = Math.max(firstactive, Math.min(lastactive, idx))
     itemelements[hilited].scrollIntoView({ block: 'center' })
-    buttonelement.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
+    buttonelement?.setAttribute('aria-activedescendant', `${menuid}-${hilited}`)
   }
 
   function isSelectable (itm: MenuTypes): itm is MenuItem {
@@ -150,7 +150,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? firstactive - 1) + 1
-        while (itemsOrderedByGroup[i] && !isSelectable(itemsOrderedByGroup[i])) i++
+        while (itemsOrderedByGroup[i] && !isSelectable(itemsOrderedByGroup[i])) i += 1
         move(i)
       } else {
         menushown = true
@@ -160,7 +160,7 @@
       e.preventDefault()
       if (menushown) {
         let i = (hilited ?? lastactive + 1) - 1
-        while (itemsOrderedByGroup[i] && !isSelectable(itemsOrderedByGroup[i])) i--
+        while (itemsOrderedByGroup[i] && !isSelectable(itemsOrderedByGroup[i])) i -= 1
         move(i)
       } else {
         menushown = true
@@ -197,18 +197,14 @@
           menushown = false
           value = (itemsOrderedByGroup[hilited])?.value
           dispatch('change', itemsOrderedByGroup[hilited])
-        } else {
-          if (buttonelement.tagName !== 'INPUT') {
-            e.preventDefault()
-            menushown = false
-          }
-        }
-      } else {
-        if (buttonelement.tagName !== 'INPUT') {
+        } else if (buttonelement?.tagName !== 'INPUT') {
           e.preventDefault()
-          menushown = true
-          tick().then(() => { move(firstactive) }).catch(console.error)
+          menushown = false
         }
+      } else if (buttonelement?.tagName !== 'INPUT') {
+        e.preventDefault()
+        menushown = true
+        tick().then(() => { move(firstactive) }).catch(console.error)
       }
     } else if (menushown && e.key === 'Escape') {
       e.preventDefault()
@@ -235,7 +231,7 @@
     if (document.activeElement === buttonelement) menushown = true
   }
 
-  function cleanup (element: HTMLElement) {
+  function cleanup (element: HTMLElement | undefined) {
     for (const observer of observers) observer.disconnect()
     observers = []
     if (element) {
@@ -254,9 +250,9 @@
   onDestroy(() => { cleanup(buttonelement) })
 
   // if buttonelement changes we need to handle listeners and aria
-  let lastbuttonelement: HTMLElement
+  let lastbuttonelement: HTMLElement | undefined
   let observers: IntersectionObserver[] = []
-  function reactToButtonElement (buttonelement: HTMLElement) {
+  function reactToButtonElement (buttonelement: HTMLElement | undefined) {
     cleanup(lastbuttonelement)
     lastbuttonelement = buttonelement
     if (buttonelement) {
@@ -271,7 +267,7 @@
       buttonelement.addEventListener('input', oninput)
       const parents = getScrollParents(buttonelement)
       for (const parent of [...parents, undefined]) {
-        const observer = new IntersectionObserver((entries) => {
+        const observer = new IntersectionObserver(entries => {
           for (const entry of entries) {
             if (entry.intersectionRatio < 0.1) menushown = false
           }
@@ -296,9 +292,9 @@
 </script>
 
 {#if menushown && !loading && (hasMeaningfulItems || !hideEmptyText)}
-  <div use:portal={usePortal === true ? undefined : (usePortal || null)} use:glue={{ target: buttonelement, align, cover, gap, adjustparentheight, store: computedalign }} class={menuContainerClass}>
+  <div use:portal={usePortal === true ? undefined : (usePortal ?? null)} use:glue={{ target: buttonelement, align, cover, gap, adjustparentheight, store: computedalign }} class={menuContainerClass}>
     <ul bind:this={menuelement} id={menuid} role={usemenurole ? 'menu' : 'listbox'} tabindex="-1" style={width ? `width: ${width}` : ''} class={menuClass} class:hasSelected class:defaultmenu={!menuClass && !menuContainerClass} on:keydown={onkeydown}>
-      {#each Object.entries(grouped) as [group, groupitems]}
+      {#each Object.entries(grouped) as [group, groupitems] (group)}
         {#if group === 'default-group'}
           {#each groupitems as item, i (item.value)}
             {@const itemIndex = getItemIndex(item)}

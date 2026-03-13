@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths'
   import { page } from '$app/stores'
   import './layout.css'
   interface Link {
@@ -102,15 +103,15 @@
   <div id="menu">
     <div class="pure-menu">
       <ul class="pure-menu-list">
-        {#each links as link}
+        {#each links as link (link.href + link.label)}
           <li class="pure-menu-item pure-menu-parent" class:pure-menu-selected={link.selected} class:pure-menu-subselected={link.parent}>
-            <a href="{link.href}" class="pure-menu-link">{link.label}</a>
+            <a href={resolve(link.href)} class="pure-menu-link">{link.label}</a>
           </li>
           {#if link.sublinks?.length && (link.selected || link.parent)}
             <ul class="pure-menu-list">
-              {#each link.sublinks as sublink}
+              {#each link.sublinks as sublink (sublink.href + sublink.label)}
                 <li class="pure-menu-item" class:pure-menu-selected={sublink.selected}>
-                  <a href="{sublink.href}" class="pure-menu-link">{sublink.label}</a>
+                  <a href={resolve(sublink.href)} class="pure-menu-link">{sublink.label}</a>
                 </li>
               {/each}
             </ul>

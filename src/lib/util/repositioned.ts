@@ -42,7 +42,7 @@ export function watchForPositionChange (el: (HTMLElement | undefined)[] | HTMLEl
     const offsets = els.map(bodyOffset)
     if (offsets.some((offset, i) => !equal(offset, lastoffsets[i]))) {
       lastoffsets = offsets
-      Array.isArray(el) ? (cb as any)(offsets) : (cb as any)(offsets[0])
+      Array.isArray(el) ? (cb as (offsets: Required<ElementOffsets>[]) => void)(offsets) : (cb as (offset: Required<ElementOffsets>) => void)(offsets[0])
     }
   }
 

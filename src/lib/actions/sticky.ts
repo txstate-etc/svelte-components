@@ -2,7 +2,7 @@ import type { SettableSubject } from '@txstate-mws/svelte-store'
 import { bodyOffset, watchForPositionChange } from '../util/index.js'
 import type { ElementOffsets } from '../util/index.js'
 
-export interface StickyArgs <T extends StickyStore = StickyStore> {
+export interface StickyArgs<T extends StickyStore = StickyStore> {
   target?: HTMLElement
   store?: SettableSubject<T>
 }

@@ -65,10 +65,10 @@ export function stickyfixed (el: HTMLElement, config?: StickyArgs) {
         const cell = el.querySelector('th:last-child,td:last-child')
         if (cell) {
           const tstyle = window.getComputedStyle(table)
-          extrawidth = tstyle.borderCollapse === 'collapse' ? parseInt(window.getComputedStyle(cell).borderRightWidth) : 0
+          extrawidth = tstyle.borderCollapse === 'collapse' ? parseInt(window.getComputedStyle(cell).borderRightWidth, 10) : 0
         }
       }
-      const width = `${parseInt(window.getComputedStyle(spacer).width) + extrawidth}px`
+      const width = `${parseInt(window.getComputedStyle(spacer).width, 10) + extrawidth}px`
       elheight = spacer.offsetHeight
       for (let i = 0; i < tds.length; i++) tds[i].style.width = widths[i]
       el.style.width = width
@@ -126,7 +126,7 @@ export function stickyfixed (el: HTMLElement, config?: StickyArgs) {
       lastOffsetParent = offsetParent
     }
     const table = el.closest('table')
-    const borderspacing = (table ? parseInt(window.getComputedStyle(table).borderSpacing) : 0)
+    const borderspacing = (table ? parseInt(window.getComputedStyle(table).borderSpacing, 10) : 0)
     scrollstart = offset[0].top + el.offsetTop
     left = offset[0].left + (spacer.parentElement ? spacer.offsetLeft : el.offsetLeft)
     if (el.tagName === 'TR') {

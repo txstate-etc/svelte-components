@@ -1,1 +1,5 @@
-/// <reference types="@sveltejs/kit" />
+import '@sveltejs/kit'
+
+declare module '$app/paths' {
+  export function resolve (route: string): string
+}

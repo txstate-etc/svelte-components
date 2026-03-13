@@ -47,7 +47,7 @@ function getTranslate (element: HTMLElement) {
 
   // Can either be 2d or 3d transform
   const matrixType = matrix.includes('3d') ? '3d' : '2d'
-  const matrixValues = matrix.match(/matrix.*\((.+)\)/)![1].split(', ')
+  const matrixValues = matrix.match(/matrix.*\((.+)\)/v)![1].split(', ')
 
   // 2d matrices have 6 values
   // Last 2 values are X and Y.

@@ -6,7 +6,6 @@ export function debounced (fn: (..._: any[]) => any, timeout: number) {
   let timer: number
   return (...args: any[]) => {
     clearTimeout(timer)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     timer = setTimeout(() => fn(...args), timeout)
   }
 }
@@ -28,7 +27,7 @@ export function getScrollParents (element: HTMLElement) {
     if (excludeStaticParent && style.position === 'static') {
       continue
     }
-    if (/(auto|scroll|hidden)/.test(style.overflow + style.overflowY + style.overflowX)) return [parent, ...getScrollParents(parent)]
+    if (/(auto|scroll|hidden)/v.test(style.overflow + style.overflowY + style.overflowX)) return [parent, ...getScrollParents(parent)]
   }
   return [document.body]
 }

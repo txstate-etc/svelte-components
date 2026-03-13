@@ -24,7 +24,8 @@
         blocks.splice(blocks.indexOf(block), 1)
         hardrecalc()
       })
-      block.order = writable(defaultOrder++)
+      block.order = writable(defaultOrder)
+      defaultOrder += 1
       block.linebreak = writable(false)
       const cols = savecolumns || Math.ceil(1024 / maxwidth)
       block.width = writable(`calc(${100.0 / cols}% - ${gutter * (cols - 1) / cols}px)`)
@@ -61,7 +62,7 @@
     const guttereach = gutter * (columns - 1) / columns
     const cycling = detectcycle(realw)
     if (columns !== savecolumns) {
-      for (const block of blocks) block.width!.set(`calc(${100.0 / columns}% - ${guttereach}px`)
+      for (const block of blocks) block.width!.set(`calc(${100.0 / columns}% - ${guttereach}px)`)
       await tick()
     }
     // collect all the card heights at this new column width
@@ -90,10 +91,10 @@
                   tallestcol = colheight
                   tallestcolidx = colidx
                 }
-                colidx++
+                colidx += 1
                 colheight = 0
               }
-              if (!arrangement[colidx]) arrangement[colidx] = []
+              arrangement[colidx] ??= []
               arrangement[colidx].push(block)
               colheight += block.height! + gutter
             }
@@ -111,7 +112,7 @@
         }
       } else {
         optimal = []
-        const heights: number[] = Array.apply(null, Array(columns)).map((_: any) => 0) // initializes heights to an array of zeroes
+        const heights: number[] = [...Array(columns)].map((_: any) => 0) // initializes heights to an array of zeroes
         // begin sorting blocks into columns
         for (const block of blocks) {
           // find the column with the smallest current height
@@ -119,7 +120,7 @@
           // record the height we are adding to the chosen column
           heights[colidx] += block.height! + gutter
           // move the current card to the chosen column
-          if (!optimal[colidx]) optimal[colidx] = []
+          optimal[colidx] ??= []
           optimal[colidx].push(block)
         }
       }
@@ -129,7 +130,8 @@
       for (let i = 0; i < optimal.length; i++) {
         for (let j = 0; j < optimal[i].length; j++) {
           const block = optimal[i][j]
-          block.order!.set(order++)
+          block.order!.set(order)
+          order += 1
           block.linebreak!.set(j === optimal[i].length - 1 && i < optimal.length - 1)
         }
       }

@@ -14,7 +14,7 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
 -->
 <script context="module" lang="ts">
   export const FocusLockStack: { focusId: string, pause: () => void, unpause: () => void, update: () => void }[] = []
-  const waitAtick = typeof requestAnimationFrame !== 'undefined' ? (resolve: () => void) => requestAnimationFrame(resolve) : resolve => resolve(0)
+  const waitAtick = typeof requestAnimationFrame !== 'undefined' ? (resolve: (value: unknown) => void) => requestAnimationFrame(resolve) : (resolve: (value: unknown) => void) => resolve(0)
 </script>
 
 <script lang="ts">
@@ -49,7 +49,7 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
       focusId,
       pause: () => { state = 'paused' },
       unpause: () => { if (state === 'paused') state = 'active' },
-      update: () => dispatch('focuslockupdate')
+      update: () => { dispatch('focuslockupdate') }
     })
     for (const entry of FocusLockStack) entry.update()
     if (typeof returnfocusto === 'undefined') {
@@ -117,7 +117,7 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
   }
 </script>
 <svelte:window on:mousedown={windowclick} />
-<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<!-- svelte-ignore a11y_interactive_supports_focus -->
 <div class={className} role="alertdialog" aria-modal="true" on:click|stopPropagation on:mousedown|stopPropagation on:keydown|stopPropagation={keydown} on:focusin={focusin}>
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div bind:this={abovelockelement} tabindex="0"></div>

@@ -24,7 +24,7 @@ to the wrapper element/component, if it gets inserted.
 -->
 <script lang="ts">
   export let condition: boolean | undefined
-  export let component: any | undefined = undefined
+  export let component: any = undefined
   export let a = false
   export let span = false
   export let element: HTMLElement | undefined = undefined
@@ -36,7 +36,6 @@ to the wrapper element/component, if it gets inserted.
     <svelte:component this={component} bind:element {...passthrough}><slot></slot></svelte:component>
   {:else}
     {#if a}
-      <!-- svelte-ignore a11y-missing-attribute -->
       <a bind:this={element} {...passthrough}><slot></slot></a>
     {:else if span}
       <span bind:this={element} {...passthrough}><slot></slot></span>

@@ -50,7 +50,7 @@
   export let confirmDelete: string | undefined = undefined
   /** A function that can be used to customize the labels on the selected item pills. Default is a function
    * that takes a PopupMenuItem and returns its label, if available, or its value when no label is provided. */
-  export let selectedItemLabel: (item: PopupMenuItem) => string = (item) => item.label || item.value
+  export let selectedItemLabel: (item: PopupMenuItem) => string = item => item.label || item.value
 
   let menushown: boolean
   let loading = false
@@ -63,9 +63,7 @@
   const instructionid = randomid()
   const dispatch = createEventDispatcher()
 
-  const optionsCache = new Cache(async (ipt: string) => {
-    return await getOptions(ipt)
-  }, { freshseconds: 5 })
+  const optionsCache = new Cache(async (ipt: string) => await getOptions(ipt), { freshseconds: 5 })
 
   const selectedStore = new SafeStore(selected)
   $: $selectedStore = selected
@@ -147,7 +145,8 @@
 
   function confirmRemoveAllSelections () {
     if (confirmDelete) {
-      if (confirm(confirmDelete)) {
+      // eslint-disable-next-line no-alert -- just doing something super simple here
+      if (window.confirm(confirmDelete)) {
         removeAllSelections()
       }
     } else {
@@ -171,7 +170,7 @@
   let gap = 0
   onMount(() => {
     const ul = inputelement.closest<HTMLElement>('.multiselect-selected')
-    if (ul != null) gap = ((ul.offsetHeight - ul.clientHeight) / 2) + parseInt(window.getComputedStyle(ul).paddingBottom)
+    if (ul != null) gap = ((ul.offsetHeight - ul.clientHeight) / 2) + parseInt(window.getComputedStyle(ul).paddingBottom, 10)
   })
 </script>
 
@@ -197,7 +196,6 @@
       {/each}
     </div>
   {/if}
-  <!-- svelte-ignore a11y-role-has-required-aria-props -->
   <input type="text" class={inputClass} {id} {name} {disabled} {placeholder}
     bind:this={inputelement} on:input={reactToInput} on:blur={inputblur}
     on:focus={inputfocus} on:keydown={inputkeydown}

@@ -19,17 +19,17 @@ export class ResizeStore extends Store<ElementSize> {
   constructor (initialState?: ElementSize) {
     super(initialState ?? typeof window === 'undefined'
       ? {
-          clientWidth: 1024,
-          clientHeight: 1024,
-          offsetWidth: 1024,
-          offsetHeight: 1024
-        }
+        clientWidth: 1024,
+        clientHeight: 1024,
+        offsetWidth: 1024,
+        offsetHeight: 1024
+      }
       : {
-          clientWidth: window.innerWidth,
-          clientHeight: window.innerHeight,
-          offsetWidth: window.innerWidth,
-          offsetHeight: window.innerHeight
-        }
+        clientWidth: window.innerWidth,
+        clientHeight: window.innerHeight,
+        offsetWidth: window.innerWidth,
+        offsetHeight: window.innerHeight
+      }
     )
   }
 }

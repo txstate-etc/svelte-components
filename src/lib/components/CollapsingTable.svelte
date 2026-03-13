@@ -27,9 +27,9 @@ to be displayed instead.
   export let defaultCellWidth = 150
   export let PopupMenu = DefaultPopupMenu
   export let slots: Record<string, boolean> = $$slots
-  export let stickyheader: boolean = false
+  export let stickyheader = false
   let columns: CollapsingTableColumn[]
-  let width: number = 320
+  let width = 320
   let selected: PopupMenuItem | undefined
   let identifyingkeys: string[] = []
   $: firstrow = items?.[0] ?? {}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+  import { onMount } from 'svelte'
   import PopupMenuComplex from '../../../test/PopupMenuComplex.svelte'
   const items = [
     { value: '0', label: 'Sunday', disabled: true },

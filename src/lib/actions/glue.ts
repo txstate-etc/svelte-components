@@ -9,7 +9,7 @@ export interface GlueArgs<T extends GlueAlignStore = GlueAlignStore> {
    * it is; the element you placed the glue action on will become position: fixed and
    * move to align with the target.
    */
-  target: HTMLElement
+  target?: HTMLElement
   /**
    * How to align the element relative to the target.
    *
@@ -77,7 +77,8 @@ export interface GlueAlignStore {
 export function glue (el: HTMLElement, { target, align = 'auto', cover = false, gap = 0, adjustparentheight = false, store }: GlueArgs) {
   let halign: GlueAlignStore['halign']
   let valign: GlueAlignStore['valign']
-  const parent: HTMLElement | undefined = el.offsetParent as HTMLElement
+  const parent = el.offsetParent instanceof HTMLElement ? el.offsetParent : undefined
+
   const formerMinHeight: string | undefined = parent?.style.minHeight
   if (target) el.style.position = 'fixed'
 
@@ -109,15 +110,15 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     const leftright = rect.right > rect.left ? 'left' : 'right'
     const topbottom = rect.bottom > rect.top ? 'bottom' : 'top'
     if (align === 'auto') {
-      autoalign = (topbottom + leftright) as GlueAlignOpts
+      autoalign = topbottom + leftright
     } else if (align === 'autoleft') {
-      autoalign = (topbottom + 'left') as GlueAlignOpts
+      autoalign = topbottom + 'left'
     } else if (align === 'autoright') {
-      autoalign = (topbottom + 'right') as GlueAlignOpts
+      autoalign = topbottom + 'right'
     } else if (align === 'topauto') {
-      autoalign = ('top' + leftright) as GlueAlignOpts
+      autoalign = 'top' + leftright
     } else if (align === 'bottomauto') {
-      autoalign = ('bottom' + leftright) as GlueAlignOpts
+      autoalign = 'bottom' + leftright
     } else if (align === 'automiddle') {
       autoalign = topbottom
     } else if (align === 'middleauto') {
@@ -253,7 +254,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     }
     store?.update(v => ({ ...v, valign, halign }))
   }
-  // eslint-disable-next-line @typescript-eslint/unbound-method
+
   const { destroy: watchDestroy } = watchForMutations(reposition)
   document.addEventListener('scroll', reposition, { capture: true })
   return {
@@ -277,7 +278,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     destroy () {
       watchDestroy()
       document.removeEventListener('scroll', reposition)
-      if (adjustparentheight) {
+      if (adjustparentheight && parent) {
         if (formerMinHeight) parent.style.minHeight = formerMinHeight
         parent.style.removeProperty('min-height')
       }

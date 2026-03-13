@@ -38,7 +38,6 @@
     return thirdItems.filter(o => o.value.includes(val.toLocaleLowerCase()))
   }
 
-
   /* ------------------------------------------------------------------------------------------
    * Demo of combining multiple lists with styling to create a quick options MultiSelect with choice groupings.
    * ------------------------------------------------------------------------------------------ */
@@ -116,7 +115,6 @@
   }
 </script>
 
-
 <label for={firstid}>Fruit with only values</label><br>
 <MultiSelect bind:id={firstid} name="test1" selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
 
@@ -133,7 +131,7 @@
 <MultiSelect bind:id={fifthid} name="test5" maxSelections={2} selected={[{ value: 'apple' }]} getOptions={getOptionsFirst} />
 
 <label for={hybridid}>Select a common option or type/select a car model - with group headers and styling</label><br>
-<MultiSelect bind:id={hybridid} name="testhybrid" bind:selected={selectedHybrid} bind:placeholder={placeholderHybrid}
+<MultiSelect bind:id={hybridid} name="testhybrid" bind:selected={selectedHybrid} placeholder={placeholderHybrid}
  getOptions={getOptionsHybrid} menuCategoryClass='multiselect-dividers'
 />
 

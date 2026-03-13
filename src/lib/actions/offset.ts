@@ -24,12 +24,12 @@ export function offset (el: HTMLElement, config?: OffsetConfig) {
     el.dispatchEvent(new CustomEvent('offset', { detail: current }))
   }
   let resolvedchange = config?.debounce ? debounced(lookforoffsetchange, config.debounce) : lookforoffsetchange
-  const offsetContainer = !config?.container ? document.body : (config.container === 'nearest' ? el.offsetParent as HTMLElement ?? document.body : config.container)
+  const offsetContainer = !config?.container ? document.body : (config.container === 'nearest' ? el.offsetParent instanceof HTMLElement ? el.offsetParent : document.body : config.container)
   const { destroy, update } = watchForPositionChangeInContainer(el, offsetContainer, resolvedchange)
 
   return {
     update (newConfig?: OffsetConfig) {
-      const offsetContainer = !config?.container ? document.body : (config.container === 'nearest' ? el.offsetParent as HTMLElement ?? document.body : config.container)
+      const offsetContainer = !config?.container ? document.body : (config.container === 'nearest' ? el.offsetParent instanceof HTMLElement ? el.offsetParent : document.body : config.container)
       if (newConfig?.debounce === true) newConfig.debounce = 100
       if (newConfig?.store !== config?.store) {
         newConfig?.store?.update(v => ({ ...v, ...lastOffset }))

@@ -32,10 +32,10 @@ export class ToastStore extends Store<ToastStorage[]> {
   add (msgOrToast: string | Toast, type?: Toast['type'], ttlMs?: number) {
     const toast = typeof msgOrToast === 'string'
       ? {
-          message: msgOrToast,
-          type,
-          ttlMs
-        }
+        message: msgOrToast,
+        type,
+        ttlMs
+      }
       : msgOrToast
 
     const resolvedType = toast.type ?? 'error'

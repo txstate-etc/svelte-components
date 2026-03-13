@@ -10,15 +10,15 @@ class ElementQueries {
   #stores = new Map<HTMLElement, WritableSubject<{ width: number }>>()
 
   #processwidths () {
-    for (let i = 0; i < this.#watchlist.length; i++) {
+    for (const layer of this.#watchlist) {
       const widths: number[] = []
       const attrs: (string | null)[] = []
-      for (let j = 0; j < this.#watchlist[i].length; j++) {
-        widths.push(this.#watchlist[i][j].offsetWidth)
-        attrs.push(this.#watchlist[i][j].getAttribute('data-eq'))
+      for (const el of layer) {
+        widths.push(el.offsetWidth)
+        attrs.push(el.getAttribute('data-eq'))
       }
-      for (let j = 0; j < this.#watchlist[i].length; j++) {
-        const el = this.#watchlist[i][j]
+      for (let j = 0; j < layer.length; j++) {
+        const el = layer[j]
         const w = widths[j]
         let attrstr = ''
         let finalw = 1600
@@ -52,17 +52,17 @@ class ElementQueries {
   refresh () {
     if (!this.#busy && this.#watchlist.length > 0) {
       this.#busy = true
-      requestAnimationFrame(this.#processwidths.bind(this) as () => void)
+      requestAnimationFrame(this.#processwidths.bind(this))
     }
   }
 
   #gotoanchor () {
     // since we are dramatically resizing, we need to scroll to the proper place for an
     // anchor tag
-    const m = document.location.hash.match(/^#([a-z][\w:.-]*)$/i)
+    const m = document.location.hash.match(/^#([a-z][a-zA-Z0-9_:.\-]*)$/iv)
     if (m) {
       const id = m[1]
-      requestAnimationFrame(() => { (document.getElementById(id) || document.querySelector(`[name="${id}"]`))?.scrollIntoView(true) })
+      requestAnimationFrame(() => { (document.getElementById(id) ?? document.querySelector(`[name="${id}"]`))?.scrollIntoView(true) })
     }
   }
 
@@ -99,7 +99,7 @@ class ElementQueries {
   // instead of faithfully subscribing and unsubscribing, so we'll add a subscriber that can't be
   // decremented and it will stay activated forever
   activate () {
-    this.#subscribers++
+    this.#subscribers += 1
     this.#activateRaw()
   }
 
@@ -111,12 +111,13 @@ class ElementQueries {
   }
 
   subscribe (el: HTMLElement, store?: WritableSubject<{ width: number }>) {
-    this.#subscribers++
+    this.#subscribers += 1
     if (store) this.#stores.set(el, store)
     else this.#stores.delete(el)
     this.#activateRaw()
     return () => {
-      if (--this.#subscribers === 0) this.#deactivate()
+      this.#subscribers -= 1
+      if (this.#subscribers === 0) this.#deactivate()
     }
   }
 }

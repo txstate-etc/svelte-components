@@ -2,11 +2,11 @@
   import { randomid } from 'txstate-utils'
   import { Store } from '@txstate-mws/svelte-store'
   import type { GlueAlignOpts, GlueAlignStore } from '$lib/actions'
-  import type { PopupMenuTypes } from '$lib/types'
+  import type { PopupMenuItem } from '$lib/types'
   import PopupMenu from './PopupMenu.svelte'
 
   export let buttonelement: HTMLButtonElement
-  export let items: PopupMenuTypes[] = []
+  export let items: PopupMenuItem[] = []
   export let menushown = false
   export let value: string | undefined = undefined
   export let align: GlueAlignOpts = 'auto'
@@ -26,7 +26,6 @@
   export let menuItemClass = ''
   export let menuItemHilitedClass = ''
   export let menuItemSelectedClass = ''
-  export let menuDividerClass = ''
 
   const usemenurole = true
 
@@ -55,4 +54,4 @@
   {menuItemClass}
   {menuItemHilitedClass}
   {menuItemSelectedClass}
-  {menuDividerClass}/>
+/>

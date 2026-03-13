@@ -10,17 +10,31 @@ readable content or a good label. Does NOT change styling at all.
 
 ## `glue`
 This action glues the element it is placed on to the target specified, with a specified alignment
-option. It is most useful for dropdown or autocomplete menus.
+option. It is most useful for dropdowns, autocomplete menus, and tooltips.
 
-The element should have `position: absolute` on it already. It is not moved to a new place in the DOM,
-it just gets `top`/`left`/`bottom`/`right` properties set.
+The element will have `position: fixed` applied to it so it will escape whatever box it's in. It is not moved to a new place in the DOM. You may need to give it a `z-index` to make sure it appears above other elements.
 
-If you have problems with the glued element being clipped by a parent with `overflow: hidden`, you
-may combine it with the `use:portal` action to move it somewhere else; `use:glue` will recalculate
-for the new location.
+If a parent element creates a containing block for fixed elements, the `portal` action can be used to move the element to a new place in the DOM. `glue` will automatically figure it out and update the positioning math.
 
-If you do not specify an `align` setting, the default is `auto`, which will evaluate the current
-viewport and determine which alignment gives the glued element the most space to grow.
+### Alignment options
+
+**Corner alignments** place matching corners of the element next to the target:
+`topleft`, `topright`, `bottomleft`, `bottomright`
+
+**Side alignments** center the element along one side of the target:
+`top`, `bottom`, `left`, `right`
+
+**Auto alignments** pick between two or more options based on available viewport space:
+- `auto` — choose between all four corners (default)
+- `autoleft` / `autoright` — choose top vs bottom, locked to one horizontal side
+- `topauto` / `bottomauto` — choose left vs right, locked to one vertical side
+- `automiddle` — choose between `top` and `bottom`
+- `middleauto` — choose between `left` and `right`
+- `middle` — choose between `top`, `bottom`, `left`, and `right`
+
+The `cover` option controls whether the element overlaps the target (`true`) or sits adjacent to it (`false`, default). The `gap` option adds pixels of space between the element and target.
+
+When `align` is `middle` and `cover` is `true`, the element is centered directly over the target.
 ```svelte
 <button bind:this={menubutton}>Activate Menu</button>
 <ul use:glue={{ target: menubutton, align: 'bottomright' }}>

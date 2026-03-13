@@ -23,11 +23,11 @@ export type SVGActionEntry<P = any> =
   | SvelteSVGActionType<P>
   | [SvelteSVGActionType<P>, P]
 
-export function passActions (node: HTMLElement, actions: HTMLActionEntry[]): SvelteActionReturnType<HTMLActionEntry[]>
-export function passActions (node: SVGElement, actions: SVGActionEntry[]): SvelteActionReturnType<SVGActionEntry[]>
+export function passActions (node: HTMLElement, actions: HTMLActionEntry[] | undefined): SvelteActionReturnType<HTMLActionEntry[]>
+export function passActions (node: SVGElement, actions: SVGActionEntry[] | undefined): SvelteActionReturnType<SVGActionEntry[]>
 export function passActions (
   node: HTMLElement & SVGElement,
-  actions: HTMLActionEntry[] | SVGActionEntry[]
+  actions: HTMLActionEntry[] | SVGActionEntry[] | undefined
 ) {
   let actionReturns = new Map<HTMLActionEntry | SVGActionEntry, SvelteActionReturnType<any> | undefined>()
 
@@ -37,7 +37,7 @@ export function passActions (
   }
 
   return {
-    update (actions: HTMLActionEntry[] | SVGActionEntry[]) {
+    update (actions: HTMLActionEntry[] | SVGActionEntry[] | undefined) {
       const newActionReturns = new Map<HTMLActionEntry | SVGActionEntry, SvelteActionReturnType<any> | undefined>()
 
       // accept new actions and update actions we already had

@@ -44,7 +44,6 @@ Any time the Modal is in the DOM, it will take over the screen. You make it go a
   })
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div use:portal={usePortal} class="modal-backdrop" style:--modal-z={stackPosition * 10 + 3000} class:opaque on:mousedown|stopPropagation|preventDefault={() => { escapable && endmodal() }}>
   <FocusLock bind:focusId class="modal-container {containerClass}" {includeselector} {escapable} on:escape {hidefocus} {hidefocuslabel} {returnfocusto} {initialfocus} on:focuslockupdate={onFocusLockUpdate}>
