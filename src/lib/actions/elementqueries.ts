@@ -7,7 +7,7 @@ class ElementQueries {
   #mutationobserver?: MutationObserver
   #boundRefresh: () => void = this.refresh.bind(this)
   #subscribers = 0
-  #stores = new Map<HTMLElement, WritableSubject<{ width: number }>>()
+  #stores = new Map<HTMLElement, WritableSubject<any>>()
 
   #processwidths () {
     for (const layer of this.#watchlist) {
@@ -110,7 +110,7 @@ class ElementQueries {
     this.#hasInit = false
   }
 
-  subscribe (el: HTMLElement, store?: WritableSubject<{ width: number }>) {
+  subscribe<S extends { width: number }> (el: HTMLElement, store?: WritableSubject<S>) {
     this.#subscribers += 1
     if (store) this.#stores.set(el, store)
     else this.#stores.delete(el)
@@ -124,14 +124,11 @@ class ElementQueries {
 
 export const elementqueries = new ElementQueries()
 
-interface EqOpts {
-  store: WritableSubject<{ width: number }>
-}
-export function eq (el: HTMLElement, opts?: EqOpts) {
+export function eq<S extends { width: number } = { width: number }> (el: HTMLElement, opts?: { store: WritableSubject<S> }) {
   el.classList.add('eq-parent')
   let unsubscribe = elementqueries.subscribe(el, opts?.store)
   return {
-    update (opts?: EqOpts) {
+    update (opts?: { store: WritableSubject<S> }) {
       unsubscribe()
       unsubscribe = elementqueries.subscribe(el, opts?.store)
     },
