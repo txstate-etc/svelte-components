@@ -27,8 +27,8 @@ export interface ToastStorage {
 }
 
 export class ToastStore extends Store<ToastStorage[]> {
-  add (toast: Toast)
-  add (msg: string, type?: Toast['type'], ttlMs?: number)
+  add (toast: Toast): void
+  add (msg: string, type?: Toast['type'], ttlMs?: number): void
   add (msgOrToast: string | Toast, type?: Toast['type'], ttlMs?: number) {
     const toast = typeof msgOrToast === 'string'
       ? {

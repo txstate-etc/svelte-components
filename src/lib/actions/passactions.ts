@@ -10,23 +10,23 @@ export type SvelteHTMLActionType<P = any> = (
   params?: P
 ) => SvelteActionReturnType<P> | undefined
 
-export type HTMLActionEntry<P = any> =
-  | SvelteHTMLActionType<P>
-  | [SvelteHTMLActionType<P>, P]
+export type HTMLActionEntry<P = any>
+  = | SvelteHTMLActionType<P>
+    | [SvelteHTMLActionType<P>, P]
 
 export type SvelteSVGActionType<P = any> = (
   node: SVGElement,
   params?: P
 ) => SvelteActionReturnType<P> | undefined
 
-export type SVGActionEntry<P = any> =
-  | SvelteSVGActionType<P>
-  | [SvelteSVGActionType<P>, P]
+export type SVGActionEntry<P = any>
+  = | SvelteSVGActionType<P>
+    | [SvelteSVGActionType<P>, P]
 
 export function passActions (node: HTMLElement, actions: HTMLActionEntry[] | undefined): SvelteActionReturnType<HTMLActionEntry[]>
 export function passActions (node: SVGElement, actions: SVGActionEntry[] | undefined): SvelteActionReturnType<SVGActionEntry[]>
 export function passActions (
-  node: HTMLElement & SVGElement,
+  node: any,
   actions: HTMLActionEntry[] | SVGActionEntry[] | undefined
 ) {
   let actionReturns = new Map<HTMLActionEntry | SVGActionEntry, SvelteActionReturnType<any> | undefined>()

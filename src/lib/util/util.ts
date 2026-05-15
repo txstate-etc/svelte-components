@@ -10,7 +10,7 @@ export function debounced (fn: (..._: any[]) => any, timeout: number) {
   }
 }
 
-export function modifierKey (e) {
+export function modifierKey (e: KeyboardEvent) {
   return e.ctrlKey || e.altKey || e.metaKey || e.key === 'Insert'
 }
 
@@ -18,7 +18,7 @@ export function selectionIsLeft (ele: HTMLInputElement | HTMLTextAreaElement) {
   return ele.selectionStart === 0 && ele.selectionEnd === 0
 }
 
-export function getScrollParents (element: HTMLElement) {
+export function getScrollParents (element: HTMLElement): HTMLElement[] {
   let style = getComputedStyle(element)
   const excludeStaticParent = style.position === 'absolute'
   if (style.position === 'fixed') return [document.body]

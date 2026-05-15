@@ -1,16 +1,16 @@
 <script lang="ts">
   import { MultiSelect, type PopupMenuItem } from '$lib'
   import { sleep } from 'txstate-utils'
-  let firstid
-  let secondid
-  let thirdid
-  let fourthid
-  let fifthid
-  let hybridid
-  let longid
-  let longslotid
-  let lotsofid
-  let groupeditemsid
+  let firstid: string
+  let secondid: string
+  let thirdid: string
+  let fourthid: string
+  let fifthid: string
+  let hybridid: string
+  let longid: string
+  let longslotid: string
+  let lotsofid: string
+  let groupeditemsid: string
 
   function getOptionsFirst (val: string) {
     return ['apple', 'orange', 'banana'].filter(o => o.includes(val)).map(value => ({ value }))

@@ -81,7 +81,7 @@
     return !isSelected(link) && link.href !== '/' && $page.url.pathname.startsWith(link.href)
   }
 
-  function updateLinks (links: Link[], ..._: any) {
+  function updateLinks (links: Link[], ..._: any): Link[] {
     if (!links) return []
     return links.map(l => ({ ...l, selected: isSelected(l), parent: isParentOfSelected(l), sublinks: l.sublinks ? updateLinks(l.sublinks) : undefined }))
   }

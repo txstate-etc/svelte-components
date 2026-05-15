@@ -56,7 +56,7 @@
   let loading = false
   let options: PopupMenuItem[] = []
   let hilitedpill: string | undefined
-  let popupvalue = undefined
+  let popupvalue: string | undefined = undefined
   let inputelement: HTMLInputElement
   let menuid: string
   let announcement = ''
@@ -154,7 +154,7 @@
     }
   }
 
-  let popuphilited
+  let popuphilited: number | undefined
   $: if (popuphilited != null) hilitedpill = undefined
   function reactToHilite (..._: any) {
     if (!inputelement) return

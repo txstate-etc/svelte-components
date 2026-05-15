@@ -33,7 +33,7 @@ class ElementQueries {
     this.#busy = false
   }
 
-  #finddepth (target: HTMLElement, currentdepth = 0) {
+  #finddepth (target: HTMLElement, currentdepth = 0): number {
     const closest = target.parentElement?.closest<HTMLElement>('.eq-parent')
     if (!closest) return currentdepth
     return this.#finddepth(closest, currentdepth + 1)

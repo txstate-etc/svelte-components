@@ -13,7 +13,7 @@ const customConfig = {
     '@stylistic': stylistic
   },
   rules: {
-    ...stylistic.configs['recommended-flat'].rules,
+    ...stylistic.configs.recommended.rules,
     ...love.rules,
     'complexity': 'off', // overkill
     'eqeqeq': ['error', 'smart'],
@@ -24,12 +24,16 @@ const customConfig = {
     'no-negated-condition': 'off', // overkill
     'no-param-reassign': 'off', // this is often necessary in svelte actions
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }], // allow normal for loops
+    'no-useless-assignment': 'off', // often done for reactivity
     'prefer-named-capture-group': 'off', // do not prefer
+    'require-unicode-regexp': 'off', // v flag breaks downstream vite-plugin-svelte
     'prefer-template': 'off', // unnecessary
     'promise/avoid-new': 'off',
     'no-self-assign': 'off', // self assign in svelte is to trigger reactivity
     'no-unused-vars': 'off',
     'no-use-before-define': 'off',
+    'require-atomic-updates': 'off', // buggy, was catching variable resets
+    'svelte/no-at-html-tags': 'off', // we use @html for rendering icons and other small bits of html, and it's not a security risk because the content is static and controlled by us
     'svelte/no-useless-mustaches': 'off', // might be using the mustache for html escaping
     '@typescript-eslint/array-type': ['error', { default: 'array' }],
     '@typescript-eslint/class-methods-use-this': 'off', // sometimes it's just for organization
