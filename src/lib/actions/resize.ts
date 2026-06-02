@@ -1,6 +1,6 @@
 import { equal } from 'txstate-utils'
 import { Store } from '@txstate-mws/svelte-store'
-import type { SettableSubject } from '@txstate-mws/svelte-store'
+import type { WritableSubject } from '@txstate-mws/svelte-store'
 import { debounced } from '../util/index.js'
 
 export interface ElementSize {
@@ -10,9 +10,9 @@ export interface ElementSize {
   offsetHeight?: number
 }
 
-interface ResizeConfig {
+interface ResizeConfig<T extends ElementSize = ElementSize> {
   debounce?: boolean | number
-  store?: SettableSubject<ElementSize>
+  store?: WritableSubject<T>
 }
 
 export class ResizeStore extends Store<ElementSize> {
@@ -34,7 +34,7 @@ export class ResizeStore extends Store<ElementSize> {
   }
 }
 
-export function resize (el: HTMLElement, config?: ResizeConfig) {
+export function resize<T extends ElementSize = ElementSize> (el: HTMLElement, config?: ResizeConfig<T>) {
   if (config?.debounce === true) config.debounce = 100
   let lastSize: ElementSize = {}
   function watch () {
@@ -53,7 +53,7 @@ export function resize (el: HTMLElement, config?: ResizeConfig) {
   watch()
 
   return {
-    update (newConfig?: ResizeConfig) {
+    update (newConfig?: ResizeConfig<T>) {
       if (newConfig?.debounce === true) newConfig.debounce = 100
       if (newConfig?.store !== config?.store) {
         newConfig?.store?.update(v => ({ ...v, ...lastSize }))
