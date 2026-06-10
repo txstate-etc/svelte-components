@@ -93,8 +93,20 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
 
   let lastrect: { left: number, right: number, top: number, bottom: number, width: number, height: number } | undefined
   let timer: number | undefined
+  // The containing block (nearest ancestor that establishes a containing block for
+  // position: fixed) is determined by the ancestors' computed styles. Scrolling can
+  // never change it, but it CAN change when an ancestor gains/loses a transform,
+  // filter, will-change, contain, etc. Walking the ancestor chain and calling
+  // getComputedStyle on each node is expensive, so cache it across the high-frequency
+  // scroll events and recompute only when something might have changed: a DOM/style
+  // mutation, a resize, or a target change (see invalidate / update).
+  let fixedParent: HTMLElement | null | undefined
+  let fixedParentComputed = false
   function reposition () {
-    const fixedParent = fixedContainingBlock(el)
+    if (!fixedParentComputed) {
+      fixedParent = fixedContainingBlock(el)
+      fixedParentComputed = true
+    }
     let fixedRect = { left: 0, top: 0, right: 0, bottom: 0 }
     if (fixedParent) {
       const tmpRect = fixedParent.getBoundingClientRect()
@@ -255,7 +267,12 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     store?.update(v => ({ ...v, valign, halign }))
   }
 
-  const { destroy: watchDestroy } = watchForMutations(reposition)
+  function repositionAfterMutation () {
+    // A mutation or resize may have changed which ancestor is the containing block.
+    fixedParentComputed = false
+    reposition()
+  }
+  const { destroy: watchDestroy } = watchForMutations(repositionAfterMutation)
   document.addEventListener('scroll', reposition, { capture: true })
   return {
     update ({ target: utarget, align: ualign = 'auto', cover: ucover = false, gap: ugap = 0, store: ustore }: GlueArgs) {
@@ -271,6 +288,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         if (!target) el.style.removeProperty('position')
         else {
           el.style.position = 'fixed'
+          fixedParentComputed = false
           reposition()
         }
       }
