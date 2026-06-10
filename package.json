@@ -29,7 +29,7 @@
     "@sveltejs/package": "^2.0.2",
     "eslint-config-love": "^154.0.0",
     "eslint-plugin-svelte": "^3.0.0",
-    "svelte": "^5.0.0",
+    "svelte": "^5.56.3",
     "svelte-check": "^4.0.0",
     "tslib": "^2.3.1",
     "typescript": "^6.0.3"
