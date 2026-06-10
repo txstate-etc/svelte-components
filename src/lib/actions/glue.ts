@@ -72,6 +72,60 @@ export interface GlueAlignStore {
 }
 
 /**
+ * A measure function reads the current geometry of one glued element and returns a
+ * thunk that performs the resulting DOM writes (or undefined when nothing changed).
+ */
+type GlueMeasure = () => (() => void) | undefined
+
+/**
+ * All active glue instances share one scroll listener and one requestAnimationFrame
+ * per frame. Each frame runs every registered measure() (the layout reads) and only
+ * then runs the write thunks they return, so for a page with thousands of glued
+ * elements the browser reads layout once per frame and never interleaves reads with
+ * writes. Multiple scroll events that arrive before a frame paints coalesce into a
+ * single measure pass.
+ */
+const glueInstances = new Set<GlueMeasure>()
+let frameRequested = false
+let scrollBound = false
+
+function runGlueFrame () {
+  frameRequested = false
+  const writes: (() => void)[] = []
+  for (const measure of glueInstances) {
+    const write = measure()
+    if (write) writes.push(write)
+  }
+  for (const write of writes) write()
+}
+
+function scheduleGlueFrame () {
+  if (frameRequested) return
+  frameRequested = true
+  requestAnimationFrame(runGlueFrame)
+}
+
+function onGlueScroll () {
+  scheduleGlueFrame()
+}
+
+function registerGlue (measure: GlueMeasure) {
+  glueInstances.add(measure)
+  if (!scrollBound) {
+    document.addEventListener('scroll', onGlueScroll, { capture: true, passive: true })
+    scrollBound = true
+  }
+}
+
+function unregisterGlue (measure: GlueMeasure) {
+  glueInstances.delete(measure)
+  if (glueInstances.size === 0 && scrollBound) {
+    document.removeEventListener('scroll', onGlueScroll, { capture: true })
+    scrollBound = false
+  }
+}
+
+/**
  * Make this element `position: fixed` and move it around to align with the target element.
  */
 export function glue (el: HTMLElement, { target, align = 'auto', cover = false, gap = 0, adjustparentheight = false, store }: GlueArgs) {
@@ -92,17 +146,19 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
   }
 
   let lastrect: { left: number, right: number, top: number, bottom: number, width: number, height: number } | undefined
-  let timer: number | undefined
   // The containing block (nearest ancestor that establishes a containing block for
   // position: fixed) is determined by the ancestors' computed styles. Scrolling can
   // never change it, but it CAN change when an ancestor gains/loses a transform,
   // filter, will-change, contain, etc. Walking the ancestor chain and calling
   // getComputedStyle on each node is expensive, so cache it across the high-frequency
   // scroll events and recompute only when something might have changed: a DOM/style
-  // mutation, a resize, or a target change (see invalidate / update).
+  // mutation, a resize, or a target change (see invalidateAndSchedule / update).
   let fixedParent: HTMLElement | null | undefined
   let fixedParentComputed = false
-  function reposition () {
+
+  // Read-only pass: gather geometry and build the write thunk. Runs inside the shared
+  // frame's measure phase, so it must not write to the DOM.
+  function measure (): (() => void) | undefined {
     if (!fixedParentComputed) {
       fixedParent = fixedContainingBlock(el)
       fixedParentComputed = true
@@ -112,10 +168,10 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       const tmpRect = fixedParent.getBoundingClientRect()
       fixedRect = { left: tmpRect.left, right: document.documentElement.clientWidth - tmpRect.right, top: tmpRect.top, bottom: document.documentElement.clientHeight - tmpRect.bottom }
     }
-    if (!target) return
+    if (!target) return undefined
     const tmpRect = target.getBoundingClientRect()
     const rect = { left: tmpRect.left - fixedRect.left, right: document.documentElement.clientWidth - tmpRect.right - fixedRect.right, top: tmpRect.top - fixedRect.top, bottom: document.documentElement.clientHeight - tmpRect.bottom - fixedRect.bottom, width: tmpRect.width, height: tmpRect.height }
-    if (equal(rect, lastrect)) return
+    if (equal(rect, lastrect)) return undefined
     lastrect = rect
 
     let autoalign: GlueAlignOpts = align
@@ -154,75 +210,69 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     const elOffsetHeight = el.offsetHeight
     const parentClientHeight = parent?.clientHeight ?? 0
     const parentOverflowY = parent?.style.overflowY
+    let position: (() => void) | undefined
     if (autoalign === 'bottomleft') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
         el.style.left = `${rect.left}px`
         el.style.removeProperty('bottom')
         el.style.removeProperty('right')
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'bottom'
       halign = 'left'
     } else if (autoalign === 'bottomright') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
         el.style.removeProperty('left')
         el.style.removeProperty('bottom')
         el.style.right = `${rect.right}px`
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'bottom'
       halign = 'right'
     } else if (autoalign === 'topleft') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.removeProperty('top')
         el.style.left = `${rect.left}px`
         el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`
         el.style.removeProperty('right')
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'top'
       halign = 'left'
     } else if (autoalign === 'topright') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.removeProperty('top')
         el.style.removeProperty('left')
         el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`
         el.style.right = `${rect.right}px`
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'top'
       halign = 'right'
     } else if (autoalign === 'top') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.removeProperty('top')
         el.style.left = `${rect.left + rect.width / 2 - elWidth / 2}px`
         el.style.bottom = `${rect.bottom + (cover ? 0 : targetHeight) + gap}px`
         el.style.removeProperty('right')
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'top'
       halign = 'center'
     } else if (autoalign === 'bottom') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.top = `${rect.top + (cover ? 0 : targetHeight) + gap}px`
         el.style.left = `${rect.left + rect.width / 2 - elWidth / 2}px`
         el.style.removeProperty('bottom')
         el.style.removeProperty('right')
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'bottom'
       halign = 'center'
     } else if (autoalign === 'left') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.top = `${rect.top + rect.height / 2 - elHeight / 2}px`
         el.style.removeProperty('bottom')
         if (cover) {
@@ -233,12 +283,11 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
           el.style.right = `${rect.right + rect.width + gap}px`
         }
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'center'
       halign = 'left'
     } else if (autoalign === 'right') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.top = `${rect.top + rect.height / 2 - elHeight / 2}px`
         el.style.removeProperty('bottom')
         if (cover) {
@@ -249,31 +298,36 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
           el.style.removeProperty('right')
         }
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'center'
       halign = 'right'
     } else if (autoalign === 'middle') {
-      cancelAnimationFrame(timer!)
-      timer = requestAnimationFrame(() => {
+      position = () => {
         el.style.top = `${rect.top + rect.height / 2 - elHeight / 2}px`
         el.style.left = `${rect.left + rect.width / 2 - elWidth / 2}px`
         el.style.removeProperty('bottom')
         el.style.removeProperty('right')
         adjustParentHeight(elOffsetTop, elOffsetHeight, parentClientHeight, parentOverflowY)
-      })
+      }
       valign = 'center'
       halign = 'center'
     }
-    store?.update(v => ({ ...v, valign, halign }))
+    const fvalign = valign
+    const fhalign = halign
+    return () => {
+      position?.()
+      store?.update(v => ({ ...v, valign: fvalign, halign: fhalign }))
+    }
   }
 
-  function repositionAfterMutation () {
+  function invalidateAndSchedule () {
     // A mutation or resize may have changed which ancestor is the containing block.
     fixedParentComputed = false
-    reposition()
+    scheduleGlueFrame()
   }
-  const { destroy: watchDestroy } = watchForMutations(repositionAfterMutation)
-  document.addEventListener('scroll', reposition, { capture: true })
+
+  const { destroy: watchDestroy } = watchForMutations(invalidateAndSchedule)
+  registerGlue(measure)
   return {
     update ({ target: utarget, align: ualign = 'auto', cover: ucover = false, gap: ugap = 0, store: ustore }: GlueArgs) {
       align = ualign
@@ -289,13 +343,13 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
         else {
           el.style.position = 'fixed'
           fixedParentComputed = false
-          reposition()
         }
+        scheduleGlueFrame()
       }
     },
     destroy () {
+      unregisterGlue(measure)
       watchDestroy()
-      document.removeEventListener('scroll', reposition)
       if (adjustparentheight && parent) {
         if (formerMinHeight) parent.style.minHeight = formerMinHeight
         parent.style.removeProperty('min-height')
