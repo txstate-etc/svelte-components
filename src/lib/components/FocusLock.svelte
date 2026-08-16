@@ -13,7 +13,7 @@ When they do, the escape event will be fired, allowing you to remove the dialog.
 When it goes away, they'll be trapped inside the previous `FocusLock`, and so on.
 -->
 <script context="module" lang="ts">
-  export const FocusLockStack: { focusId: string, pause: () => void, unpause: () => void, update: () => void }[] = []
+  export const FocusLockStack: { focusId: string, pause: () => void, unpause: () => void, update: () => void, inheritReturnFocus: (el: HTMLElement) => void }[] = []
   const waitAtick = typeof requestAnimationFrame !== 'undefined' ? (resolve: (value: unknown) => void) => requestAnimationFrame(resolve) : (resolve: (value: unknown) => void) => resolve(0)
 </script>
 
@@ -49,7 +49,13 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
       focusId,
       pause: () => { state = 'paused' },
       unpause: () => { if (state === 'paused') state = 'active' },
-      update: () => { dispatch('focuslockupdate') }
+      update: () => { dispatch('focuslockupdate') },
+      inheritReturnFocus: el => {
+        // only accept a hand-me-down if our own recorded target is useless - we
+        // captured document.activeElement after the previous lock's content was
+        // already removed, so it's usually document.body or a disconnected element
+        if (!returnfocusto || returnfocusto === document.body || !returnfocusto.isConnected) returnfocusto = el
+      }
     })
     for (const entry of FocusLockStack) entry.update()
     if (typeof returnfocusto === 'undefined') {
@@ -76,8 +82,17 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
     // will think it was an "outside" click and kill itself
     await new Promise(waitAtick)
 
-    if (returnfocusto && wasactive) {
-      returnfocusto.focus()
+    const top = FocusLockStack.slice(-1)[0]
+    if (top?.focusId === focusId) {
+      // never restore focus to document.body - it accomplishes nothing except
+      // blurring whatever the user has focused since we began closing
+      if (returnfocusto && wasactive && returnfocusto !== document.body) returnfocusto.focus()
+    } else if (top && returnfocusto?.isConnected && returnfocusto !== document.body) {
+      // another focus lock mounted while we were waiting (e.g. one modal replaced
+      // by another in the same update) and has taken focus - restoring ours would
+      // steal it back out of the new dialog. instead, hand our return target down
+      // the chain so the final modal can return focus to the original trigger
+      top.inheritReturnFocus(returnfocusto)
     }
     const idx = FocusLockStack.findIndex(f => f.focusId === focusId)
     if (idx > -1) FocusLockStack.splice(idx, 1)
@@ -98,7 +113,7 @@ When it goes away, they'll be trapped inside the previous `FocusLock`, and so on
     }
   }
   const keydown = (e: KeyboardEvent) => {
-    if (state === 'active' && e.key === 'Escape' && escapable) {
+    if ((state === 'active' || state === 'init') && e.key === 'Escape' && escapable) {
       e.preventDefault()
       dispatch('escape')
     }
