@@ -97,12 +97,23 @@ theme every instance at once. For anything heavier, the `className` prop and the
   with an ellipsis, after `format` has had its say. Set `Infinity` if you really want it all.
 * `allowHtml: boolean` (default false) - Render leaf values containing markup as actual HTML.
   See the HTML section above, especially before enabling it on untrusted data.
-* `format?: (value: string, path: (string|number)[]) => string | undefined` - Take over the
-  display of any leaf value. You receive the default rendering (datetimes already rewritten,
-  everything else stringified) and the value's path from the root, e.g.
-  `['sections', 0, 'heading']`, so you can target specific fields:
+* `format?: (value: string, path: (string|number)[]) => string | { html, inline? } | undefined` -
+  Take over the display of any leaf value. You receive the default rendering (datetimes
+  already rewritten, everything else stringified) and the value's path from the root,
+  e.g. `['sections', 0, 'heading']`, so you can target specific fields - or recognize
+  marker strings your data source deliberately embedded, like
+  `'{"image": "https://..."}'`. Return a string to display text, or `{ html }` to display
+  markup you built yourself - it renders regardless of `allowHtml` and without the dotted
+  frame, because your formatter is code rather than data, though it still gets the
+  `stripUnsafeHtml` treatment since the urls and labels you interpolate usually do come
+  from the data. `{ html }` drops below its key as an indented block by default; pass
+  `inline: true` for something compact like a link that should sit beside its key.
   ```js
   function format (value, path) {
+    if (value.startsWith('{"image":')) {
+      const parsed = JSON.parse(value)
+      return { html: `<img src="${parsed.image}" alt="${parsed.alt ?? ''}">` }
+    }
     if (path[path.length - 1] === 'price') return `$${value}`
     // return undefined to keep the default rendering
   }

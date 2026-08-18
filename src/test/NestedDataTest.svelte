@@ -43,6 +43,26 @@ Cras ut tincidunt est. Nam tempor consequat suscipit. Fusce magna metus, porttit
     if (path[path.length - 1] === 'price') return `$${value}`
     return undefined
   }
+
+  // marker strings a disciplined data source embeds for the formatter to
+  // recognize and collapse into markup it builds itself; the "evil" one proves
+  // trusted html still gets scrubbed, since its href comes from data
+  const linked = {
+    name: 'Campus Map',
+    download: JSON.stringify({ link: 'https://example.edu/map.pdf', label: 'Map PDF' }),
+    // eslint-disable-next-line no-script-url -- intentional test of bad behavior being blocked
+    tracker: JSON.stringify({ link: 'javascript:window.hacked = true', label: 'bad' }),
+    thumbnail: JSON.stringify({ image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23501214'/%3E%3C/svg%3E", alt: 'maroon square' })
+  }
+  function linkFormat (value: string, path: (string | number)[]) {
+    if (!value.startsWith('{')) return undefined
+    try {
+      const parsed = JSON.parse(value)
+      if (typeof parsed?.link === 'string') return { html: `<a href="${parsed.link}">${parsed.label ?? parsed.link}</a>`, inline: true }
+      if (typeof parsed?.image === 'string') return { html: `<img src="${parsed.image}" alt="${parsed.alt ?? ''}">` }
+    } catch {}
+    return undefined
+  }
 </script>
 
 <h2>default rendering</h2>
@@ -71,6 +91,9 @@ Cras ut tincidunt est. Nam tempor consequat suscipit. Fusce magna metus, porttit
 <h2>custom format and elided placeholder</h2>
 <div id="formatted">
   <NestedData data={priced} format={currency} />
+</div>
+<div id="marker">
+  <NestedData data={linked} format={linkFormat} />
 </div>
 <div id="shallow">
   <NestedData {data} maxlevel={1} elidedObjectText="(object)" elidedArrayText="(list)" elidedTooltip="too deep" />

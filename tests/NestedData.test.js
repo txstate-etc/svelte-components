@@ -163,3 +163,31 @@ test('format receives the default-rendered string and can override by path', asy
   await expect(formatted.locator('text=$42.5')).toHaveCount(1)
   await expect(formatted.locator('text=plain')).toHaveCount(1)
 })
+
+test('format recognizes container marker shapes and returns trusted html, scrubbed and unframed', async ({ page }) => {
+  const marker = page.locator('#marker')
+
+  // the link marker collapses to an anchor beside its key, with no HTML frame
+  const a = marker.locator('a', { hasText: 'Map PDF' })
+  await expect(a).toHaveCount(1)
+  expect(await a.getAttribute('href')).toBe('https://example.edu/map.pdf')
+  await expect(marker.locator('fieldset')).toHaveCount(0)
+  const dlDt = await marker.locator('dt', { hasText: 'download:' }).boundingBox()
+  const dlDd = await marker.locator('dt', { hasText: 'download:' }).locator('..').locator('dd').boundingBox()
+  expect(Math.abs(dlDd.y - dlDt.y)).toBeLessThan(5)
+
+  // trusted html is still scrubbed: a javascript: href smuggled in through data
+  // loses the href but keeps the label
+  const bad = marker.locator('a', { hasText: 'bad' })
+  await expect(bad).toHaveCount(1)
+  expect(await bad.getAttribute('href')).toBeNull()
+  expect(await page.evaluate(() => window.hacked)).toBeUndefined()
+
+  // the image marker takes the block default and drops below its key at full strength
+  const img = marker.locator('img[alt="maroon square"]')
+  await expect(img).toHaveCount(1)
+  const imgDt = await marker.locator('dt', { hasText: 'thumbnail:' }).boundingBox()
+  const imgDd = await marker.locator('dt', { hasText: 'thumbnail:' }).locator('..').locator('dd').boundingBox()
+  expect(imgDd.y).toBeGreaterThan(imgDt.y + 5)
+  await expect(marker.locator('dt', { hasText: 'thumbnail:' }).locator('..').locator('.nested-data-trusted')).toHaveCSS('opacity', '1')
+})

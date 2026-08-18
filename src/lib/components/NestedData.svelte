@@ -88,11 +88,23 @@
   export let maxlevel = 5
   /**
    * take over the display of any leaf value; receives the default rendering
-   * (datetimes already rewritten as local ISO8601, everything else stringified)
-   * plus the value's path, so it can do something else with specific fields or
-   * types; return undefined to keep the default rendering
+   * (datetimes already rewritten as local ISO8601, everything else
+   * stringified) plus the value's path, so it can do something else with
+   * specific fields or types - including recognizing marker strings a data
+   * source deliberately embedded, like '{"image": "https://..."}'
+   *
+   * return a string to display as text, return { html } to display markup the
+   * formatter built itself - it renders regardless of allowHtml, because the
+   * formatter is application code rather than data, though it is still
+   * scrubbed with stripUnsafeHtml since the urls and labels interpolated into
+   * it usually do come from the data - or return undefined to keep the
+   * default rendering
+   *
+   * { html } drops below its key as an indented block by default; pass
+   * inline: true for something compact like a link that should sit beside its
+   * key the way a short scalar does
    */
-  export let format: ((value: string, path: (string | number)[]) => string | undefined) | undefined = undefined
+  export let format: ((value: string, path: (string | number)[]) => string | { html: string, inline?: boolean } | undefined) | undefined = undefined
   /**
    * leaf values longer than this many characters are cut off with an ellipsis,
    * after `format` has had its say; set Infinity if you really want it all
@@ -144,12 +156,21 @@
    * so it stays beside the key, and a scalar whose rendered text contains line
    * breaks (or is long enough that wrapping is inevitable) drops below the key,
    * so the breaks don't leave text hanging in the middle of the row
+   *
+   * formatted values follow the same rules: { html } is a block unless the
+   * formatter flagged it inline, text follows the scalar rules
    */
   function isBlockValue (value: any, key: string) {
+    const formatted = applyFormat(value, [...path, key])
+    if (formatted != null) {
+      if (typeof formatted === 'object') return !formatted.inline
+      const t = truncate(formatted)
+      return t.includes('\n') || t.length > BLOCKTEXT
+    }
     if (level + 1 >= maxlevel || childAncestors.includes(value)) return false
     if (arrayEntries(value) != null || objectEntries(value) != null) return true
     if (typeof value !== 'string') return false
-    const rendered = formatValue(value, [...path, key])
+    const rendered = formatValue(value)
     return isHtml(rendered) || rendered.includes('\n') || rendered.length > BLOCKTEXT
   }
 
@@ -165,16 +186,41 @@
   let htmlContentHeight = 0
   $: htmlClipped = htmlContentHeight > htmlClipHeight + 1
 
-  function formatValue (value: any, atPath: (string | number)[]) {
+  function truncate (str: string) {
+    return str.length > maxtext ? str.slice(0, maxtext).trimEnd() + '…' : str
+  }
+
+  /**
+   * run the format prop on a leaf value's default rendering; an { html }
+   * result needs DOMParser for scrubbing, so without one (i.e. during SSR) it
+   * is ignored and the value renders the default way until the browser
+   * hydrates
+   */
+  function applyFormat (value: any, atPath: (string | number)[]): string | { html: string, inline?: boolean } | undefined {
+    if (format == null) return undefined
+    if (value == null || (typeof value === 'object' && !(value instanceof Date)) || typeof value === 'function') return undefined
+    const result = format(renderScalar(value), atPath)
+    if (result != null && typeof result === 'object' && typeof DOMParser === 'undefined') return undefined
+    return result
+  }
+
+  $: formatted = applyFormat(data, path)
+  $: formattedHtml = formatted != null && typeof formatted === 'object' ? stripUnsafeHtml(formatted.html) : undefined
+  $: formattedText = typeof formatted === 'string' ? truncate(formatted) : undefined
+
+  function formatValue (value: any) {
     const str = renderScalar(value)
-    const formatted = format?.(str, atPath) ?? str
     // never truncate html - slicing markup in half would break it
-    if (isHtml(formatted)) return formatted
-    return formatted.length > maxtext ? formatted.slice(0, maxtext).trimEnd() + '…' : formatted
+    if (isHtml(str)) return str
+    return truncate(str)
   }
 </script>
 
-{#if arrayData}
+{#if formattedHtml != null}
+  <span class="nested-data-scalar nested-data-trusted {className}">{@html formattedHtml}</span>
+{:else if formattedText != null}
+  <span class="nested-data-scalar {className}">{formattedText}</span>
+{:else if arrayData}
   {#if elided}
     <span class="nested-data-elided {className}" title={elidedTooltip}>{elidedArrayText}</span>
   {:else if arrayData.length}
@@ -198,19 +244,19 @@
     </dl>
   {/if}
 {:else if data != null && (typeof data !== 'object' || data instanceof Date) && typeof data !== 'function'}
-  {#if isHtml(formatValue(data, path))}
+  {#if isHtml(formatValue(data))}
     <!-- the frame and legend keep rendered markup (especially lists) from being mistaken for the data's own structure -->
     <fieldset class="nested-data-scalar nested-data-html {className}" class:nested-data-clipped={htmlClipped}>
       <legend>HTML</legend>
       <div class="nested-data-html-clip" bind:clientHeight={htmlClipHeight}>
-        <div bind:offsetHeight={htmlContentHeight}>{@html stripUnsafeHtml(formatValue(data, path))}</div>
+        <div bind:offsetHeight={htmlContentHeight}>{@html stripUnsafeHtml(formatValue(data))}</div>
       </div>
       {#if htmlClipped}
         <div class="nested-data-html-more" title={clippedTooltip}>&hellip;</div>
       {/if}
     </fieldset>
   {:else}
-    <span class="nested-data-scalar {className}">{formatValue(data, path)}</span>
+    <span class="nested-data-scalar {className}">{formatValue(data)}</span>
   {/if}
 {/if}
 
@@ -252,6 +298,14 @@
   .nested-data-scalar {
     white-space: pre-line;
     overflow-wrap: break-word;
+  }
+  /* markup built by the format prop renders inline, unframed */
+  .nested-data-trusted {
+    white-space: normal;
+  }
+  .nested-data-trusted :global(img) {
+    max-width: 100%;
+    vertical-align: middle;
   }
   /* html brings its own paragraphs and breaks; pre-line would double them up */
   .nested-data-html {
@@ -296,8 +350,8 @@
   .nested-data-html :global(p:last-of-type) {
     margin-bottom: 0;
   }
-  /* de-emphasize blocks of text that have dropped below their key */
-  dl.nested-data dd.nested-data-block > :global(.nested-data-scalar) {
+  /* de-emphasize blocks of text that have dropped below their key; formatter-built markup keeps full strength */
+  dl.nested-data dd.nested-data-block > :global(.nested-data-scalar:not(.nested-data-trusted)) {
     opacity: var(--nested-data-block-opacity, 0.85);
   }
   .nested-data-elided {
