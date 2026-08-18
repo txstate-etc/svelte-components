@@ -67,6 +67,7 @@
       ]
     },
     { label: 'MultiSelect', href: '/multiselect', subtitle: 'A component for selecting multiple items from a list.' },
+    { label: 'NestedData', href: '/nesteddata', subtitle: 'A component for displaying arbitrary data as a compact nested structure.' },
     { label: 'Lottie', href: '/lottie', subtitle: 'A component for loading lottie animations.' }
   ]
   $: current = links.find(l => l.href === '/' ? $page.url.pathname === '/' : $page.url.pathname.startsWith(l.href))
