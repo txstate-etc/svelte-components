@@ -4,6 +4,14 @@
   for objects (and Maps), bulleted lists for arrays (and Sets), scalars as text.
   Intended for read-only summaries like preview panes, not for editing.
 
+  Long text is kept in check: leaf values cut off with an ellipsis after `maxtext`
+  characters, line breaks are preserved, and a value that would need to wrap drops
+  below its key as an indented block instead of snaking around it.
+
+  Values are escaped text by default; the `allowHtml` prop renders values that
+  contain markup as actual HTML in a framed, height-clipped block - only enable
+  it for trusted payloads.
+
   Notes on odd input:
   - datetimes render as ISO8601 in the browser's timezone, whether they arrive as
     Date objects or ISO strings (e.g. UTC from a JSON API); use `format` to display
@@ -16,6 +24,7 @@
 -->
 <script lang="ts" context="module">
   import { dateToISOWithTZ } from 'txstate-utils'
+  import { stripUnsafeHtml } from '../util/striphtml.js'
 
   /**
    * datetimes display as ISO8601 in the browser's timezone, whether they arrive
@@ -36,6 +45,9 @@
     }
     return String(value)
   }
+
+  /** simple HTML auto-detection: any <tag ...> or </tag> in the string */
+  const htmlPattern = /<\/?[a-z][^>]*>/i
 
   /** a Map key we can display: a primitive or anything with a custom toString */
   function stringableKey (key: any) {
@@ -81,10 +93,29 @@
    * types; return undefined to keep the default rendering
    */
   export let format: ((value: string, path: (string | number)[]) => string | undefined) | undefined = undefined
+  /**
+   * leaf values longer than this many characters are cut off with an ellipsis,
+   * after `format` has had its say; set Infinity if you really want it all
+   */
+  export let maxtext = 200
+  /**
+   * render leaf values that contain HTML tags as actual HTML instead of escaped
+   * text; they display as an indented block below their key and are exempt from
+   * maxtext, since slicing markup in half would break it
+   *
+   * markup is scrubbed with stripUnsafeHtml before rendering (scripts, styles,
+   * iframes, event handlers, and executable urls dropped), but that is a safety
+   * net, not full sanitization; off by default because it means trusting the
+   * data: only enable this when the payload is sanitized or comes from a trusted
+   * source, otherwise you are opening your users up to XSS attacks
+   */
+  export let allowHtml = false
   /** the placeholders shown in place of data nested deeper than maxlevel, distinct so the reader knows what kind of data is hiding */
   export let elidedObjectText = '{ ... }'
   export let elidedArrayText = '[...]'
   export let elidedTooltip = 'deeper data not shown'
+  /** tooltip on the indicator shown when a rendered html block is taller than its max height and gets clipped */
+  export let clippedTooltip = 'more content not shown'
   export let className = ''
   /**
    * the containers above this one, used internally to detect cycles; a container
@@ -99,9 +130,47 @@
   $: elided = level >= maxlevel || ancestors.includes(data)
   $: childAncestors = [...ancestors, data]
 
+  /**
+   * a rendered string this long will essentially always need to wrap, so we drop
+   * it below the key up front; that also lets the CSS de-emphasize wrapped blocks,
+   * which it could not do if the drop only happened through inline-block layout
+   */
+  const BLOCKTEXT = 80
+
+  /**
+   * containers always drop below their key as a full-width block; scalars are
+   * inline-blocks that stay beside the key until they need to wrap - with two
+   * exceptions: a container the child will elide renders as a short placeholder,
+   * so it stays beside the key, and a scalar whose rendered text contains line
+   * breaks (or is long enough that wrapping is inevitable) drops below the key,
+   * so the breaks don't leave text hanging in the middle of the row
+   */
+  function isBlockValue (value: any, key: string) {
+    if (level + 1 >= maxlevel || childAncestors.includes(value)) return false
+    if (arrayEntries(value) != null || objectEntries(value) != null) return true
+    if (typeof value !== 'string') return false
+    const rendered = formatValue(value, [...path, key])
+    return isHtml(rendered) || rendered.includes('\n') || rendered.length > BLOCKTEXT
+  }
+
+  function isHtml (rendered: string) {
+    // no DOMParser means no script/style stripping (i.e. during SSR), so behave
+    // as if allowHtml were off; the browser re-renders as html when it hydrates
+    return allowHtml && typeof DOMParser !== 'undefined' && htmlPattern.test(rendered)
+  }
+
+  // measured heights of an html block's clip window and its natural content;
+  // when the content is taller, we fade the bottom and show an indicator
+  let htmlClipHeight = 0
+  let htmlContentHeight = 0
+  $: htmlClipped = htmlContentHeight > htmlClipHeight + 1
+
   function formatValue (value: any, atPath: (string | number)[]) {
     const str = renderScalar(value)
-    return format?.(str, atPath) ?? str
+    const formatted = format?.(str, atPath) ?? str
+    // never truncate html - slicing markup in half would break it
+    if (isHtml(formatted)) return formatted
+    return formatted.length > maxtext ? formatted.slice(0, maxtext).trimEnd() + '…' : formatted
   }
 </script>
 
@@ -111,7 +180,7 @@
   {:else if arrayData.length}
     <ul class="nested-data {className}">
       {#each arrayData as entry, i (i)}
-        <li><svelte:self data={entry} path={[...path, i]} ancestors={childAncestors} {maxlevel} {format} {elidedObjectText} {elidedArrayText} {elidedTooltip} /></li>
+        <li><svelte:self data={entry} path={[...path, i]} ancestors={childAncestors} {maxlevel} {format} {maxtext} {allowHtml} {elidedObjectText} {elidedArrayText} {elidedTooltip} {clippedTooltip} /></li>
       {/each}
     </ul>
   {/if}
@@ -123,13 +192,26 @@
       {#each objectData as [key, value], i (i)}
         <div>
           <dt>{key}:</dt>
-          <dd><svelte:self data={value} path={[...path, key]} ancestors={childAncestors} {maxlevel} {format} {elidedObjectText} {elidedArrayText} {elidedTooltip} /></dd>
+          <dd class:nested-data-block={isBlockValue(value, key)}><svelte:self data={value} path={[...path, key]} ancestors={childAncestors} {maxlevel} {format} {maxtext} {allowHtml} {elidedObjectText} {elidedArrayText} {elidedTooltip} {clippedTooltip} /></dd>
         </div>
       {/each}
     </dl>
   {/if}
 {:else if data != null && (typeof data !== 'object' || data instanceof Date) && typeof data !== 'function'}
-  {formatValue(data, path)}
+  {#if isHtml(formatValue(data, path))}
+    <!-- the frame and legend keep rendered markup (especially lists) from being mistaken for the data's own structure -->
+    <fieldset class="nested-data-scalar nested-data-html {className}" class:nested-data-clipped={htmlClipped}>
+      <legend>HTML</legend>
+      <div class="nested-data-html-clip" bind:clientHeight={htmlClipHeight}>
+        <div bind:offsetHeight={htmlContentHeight}>{@html stripUnsafeHtml(formatValue(data, path))}</div>
+      </div>
+      {#if htmlClipped}
+        <div class="nested-data-html-more" title={clippedTooltip}>&hellip;</div>
+      {/if}
+    </fieldset>
+  {:else}
+    <span class="nested-data-scalar {className}">{formatValue(data, path)}</span>
+  {/if}
 {/if}
 
 <style>
@@ -143,23 +225,82 @@
     padding-left: 0.9em;
     list-style: disc;
   }
+  /*
+   * hanging indent: a value that fits stays on the same line as its key, but the
+   * dd is an inline-block, so as soon as its content needs to wrap, the whole
+   * block drops below the key and picks up the row's padding as its indent;
+   * text-indent only pulls the first line (the key) back to the left edge
+   */
+  dl.nested-data > div {
+    padding-left: 0.75em;
+    text-indent: -0.75em;
+  }
   dl.nested-data dt {
     display: inline;
     font-weight: 600;
   }
   dl.nested-data dd {
-    display: inline;
+    display: inline-block;
     margin: 0;
+    max-width: 100%;
+    text-indent: 0;
+    vertical-align: top;
   }
-  /*
-   * an object directly beneath a key drops below it, indented a step; the child
-   * combinator keeps the indent from leaking into deeper levels, so an object
-   * inside an array entry hangs on the li's bullet with no extra margin
-   */
-  dl.nested-data dd > :global(dl.nested-data) {
-    margin-left: 0.75em;
+  dl.nested-data dd.nested-data-block {
+    display: block;
+  }
+  .nested-data-scalar {
+    white-space: pre-line;
+    overflow-wrap: break-word;
+  }
+  /* html brings its own paragraphs and breaks; pre-line would double them up */
+  .nested-data-html {
+    white-space: normal;
+    display: block;
+    border: 1px dotted;
+    border-radius: 0.25em;
+    margin: 0.2em 0 0.2em 0;
+    padding: 0 0.6em 0.4em;
+    /* fieldsets refuse to shrink below their content width without this */
+    min-width: 0;
+  }
+  .nested-data-html legend {
+    font-size: 0.7em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 0 0.4em;
+    margin-left: -0.4em;
+    opacity: 0.75;
+  }
+  .nested-data-html-clip {
+    max-height: var(--nested-data-html-max-height, 12em);
+    overflow: hidden;
+  }
+  /* fade the content itself so the effect works on any background */
+  .nested-data-clipped .nested-data-html-clip {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5em), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5em), transparent);
+  }
+  .nested-data-html-more {
+    text-align: center;
+    line-height: 1;
+    opacity: var(--nested-data-elided-opacity, 0.65);
+  }
+  .nested-data-html :global(img) {
+    max-width: 100%;
+  }
+  /* the browser's default paragraph margins would pad out the block's top and bottom (first-of-type since the legend is always the first child) */
+  .nested-data-html :global(p:first-of-type) {
+    margin-top: 0;
+  }
+  .nested-data-html :global(p:last-of-type) {
+    margin-bottom: 0;
+  }
+  /* de-emphasize blocks of text that have dropped below their key */
+  dl.nested-data dd.nested-data-block > :global(.nested-data-scalar) {
+    opacity: var(--nested-data-block-opacity, 0.85);
   }
   .nested-data-elided {
-    opacity: 0.65;
+    opacity: var(--nested-data-elided-opacity, 0.65);
   }
 </style>
