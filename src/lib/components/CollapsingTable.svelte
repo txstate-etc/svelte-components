@@ -130,11 +130,13 @@ to be displayed instead.
     position: relative;
     box-sizing: border-box;
   }
-  th[role="button"] {
+  /* PopupMenu replaces our role="button" with role="combobox", so key off the tabindex we set instead */
+  th[tabindex] {
     cursor: pointer !important;
   }
-  th.defaultIcon :global([role="button"]) {
-    padding-right: 1.3em;
+  /* reserve room for the icon; extra specificity to beat framework rules like fomantic's .ui.table > thead > tr > th */
+  thead > tr > th.defaultIcon[tabindex] {
+    padding-right: 1.6em;
   }
   th.defaultIcon :global(i) {
     transform: translateY(-50%) rotate(45deg);
@@ -144,7 +146,7 @@ to be displayed instead.
   }
   th :global(i) {
     position: absolute;
-    right: 0.4em;
+    right: 0.7em;
     top: calc(50% - 0.08em);
   }
   .stickyheader th {
