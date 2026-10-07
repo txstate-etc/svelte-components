@@ -145,7 +145,7 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     }
   }
 
-  let lastrect: { left: number, right: number, top: number, bottom: number, width: number, height: number } | undefined
+  let lastmeasured: { rect: { left: number, right: number, top: number, bottom: number, width: number, height: number }, space: { left: number, right: number, top: number, bottom: number } } | undefined
   // The containing block (nearest ancestor that establishes a containing block for
   // position: fixed) is determined by the ancestors' computed styles. Scrolling can
   // never change it, but it CAN change when an ancestor gains/loses a transform,
@@ -165,18 +165,32 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
     }
     let fixedRect = { left: 0, top: 0, right: 0, bottom: 0 }
     if (fixedParent) {
+      // fixed elements are positioned against the containing block's padding box, so
+      // measure from inside its borders
       const tmpRect = fixedParent.getBoundingClientRect()
-      fixedRect = { left: tmpRect.left, right: document.documentElement.clientWidth - tmpRect.right, top: tmpRect.top, bottom: document.documentElement.clientHeight - tmpRect.bottom }
+      const left = tmpRect.left + fixedParent.clientLeft
+      const top = tmpRect.top + fixedParent.clientTop
+      fixedRect = { left, right: document.documentElement.clientWidth - left - fixedParent.clientWidth, top, bottom: document.documentElement.clientHeight - top - fixedParent.clientHeight }
     }
     if (!target) return undefined
     const tmpRect = target.getBoundingClientRect()
-    const rect = { left: tmpRect.left - fixedRect.left, right: document.documentElement.clientWidth - tmpRect.right - fixedRect.right, top: tmpRect.top - fixedRect.top, bottom: document.documentElement.clientHeight - tmpRect.bottom - fixedRect.bottom, width: tmpRect.width, height: tmpRect.height }
-    if (equal(rect, lastrect)) return undefined
-    lastrect = rect
+    const vpWidth = document.documentElement.clientWidth
+    const vpHeight = document.documentElement.clientHeight
+    // The space available around the target in the viewport, used to make the auto
+    // alignment decision. This must not be relative to the fixed containing block: an
+    // ancestor with a transform, container-type, etc. changes what our CSS offsets are
+    // measured from, but it doesn't clip us, so the space that matters is the viewport.
+    const space = { left: tmpRect.left, right: vpWidth - tmpRect.right, top: tmpRect.top, bottom: vpHeight - tmpRect.bottom }
+    // The target's offsets from the edges of the fixed containing block, used to write
+    // the CSS position values.
+    const rect = { left: tmpRect.left - fixedRect.left, right: vpWidth - tmpRect.right - fixedRect.right, top: tmpRect.top - fixedRect.top, bottom: vpHeight - tmpRect.bottom - fixedRect.bottom, width: tmpRect.width, height: tmpRect.height }
+    const measured = { rect, space }
+    if (equal(measured, lastmeasured)) return undefined
+    lastmeasured = measured
 
     let autoalign: GlueAlignOpts = align
-    const leftright = rect.right > rect.left ? 'left' : 'right'
-    const topbottom = rect.bottom > rect.top ? 'bottom' : 'top'
+    const leftright = space.right > space.left ? 'left' : 'right'
+    const topbottom = space.bottom > space.top ? 'bottom' : 'top'
     if (align === 'auto') {
       autoalign = topbottom + leftright
     } else if (align === 'autoleft') {
@@ -195,10 +209,10 @@ export function glue (el: HTMLElement, { target, align = 'auto', cover = false, 
       if (cover) {
         autoalign = 'middle'
       } else {
-        const maxSpace = Math.max(rect.top, rect.bottom, rect.left, rect.right)
-        if (maxSpace === rect.bottom) autoalign = 'bottom'
-        else if (maxSpace === rect.top) autoalign = 'top'
-        else if (maxSpace === rect.right) autoalign = 'right'
+        const maxSpace = Math.max(space.top, space.bottom, space.left, space.right)
+        if (maxSpace === space.bottom) autoalign = 'bottom'
+        else if (maxSpace === space.top) autoalign = 'top'
+        else if (maxSpace === space.right) autoalign = 'right'
         else autoalign = 'left'
       }
     }
@@ -364,10 +378,9 @@ const isHTMLElement = (e: Element | null | undefined): e is HTMLElement =>
 function isFixedContainer (el: HTMLElement) {
   const css = getComputedStyle(el)
   if (css.getPropertyValue('transform') !== 'none' || css.getPropertyValue('perspective') !== 'none') return true // A transform or perspective value other than none
-  if (['transform', 'perspective', 'filter'].includes(css.getPropertyValue('will-change'))) return true // A will-change value of transform, filter, or perspective
+  if (css.getPropertyValue('will-change').split(/,\s*/).some(v => ['transform', 'perspective', 'filter'].includes(v))) return true // A will-change value including transform, filter, or perspective (e.g. will-change: opacity, transform;)
   if (css.getPropertyValue('filter') !== 'none') return true // A filter value other than none
-  if (['layout', 'paint', 'strict', 'content'].includes(css.getPropertyValue('contain'))) return true // A contain value of layout, paint, strict or content (e.g. contain: paint;)
-  if ('container-type' in css && css.getPropertyValue('container-type') !== 'normal') return true // A container-type value other than normal
+  if (css.getPropertyValue('contain').split(/\s+/).some(v => ['layout', 'paint', 'strict', 'content'].includes(v))) return true // A contain value including layout, paint, strict or content (e.g. contain: paint; or contain: size layout;)
   if ('backdrop-filter' in css && css.getPropertyValue('backdrop-filter') !== 'none') return true // A backdrop-filter other than none (e.g. backdrop-filter: blur(10px);)
   return false
 }

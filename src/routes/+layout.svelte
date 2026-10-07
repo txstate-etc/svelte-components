@@ -22,7 +22,8 @@
         { label: 'resize', href: '/actions/resize' },
         { label: 'resize debounced', href: '/actions/resizedebounce' },
         { label: 'sticky', href: '/actions/sticky' },
-        { label: 'element queries', href: '/actions/elementqueries' }
+        { label: 'element queries', href: '/actions/elementqueries' },
+        { label: 'glue in containing block', href: '/actions/glue' }
       ]
     },
     {
